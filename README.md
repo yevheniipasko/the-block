@@ -29,7 +29,7 @@ A buyer should be able to browse inventory, inspect vehicle details, and place b
 ## Assumptions You Can Make
 
 - This is a prototype, not a production launch.
-- Target roughly **4-8 hours** of work. If you spend more, that's your call, but we do not expect a fully built marketplace.
+- Please spend no more than 3-4 hours of work on this. If you spend more, that's your call, but we do not expect a fully built marketplace.
 - Use any framework, language, or stack.
 - If you want stack examples that fit this challenge, React + Vite is a good web option, and SwiftUI for iOS or Compose for Android are reasonable native mobile examples. None of these are required.
 - You may use AI tools and coding assistants, and their use is encouraged. Be ready to explain how you used them, what decisions you made, and what parts of the implementation you would refine.
@@ -143,4 +143,4 @@ Here's what a single vehicle looks like:
 }
 ```
 
-The data is synthetic but meant to feel realistic. Use it however you want.
+The data is synthetic but meant to feel realistic. Use it however you want. Should you need reasonable accommodation, please reach out to careers@openlane.com
