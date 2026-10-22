@@ -24,6 +24,10 @@ private final class FakeViewModelFactory: ViewModelFactoryProtocol {
         BidViewModel(vehicleID: vehicleID, repository: repository)
     }
 
+    func makeMyBidsViewModel() -> MyBidsViewModel {
+        MyBidsViewModel(repository: repository)
+    }
+
 }
 
 @MainActor
@@ -69,6 +73,19 @@ struct InventoryRouterTests {
         router.dismissSheet()
         #expect(router.presentedSheet == nil)
         #expect(router.bidViewModel == nil)
+    }
+
+    @Test("MYBIDS-1 / MYBIDS-5: My bids opens and closes; its ViewModel is built once with the router")
+    func myBids() {
+        let router = InventoryRouter(factory: factory)
+        let viewModel = router.myBidsViewModel
+
+        router.showMyBids()
+        #expect(router.isShowingMyBids)
+
+        router.hideMyBids()
+        #expect(!router.isShowingMyBids)
+        #expect(router.myBidsViewModel === viewModel)
     }
 
 }

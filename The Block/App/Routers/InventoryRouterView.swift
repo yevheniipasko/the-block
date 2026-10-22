@@ -8,6 +8,16 @@ struct InventoryRouterView: View {
     var body: some View {
         NavigationSplitView {
             InventoryView(viewModel: router.inventoryViewModel, selection: selection)
+                .toolbar {
+                    MyBidsToolbarItem(outbidCount: router.myBidsViewModel.outbidCount, action: router.showMyBids)
+                }
+                .navigationDestination(isPresented: isShowingMyBids) {
+                    MyBidsView(
+                        viewModel: router.myBidsViewModel,
+                        selection: selection,
+                        onBrowseInventory: router.hideMyBids
+                    )
+                }
         } detail: {
             if let detailViewModel = router.detailViewModel {
                 VehicleDetailView(
@@ -20,6 +30,7 @@ struct InventoryRouterView: View {
                 ContentUnavailableView(Localizable.emptyDetailTitle, systemImage: "car.side")
             }
         }
+        .task { await router.myBidsViewModel.observe() }
         .sheet(item: presentedSheet) { sheet in
             if let bidViewModel = router.bidViewModel {
                 switch sheet {
@@ -34,6 +45,10 @@ struct InventoryRouterView: View {
 
     private var selection: Binding<VehicleModel.ID?> {
         Binding(get: { router.selectedVehicleID }, set: { router.select($0) })
+    }
+
+    private var isShowingMyBids: Binding<Bool> {
+        Binding(get: { router.isShowingMyBids }, set: { if !$0 { router.hideMyBids() } })
     }
 
     private var presentedSheet: Binding<BiddingSheet?> {
