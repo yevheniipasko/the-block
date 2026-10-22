@@ -59,7 +59,8 @@ final class AppModule: ViewModelFactoryProtocol {
                 clock: resolve(AuctionClockProtocol.self),
                 latency: Constants.actionLatency,
                 market: launchOptions.marketSettings,
-                generator: SystemRandomNumberGenerator()
+                generator: SystemRandomNumberGenerator(),
+                seedsDemoPositions: true
             )
         }
         .inObjectScope(.container)

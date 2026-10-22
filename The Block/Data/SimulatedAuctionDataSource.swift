@@ -21,6 +21,7 @@ final class SimulatedAuctionDataSource: VehicleDataSourceProtocol {
     private let clock: AuctionClockProtocol
     private let latency: Duration
     private let market: Market?
+    private let seedsDemoPositions: Bool
     private var generator: any RandomNumberGenerator
     private let logger = Logger(subsystem: "TheBlock", category: "SimulatedAuctionDataSource")
 
@@ -34,18 +35,21 @@ final class SimulatedAuctionDataSource: VehicleDataSourceProtocol {
     ///   - latency: Simulated round trip for `placeBid` / `buyNow`; `.zero` in tests.
     ///   - market: Competing-bid simulation, or `nil` for none.
     ///   - generator: Randomness for the market; seeded in tests.
+    ///   - seedsDemoPositions: Start with one leading and one outbid position (`DemoSeed`, spec MYBIDS-7).
     init(
         loadSnapshot: @escaping () throws -> [VehicleModel],
         clock: AuctionClockProtocol,
         latency: Duration,
         market: Market?,
-        generator: any RandomNumberGenerator
+        generator: any RandomNumberGenerator,
+        seedsDemoPositions: Bool = false
     ) {
         self.loadSnapshot = loadSnapshot
         self.clock = clock
         self.latency = latency
         self.market = market
         self.generator = generator
+        self.seedsDemoPositions = seedsDemoPositions
     }
 
     func vehicleFeed() -> AsyncThrowingStream<VehicleFeedEvent, Error> {
@@ -124,8 +128,9 @@ final class SimulatedAuctionDataSource: VehicleDataSourceProtocol {
             copy.auctionStart = schedule.normalized(vehicle.auctionStart)
             return copy
         }
-        vehicles = normalized
-        return normalized
+        let snapshot = seedsDemoPositions ? DemoSeed.apply(to: normalized, now: clock.now) : normalized
+        vehicles = snapshot
+        return snapshot
     }
 
     private func currentVehicle(_ id: VehicleModel.ID) throws -> VehicleModel {
