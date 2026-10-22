@@ -53,6 +53,7 @@ struct InventoryFilterSheet: View {
         .presentationDetents([.medium, .large])
     }
 
+    /// Toggle row bound to one filter through the ViewModel.
     private func toggle(_ chip: InventoryViewModel.FilterChip, id: String) -> some View {
         Toggle(
             InventoryLabels.title(for: chip),

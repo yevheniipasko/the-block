@@ -182,6 +182,7 @@ private struct InventoryResultsHeader: View {
 /// Title first, icon after it, for removable chips.
 private struct TrailingIconLabelStyle: LabelStyle {
 
+    /// Lays out the title followed by a small icon.
     func makeBody(configuration: Configuration) -> some View {
         HStack(spacing: Spacing.xSmall) {
             configuration.title

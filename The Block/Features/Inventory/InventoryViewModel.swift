@@ -61,6 +61,7 @@ final class InventoryViewModel {
     @ObservationIgnored private var hasStarted = false
     @ObservationIgnored private let logger = Logger(subsystem: "TheBlock", category: "InventoryViewModel")
 
+    /// - Parameter repository: Shared repository; rows and pages are always read from it.
     init(repository: VehicleRepositoryProtocol) {
         self.repository = repository
     }
@@ -98,6 +99,7 @@ final class InventoryViewModel {
         return chips
     }
 
+    /// Whether any filter is on; drives the chip row and the filter button icon.
     var hasActiveFilters: Bool {
         !activeFilters.isEmpty
     }
@@ -204,6 +206,7 @@ final class InventoryViewModel {
 
     // MARK: - Private
 
+    /// Applies `searchText` to `query` once typing pauses for `Constants.searchDebounce` (spec LIST-2).
     private func scheduleSearch() {
         searchTask?.cancel()
         searchTask = Task { [weak self] in
@@ -213,6 +216,7 @@ final class InventoryViewModel {
         }
     }
 
+    /// Cancels the in-flight request and starts loading the page after `cursor` (page one when `nil`).
     private func startLoading(after cursor: PageCursor?) {
         loadTask?.cancel()
         pageStatus = .loading
@@ -221,6 +225,10 @@ final class InventoryViewModel {
         }
     }
 
+    /// Fetches one page and applies it, unless the request was cancelled by a newer one.
+    ///
+    /// A stale cursor restarts from page one without showing an error; any other failure
+    /// becomes the failed page state (full-screen for page one, inline row afterwards).
     private func fetchPage(after cursor: PageCursor?) async {
         do {
             let page = try await repository.fetchPage(query, after: cursor, limit: Constants.pageSize)
@@ -241,6 +249,7 @@ final class InventoryViewModel {
         }
     }
 
+    /// Replaces rows with page one, or appends a later page's IDs that aren't loaded yet.
     private func apply(_ page: InventoryPage, isFirstPage: Bool) {
         let ids = page.vehicles.map(\.id)
         if isFirstPage {
@@ -258,6 +267,7 @@ final class InventoryViewModel {
 
 private extension Set {
 
+    /// Inserts `member` when `isOn`, removes it otherwise.
     mutating func set(_ member: Element, isOn: Bool) {
         if isOn {
             insert(member)

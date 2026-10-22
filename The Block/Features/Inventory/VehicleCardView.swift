@@ -28,6 +28,7 @@ struct VehicleCardView: View {
         .accessibilityLabel(accessibilityLabel)
     }
 
+    /// First photo as a thumbnail, or full width when the card is stacked.
     private func photo(isStacked: Bool) -> some View {
         VehicleImage(url: vehicle.images.first)
             .frame(
@@ -98,6 +99,7 @@ struct VehicleCardView: View {
         "\(Formatting.kilometres(vehicle.odometerKm)) · \(vehicle.city), \(vehicle.province)"
     }
 
+    /// VoiceOver summary: title, price and bids, status, Buy Now, your position (spec UX-3).
     private var accessibilityLabel: String {
         var parts = [
             vehicle.title,
