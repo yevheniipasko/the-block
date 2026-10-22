@@ -21,6 +21,12 @@ private final class FlakyPageRepository: VehicleRepositoryProtocol {
 
     func vehicle(id: VehicleModel.ID) -> VehicleModel? { base.vehicle(id: id) }
 
+    func loadStateUpdates() -> AsyncStream<LoadState> { base.loadStateUpdates() }
+
+    func vehicleUpdates(id: VehicleModel.ID) -> AsyncStream<VehicleModel> { base.vehicleUpdates(id: id) }
+
+    func inventoryUpdates() -> AsyncStream<VehicleModel> { base.inventoryUpdates() }
+
     func fetchPage(_ query: InventoryQuery, after cursor: PageCursor?, limit: Int) async throws -> InventoryPage {
         if failPages { throw StubError() }
         return try await base.fetchPage(query, after: cursor, limit: limit)
@@ -45,8 +51,8 @@ struct InventoryViewModelTests {
     }
 
     private func makeRepository(_ vehicles: [VehicleModel]) async -> VehicleRepository {
-        let repository = VehicleRepository(
-            dataSource: StubVehicleDataSource(result: .success(vehicles)),
+        let repository = VehicleRepository.stubbed(
+            result: .success(vehicles),
             clock: FixedClock(now: TestDates.reference)
         )
         await repository.load()
@@ -78,8 +84,8 @@ struct InventoryViewModelTests {
 
     @Test("DATA-3 / UX-5: screen shows loading until the repository and first page are ready")
     func loadingUntilFirstPage() async {
-        let repository = VehicleRepository(
-            dataSource: StubVehicleDataSource(result: .success(fleet)),
+        let repository = VehicleRepository.stubbed(
+            result: .success(fleet),
             clock: FixedClock(now: TestDates.reference)
         )
         let viewModel = InventoryViewModel(repository: repository)
@@ -98,8 +104,8 @@ struct InventoryViewModelTests {
 
     @Test("DATA-3: a failed repository load shows an error, and retry loads page one")
     func repositoryFailureAndRetry() async {
-        let repository = VehicleRepository(
-            dataSource: StubVehicleDataSource(result: .failure(StubError())),
+        let repository = VehicleRepository.stubbed(
+            result: .failure(StubError()),
             clock: FixedClock(now: TestDates.reference)
         )
         await repository.load()

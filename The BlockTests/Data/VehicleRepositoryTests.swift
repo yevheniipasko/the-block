@@ -8,8 +8,8 @@ struct VehicleRepositoryTests {
     private let launch = TestDates.reference
 
     private func makeRepository(_ vehicles: [VehicleModel]) async -> VehicleRepository {
-        let repository = VehicleRepository(
-            dataSource: StubVehicleDataSource(result: .success(vehicles)),
+        let repository = VehicleRepository.stubbed(
+            result: .success(vehicles),
             clock: FixedClock(now: launch)
         )
         await repository.load()
@@ -27,8 +27,8 @@ struct VehicleRepositoryTests {
 
     @Test("DATA-3: a failing data source leads to a failed state, not an empty list")
     func loadFailure() async {
-        let repository = VehicleRepository(
-            dataSource: StubVehicleDataSource(result: .failure(StubError())),
+        let repository = VehicleRepository.stubbed(
+            result: .failure(StubError()),
             clock: FixedClock(now: launch)
         )
 

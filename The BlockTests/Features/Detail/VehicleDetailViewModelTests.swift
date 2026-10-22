@@ -10,8 +10,8 @@ struct VehicleDetailViewModelTests {
     private let datasetAnchor = Date(timeIntervalSince1970: 1_000_000)
 
     private func makeViewModel(_ vehicle: VehicleModel) async -> (VehicleDetailViewModel, VehicleRepository) {
-        let repository = VehicleRepository(
-            dataSource: StubVehicleDataSource(result: .success([vehicle])),
+        let repository = VehicleRepository.stubbed(
+            result: .success([vehicle]),
             clock: FixedClock(now: launch)
         )
         await repository.load()

@@ -5,8 +5,8 @@ import Testing
 @MainActor
 private final class FakeViewModelFactory: ViewModelFactoryProtocol {
 
-    let repository = VehicleRepository(
-        dataSource: StubVehicleDataSource(result: .success([])),
+    let repository = VehicleRepository.stubbed(
+        result: .success([]),
         clock: FixedClock(now: TestDates.reference)
     )
     private(set) var detailRequests: [VehicleModel.ID] = []

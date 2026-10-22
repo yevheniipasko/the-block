@@ -7,13 +7,53 @@ struct FixedClock: AuctionClockProtocol {
     var now: Date
 }
 
-/// Data source returning canned vehicles, or failing on demand.
 @MainActor
-struct StubVehicleDataSource: VehicleDataSourceProtocol {
-    var result: Result<[VehicleModel], Error>
+extension SimulatedAuctionDataSource {
+    /// Fake server serving canned vehicles (or failing), with no market and optional latency.
+    static func stub(
+        result: Result<[VehicleModel], Error>,
+        clock: AuctionClockProtocol,
+        latency: Duration = .zero
+    ) -> SimulatedAuctionDataSource {
+        SimulatedAuctionDataSource(
+            loadSnapshot: { try result.get() },
+            clock: clock,
+            latency: latency,
+            market: nil,
+            generator: SeededGenerator(seed: 42)
+        )
+    }
+}
 
-    func loadVehicles() async throws -> [VehicleModel] {
-        try result.get()
+@MainActor
+extension VehicleRepository {
+    /// Repository on a stub server sharing one clock, so normalization and rules agree on "now".
+    static func stubbed(
+        result: Result<[VehicleModel], Error>,
+        clock: AuctionClockProtocol,
+        actionLatency: Duration = .zero
+    ) -> VehicleRepository {
+        VehicleRepository(
+            dataSource: SimulatedAuctionDataSource.stub(result: result, clock: clock, latency: actionLatency),
+            clock: clock
+        )
+    }
+}
+
+/// Deterministic generator (SplitMix64) so simulated-market tests are repeatable.
+struct SeededGenerator: RandomNumberGenerator {
+    private var state: UInt64
+
+    init(seed: UInt64) {
+        state = seed
+    }
+
+    mutating func next() -> UInt64 {
+        state &+= 0x9E37_79B9_7F4A_7C15
+        var value = state
+        value = (value ^ (value >> 30)) &* 0xBF58_476D_1CE4_E5B9
+        value = (value ^ (value >> 27)) &* 0x94D0_49BB_1331_11EB
+        return value ^ (value >> 31)
     }
 }
 
