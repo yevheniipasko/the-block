@@ -125,8 +125,8 @@ Tasks:
 Tasks:
 - [x] `BiddingRules` (activity level, adaptive step, min next bid, validation, Buy Now eligibility) — pure, tested
 - [x] `VehicleRepository.placeBid` / `buyNow` (validate via rules, update state, return result)
-- [ ] `BidViewModel` + bid sheet + confirmation
-- [ ] Buy Now confirmation
+- [x] `BidViewModel` + bid sheet + confirmation
+- [x] Buy Now confirmation
 - [ ] High-bidder / purchased badges in list + detail
 - [x] Rule + repository tests
 
