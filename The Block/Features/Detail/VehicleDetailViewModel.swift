@@ -78,6 +78,8 @@ final class VehicleDetailViewModel {
         if vehicle.isYouHighBidder {
             return .highBidder
         }
+        // Once the lot has ended, the outcome bar tells the story; "outbid" is no longer actionable.
+        guard !vehicle.status(at: now).isEnded else { return nil }
         return vehicle.isYouOutbid ? .outbid : nil
     }
 

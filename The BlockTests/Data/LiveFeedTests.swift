@@ -84,6 +84,18 @@ struct LiveFeedTests {
         #expect(afterMarket?.isYouOutbid == true)
     }
 
+    @Test("LIVE-1: a subscriber that starts before the first load receives the snapshot copy")
+    func vehicleUpdatesBeforeLoad() async {
+        let id = UUID()
+        let server = SimulatedAuctionDataSource.stub(result: .success([activeLot(id: id)]), clock: clock)
+        let repository = VehicleRepository(dataSource: server, clock: clock)
+        var updates = repository.vehicleUpdates(id: id).makeAsyncIterator()
+
+        await repository.load()
+
+        #expect(await updates.next()?.id == id)
+    }
+
     @Test("LIVE-1: inventoryUpdates reports lots changed by anyone")
     func inventoryUpdatesStream() async {
         let id = UUID()

@@ -12,7 +12,7 @@ A buyer can browse a live vehicle auction inventory, judge a vehicle with confid
 - Vehicle detail: photos, specs, condition, damage notes, title status, dealership, location, auction info.
 - Bid flow: adaptive minimum step, validation, confirmation, updated visible state everywhere.
 - Buy Now for lots that have a Buy Now price.
-- Auction timing with Upcoming / Active / Ended states and countdowns, via time normalization.
+- Auction timing with Upcoming / Live / Ended states and countdowns, via time normalization.
 - Adaptive layout (iPhone + iPad), dark mode, Dynamic Type, VoiceOver.
 
 ## Out of scope
@@ -86,7 +86,7 @@ Tasks:
 
 - **LIST-1** Inventory shows every vehicle as a card: first photo, year make model trim, current bid (or "Starting at" + starting bid), bid count, odometer, city/province, status badge + countdown, Buy Now price if present.
 - **LIST-2** Search matches make, model, trim, year, lot, VIN, and dealership — case-insensitive, combinable with filters.
-- **LIST-3** Filters: status (Upcoming / Active / Ended), body style, fuel type, province (multi-select each), "Buy Now available" toggle. Active filters are visible and clearable in one tap.
+- **LIST-3** Filters: status (Upcoming / Live / Ended), body style, fuel type, province (multi-select each), "Buy Now available" toggle. Active filters are visible and clearable in one tap.
 - **LIST-4** Sort: Ending soonest (default — active by end time, then upcoming by start, ended last), Price low→high, Price high→low, Newest year, Lowest km.
 - **LIST-5** No results → empty state naming the query/filters with a "Clear" action.
 - **LIST-6** Result count is visible ("142 vehicles").
@@ -157,7 +157,7 @@ Tasks:
 - [x] Inventory: subscribe to `loadStateUpdates()` + `inventoryUpdates()`, refresh loaded rows, outbid marker
 - [x] Detail: subscribe to `vehicleUpdates(id:)`, outbid marker
 - [x] Bidding: subscribe to `vehicleUpdates(id:)`, live minimum + outbid notice in the open sheet
-- [ ] Remove `@Observable` reads of the repository once all screens use streams
+- [x] Remove `@Observable` reads of the repository once all screens use streams
 
 ### MYBIDS — your bids & purchases *(built after LIVE is merged)*
 
