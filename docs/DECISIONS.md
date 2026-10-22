@@ -31,12 +31,16 @@ Running log — see `.claude/rules/decisions-log.md`. One line per entry, newest
 - 2026-10-22 — After reviewing Copart, IAA, and OPENLANE buyer features, added proxy/max bidding (PROXY, moved out of Stretch), a fee-inclusive total estimate (FEES), auto-save on bid (SAVED-5), and a global outbid banner (ALERT). Why: proxy bidding is standard at every major auction site and pairs with the simulated market; total cost and outbid alerts build buyer trust. Proxy runs in the simulated data source, as on a real server. Skipped: saved-search alerts (needs notifications), counter-offers below floor (Pending negotiation out of scope), keys / run & drive / ERV fields (not in the data — would be invented), transport estimate (no buyer location).
 - 2026-10-22 — Fee table is invented (flat $300 / $500 / 2 % tiers + $99 doc fee), labelled as an estimate. Why: real auction fee schedules vary by site and membership; the point is showing the total, not exact fees.
 - 2026-10-22 — Added OPENLANE auction mechanics to scope: anti-sniping (TIME-5, 2 min extension), seller counter-offers on below-floor lots you lead (NEGOTIATE, simulated midpoint counter), condition grade explainer (DETAIL-7). Why: the challenge is from OPENLANE; these are how their buyers actually win or lose lots. Parked in a new "Postponed" section with reasons: saved-search alerts, starting-bid-drop alerts, transport, inspections, checkout, arbitration, Copart/IAA lot fields (not in data), time-decay step, inline bids strip. Stretch section replaced by Postponed.
+- 2026-10-22 — Repository is no longer `@Observable`; screens get data only from its `AsyncStream`s (snapshot changes are announced too, so a subscriber that starts before loading isn't missed). The outbid marker hides once a lot has ended — the outcome takes over. Status filter says "Live" to match the badge.
 
 ## Time
 
 - 2026-10-22 — Setup: project rules, workflow, repo structure: ~30 min
 - 2026-10-22 — Spec draft: ~15 min
 - 2026-10-22 — Data + domain + DI + tests (28 tests): ~45 min
+- 2026-10-22 — App shell, pagination, loading states: ~40 min
+- 2026-10-22 — Inventory / Detail / Bidding (parallel agents) + integration: ~45 min
+- 2026-10-22 — Live feed (AsyncStream, simulated market) + parallel migration + cleanup: ~75 min
 
 ## AI usage
 
@@ -49,3 +53,4 @@ Running log — see `.claude/rules/decisions-log.md`. One line per entry, newest
 - 2026-10-22 — Claude Code compared our spec against 3 other local implementations (OpenLane-style, ime8ghod, hc) and drafted MYBIDS/HIST/SAVED/LIST-8/9/UX-6 criteria; it recommended a smaller subset, I chose to spec all of them.
 - 2026-10-22 — Claude Code researched Copart / IAA / OPENLANE buyer features via web search and proposed the PROXY, FEES, ALERT, SAVED-5 additions; I approved all four.
 - 2026-10-22 — Claude Code split OPENLANE features into build-now (anti-sniping, counter-offers, grade explainer) vs. Postponed with reasons; I asked to list the rest as postponed rather than drop them.
+- 2026-10-22 — Built the screens in parallel: Claude Code acted as orchestrator (shell, shared files, integration) and ran 3 feature subagents (Inventory, Detail, Bidding) plus a docs agent, each in its own git worktree and simulator; then a second parallel round to move the screens onto live streams. Orchestrator re-ran tests on every branch after merging latest main before merging. Caught along the way: an empty UI test bundle breaking `xcodebuild test`, SVG placeholder images, a stale `.git/index.lock`, a reconnect bug in `load()` (found by a test), and a test that deadlocked by busy-waiting on the main actor (fixed; test runs now have a 60 s per-test limit).
