@@ -27,7 +27,7 @@ Spec-driven: read `docs/SPEC.md` before any feature work; acceptance criteria ID
 
 Independent features may run in parallel (subagents or a Workflow, ≤ 4 agents, one worktree each) once spec + data/domain are on `main` — see `.claude/rules/parallel-work.md`.
 
-Log decisions, time, and AI usage in `docs/DECISIONS.md` as you go — see `.claude/rules/decisions-log.md`. Commit conventions in `.claude/rules/commits.md`.
+Log decisions, time, and AI usage in `docs/DECISIONS.md` as you go — see `.claude/rules/decisions-log.md`. Commits are one line, no body, no AI co-author/attribution trailers — see `.claude/rules/commits.md`.
 
 UI flows are tested with Maestro (`maestro/flows/`), logic with Swift Testing; no XCUITest — see `.claude/rules/maestro-testing.md`.
 
