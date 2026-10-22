@@ -3,105 +3,125 @@ import Observation
 import OSLog
 
 /// Progress of the inventory load; `.failed` carries a user-facing message (spec DATA-3).
-enum LoadState: Equatable {
+enum LoadState: Equatable, Sendable {
     case idle
     case loading
     case loaded
     case failed(message: String)
 }
 
-/// Single source of truth for vehicles and the buyer's bids/purchases (held in memory).
+/// Single source of truth for vehicles: a cache of the live feed, fanned out as `AsyncStream`s
+/// (spec LIVE-1). Data can change at any time — screens subscribe instead of reading once.
 protocol VehicleRepositoryProtocol: AnyObject {
-    /// Progress of the latest `load()` call.
+    /// Latest load progress (snapshot read; subscribe with `loadStateUpdates()`).
     var loadState: LoadState { get }
-    /// All vehicles with normalized auction starts and the buyer's bids/purchases applied.
+    /// Latest known vehicles (snapshot read; subscribe with `inventoryUpdates()`).
     var vehicles: [VehicleModel] { get }
     /// The current moment from the injected clock, so views and rules agree on time.
     var now: Date { get }
 
-    /// Loads the inventory and updates `loadState` (spec DATA-1, DATA-3, TIME-1).
-    ///
-    /// Calling it again after a failure retries the load.
+    /// Connects to the live feed and returns once the first snapshot arrived or the connection
+    /// failed (spec DATA-1, DATA-3, LIVE-1). Calling it again reconnects (retry).
     func load() async
-    /// Returns the vehicle with `id`, or `nil` if it is not in the inventory.
+    /// Latest known copy of one vehicle, or `nil` if it is not in the inventory.
     func vehicle(id: VehicleModel.ID) -> VehicleModel?
+
+    /// Load progress: the current state first, then every change.
+    func loadStateUpdates() -> AsyncStream<LoadState>
+    /// One vehicle: its current copy first (if known), then every change to it (spec LIVE-1, BID-6).
+    func vehicleUpdates(id: VehicleModel.ID) -> AsyncStream<VehicleModel>
+    /// Every lot that changes from now on, whoever changed it (spec LIVE-1, LIVE-3).
+    func inventoryUpdates() -> AsyncStream<VehicleModel>
+
     /// One page of vehicles matching `query`, imitating a cursor-paginated API (spec LIST-7).
     ///
-    /// Filtering and sorting run against live state (including your bids) at call time.
+    /// Filtering and sorting run against the latest state (including your bids) at call time.
     /// - Throws: `PagingError.staleCursor` when the cursor's vehicle no longer matches.
     func fetchPage(_ query: InventoryQuery, after cursor: PageCursor?, limit: Int) async throws -> InventoryPage
-    /// Places a bid for the buyer after a simulated network round trip, validating it with `BiddingRules`
-    /// against the state at arrival (spec BID-3, BID-4, BID-6, BID-7).
+    /// Sends a bid; the server validates it against the state at arrival (spec BID-3, BID-4, BID-6, BID-7).
     ///
-    /// On success the lot's current bid becomes `amount`, its bid count goes up by one, and the buyer
-    /// becomes the high bidder.
-    ///
-    /// - Returns: The updated vehicle, or the reason the bid was rejected.
+    /// - Returns: The updated vehicle, or the reason the bid was rejected. Rejections never change state.
     @discardableResult
     func placeBid(_ amount: Int, on id: VehicleModel.ID) async -> Result<VehicleModel, BidRejection>
-    /// Buys the lot at its Buy Now price after a simulated network round trip, which ends the auction
-    /// as purchased by you (spec BID-10, BID-11).
+    /// Buys the lot at its Buy Now price, ending the auction as purchased by you (spec BID-10, BID-11).
     ///
-    /// - Returns: The updated vehicle, or `.buyNowUnavailable` / `.vehicleNotFound`.
+    /// - Returns: The updated vehicle, or `.buyNowUnavailable` / `.vehicleNotFound` / `.connectionFailed`.
     @discardableResult
     func buyNow(_ id: VehicleModel.ID) async -> Result<VehicleModel, BidRejection>
 }
 
-/// In-memory `VehicleRepositoryProtocol`; bids and purchases reset on app launch (spec Assumptions).
+/// `VehicleRepositoryProtocol` backed by `VehicleDataSourceProtocol`'s feed; bids and purchases
+/// reset on app launch (spec Assumptions).
 @Observable
 final class VehicleRepository: VehicleRepositoryProtocol {
 
-    private(set) var loadState: LoadState = .idle
+    private(set) var loadState: LoadState = .idle {
+        didSet { loadStates.yield(loadState) }
+    }
     private(set) var vehicles: [VehicleModel] = []
 
     @ObservationIgnored private let dataSource: VehicleDataSourceProtocol
     @ObservationIgnored private let clock: AuctionClockProtocol
     @ObservationIgnored private let pageLatency: Duration
-    @ObservationIgnored private let actionLatency: Duration
+    @ObservationIgnored private let loadStates = StreamBroadcaster<LoadState>()
+    @ObservationIgnored private let changes = StreamBroadcaster<VehicleModel>()
+    @ObservationIgnored private var feedTask: Task<Void, Never>?
     @ObservationIgnored private let logger = Logger(subsystem: "TheBlock", category: "VehicleRepository")
 
-    /// Creates a repository that loads from `dataSource` and reads time from `clock`.
-    ///
     /// - Parameters:
+    ///   - dataSource: Live feed and bid / Buy Now endpoints.
+    ///   - clock: Source of "now" for paging filters and the `now` property.
     ///   - pageLatency: Simulated network delay per inventory page; `.zero` in tests.
-    ///   - actionLatency: Simulated network delay per bid / Buy Now; `.zero` in tests.
-    init(
-        dataSource: VehicleDataSourceProtocol,
-        clock: AuctionClockProtocol,
-        pageLatency: Duration = .zero,
-        actionLatency: Duration = .zero
-    ) {
+    init(dataSource: VehicleDataSourceProtocol, clock: AuctionClockProtocol, pageLatency: Duration = .zero) {
         self.dataSource = dataSource
         self.clock = clock
         self.pageLatency = pageLatency
-        self.actionLatency = actionLatency
     }
 
     var now: Date { clock.now }
 
-    /// Loads vehicles and shifts every auction start with one `AuctionSchedule` anchored at `clock.now`.
-    ///
-    /// On failure it logs the underlying error and sets `.failed` with a generic message; the
-    /// previously loaded vehicles are kept (spec DATA-3, TIME-1).
+    /// Starts consuming the feed in the background and waits for the first non-loading state.
     func load() async {
+        feedTask?.cancel()
+        // Switch to `.loading` before subscribing, so a previous `.failed` isn't mistaken for this result.
         loadState = .loading
-        do {
-            let raw = try await dataSource.loadVehicles()
-            let schedule = AuctionSchedule(datasetStarts: raw.map(\.auctionStart), launchDate: clock.now)
-            vehicles = raw.map { vehicle in
-                var normalized = vehicle
-                normalized.auctionStart = schedule.normalized(vehicle.auctionStart)
-                return normalized
-            }
-            loadState = .loaded
-        } catch {
-            logger.error("[VehicleRepository] load failed: \(String(describing: error), privacy: .public)")
-            loadState = .failed(message: "We couldn't load the inventory. Please try again.")
+        let states = loadStateUpdates()
+        let feed = dataSource.vehicleFeed()
+        feedTask = Task { [weak self] in
+            await self?.consume(feed)
+        }
+        for await state in states where state != .loading && state != .idle {
+            break
         }
     }
 
     func vehicle(id: VehicleModel.ID) -> VehicleModel? {
         vehicles.first { $0.id == id }
+    }
+
+    func loadStateUpdates() -> AsyncStream<LoadState> {
+        loadStates.stream(startingWith: loadState)
+    }
+
+    func vehicleUpdates(id: VehicleModel.ID) -> AsyncStream<VehicleModel> {
+        let source = changes.stream()
+        let current = vehicle(id: id)
+        return AsyncStream { continuation in
+            if let current {
+                continuation.yield(current)
+            }
+            let task = Task {
+                for await vehicle in source where vehicle.id == id {
+                    continuation.yield(vehicle)
+                }
+                continuation.finish()
+            }
+            continuation.onTermination = { _ in task.cancel() }
+        }
+    }
+
+    func inventoryUpdates() -> AsyncStream<VehicleModel> {
+        changes.stream()
     }
 
     func fetchPage(_ query: InventoryQuery, after cursor: PageCursor?, limit: Int) async throws -> InventoryPage {
@@ -112,50 +132,72 @@ final class VehicleRepository: VehicleRepositoryProtocol {
         return try Paginator.page(of: results, after: cursor, limit: limit)
     }
 
+    /// Applies the server's response right away, so the caller sees its own bid even before the
+    /// feed echoes it; the echo is an idempotent replace.
     @discardableResult
-    /// Waits for the simulated round trip, validates at `clock.now`, then writes the updated lot back
-    /// in one assignment.
-    ///
-    /// A rejected bid leaves `vehicles` untouched, so no half-updated state is visible (spec BID-8).
     func placeBid(_ amount: Int, on id: VehicleModel.ID) async -> Result<VehicleModel, BidRejection> {
-        await simulateNetwork()
-        guard let index = vehicles.firstIndex(where: { $0.id == id }) else {
-            return .failure(.vehicleNotFound)
-        }
-        var vehicle = vehicles[index]
-        if case .failure(let rejection) = BiddingRules.validateBid(amount, on: vehicle, at: clock.now) {
-            return .failure(rejection)
-        }
-        vehicle.currentBid = amount
-        vehicle.bidCount += 1
-        vehicle.yourBid = amount
-        vehicles[index] = vehicle
-        return .success(vehicle)
+        await perform { try await dataSource.placeBid(amount, on: id) }
     }
 
     @discardableResult
-    /// Waits for the simulated round trip, checks `BiddingRules.canBuyNow` at `clock.now`, then records
-    /// the purchase price on the lot.
-    ///
-    /// A rejection leaves `vehicles` untouched (spec BID-8).
     func buyNow(_ id: VehicleModel.ID) async -> Result<VehicleModel, BidRejection> {
-        await simulateNetwork()
-        guard let index = vehicles.firstIndex(where: { $0.id == id }) else {
-            return .failure(.vehicleNotFound)
+        await perform { try await dataSource.buyNow(id) }
+    }
+
+    // MARK: - Private
+
+    /// Reads feed events until the feed ends; a feed that ends before its snapshot is a failure.
+    private func consume(_ feed: AsyncThrowingStream<VehicleFeedEvent, Error>) async {
+        do {
+            for try await event in feed {
+                handle(event)
+            }
+            if loadState == .loading {
+                fail(reason: "feed closed before snapshot")
+            }
+        } catch {
+            fail(reason: String(describing: error))
         }
-        var vehicle = vehicles[index]
-        guard BiddingRules.canBuyNow(vehicle, at: clock.now), let price = vehicle.buyNowPrice else {
-            return .failure(.buyNowUnavailable)
+    }
+
+    private func handle(_ event: VehicleFeedEvent) {
+        switch event {
+        case .snapshot(let snapshot):
+            vehicles = snapshot
+            loadState = .loaded
+        case .updated(let vehicle):
+            apply(vehicle)
         }
-        vehicle.yourPurchasePrice = price
+    }
+
+    /// Replaces the cached lot and notifies subscribers; unknown lots are ignored.
+    private func apply(_ vehicle: VehicleModel) {
+        guard let index = vehicles.firstIndex(where: { $0.id == vehicle.id }) else { return }
+        guard vehicles[index] != vehicle else { return }
         vehicles[index] = vehicle
-        return .success(vehicle)
+        changes.yield(vehicle)
     }
 
-    /// Waits `actionLatency`; cancellation just ends the wait early.
-    private func simulateNetwork() async {
-        guard actionLatency > .zero else { return }
-        try? await Task.sleep(for: actionLatency)
+    private func perform(_ request: () async throws -> VehicleModel) async -> Result<VehicleModel, BidRejection> {
+        do {
+            let vehicle = try await request()
+            apply(vehicle)
+            return .success(vehicle)
+        } catch let rejection as BidRejection {
+            return .failure(rejection)
+        } catch {
+            logger.error("[VehicleRepository] request failed: \(String(describing: error), privacy: .public)")
+            return .failure(.connectionFailed)
+        }
     }
 
+    private func fail(reason: String) {
+        logger.error("[VehicleRepository] feed failed: \(reason, privacy: .public)")
+        loadState = .failed(message: Localizable.loadFailed)
+    }
+
+}
+
+private enum Localizable {
+    static let loadFailed = "We couldn't load the inventory. Please try again."
 }

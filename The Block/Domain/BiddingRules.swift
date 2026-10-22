@@ -33,6 +33,8 @@ enum BidRejection: Error, Hashable, Sendable {
     case atOrAboveBuyNow(buyNowPrice: Int)
     case buyNowUnavailable
     case vehicleNotFound
+    /// The request never reached the server (network / feed error).
+    case connectionFailed
 }
 
 /// Pure auction rules (spec BID-1, BID-3, BID-4, BID-7, BID-9, BID-11).

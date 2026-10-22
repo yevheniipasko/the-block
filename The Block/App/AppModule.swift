@@ -49,8 +49,18 @@ final class AppModule: ViewModelFactoryProtocol {
         }
         .inObjectScope(.container)
 
-        container.register(VehicleDataSourceProtocol.self) { _ in
-            BundledJSONDataSource()
+        container.register(VehicleDataSourceProtocol.self) { [unowned self] _ in
+            let loader = BundledVehicleLoader()
+            return SimulatedAuctionDataSource(
+                loadSnapshot: { try loader.loadVehicles() },
+                clock: resolve(AuctionClockProtocol.self),
+                latency: Constants.actionLatency,
+                market: SimulatedAuctionDataSource.Market(
+                    interval: Constants.marketInterval,
+                    targetsYourLotsProbability: Constants.marketTargetsYourLots
+                ),
+                generator: SystemRandomNumberGenerator()
+            )
         }
         .inObjectScope(.container)
 
@@ -58,8 +68,7 @@ final class AppModule: ViewModelFactoryProtocol {
             VehicleRepository(
                 dataSource: resolve(VehicleDataSourceProtocol.self),
                 clock: resolve(AuctionClockProtocol.self),
-                pageLatency: Constants.pageLatency,
-                actionLatency: Constants.actionLatency
+                pageLatency: Constants.pageLatency
             )
         }
         .inObjectScope(.container)
@@ -113,4 +122,8 @@ private enum Constants {
     static let pageLatency: Duration = .milliseconds(350)
     /// Simulated network delay for placing a bid or buying now.
     static let actionLatency: Duration = .milliseconds(600)
+    /// Pause between simulated competing bids from other buyers (spec LIVE-2).
+    static let marketInterval: Duration = .seconds(6)
+    /// Chance a competing bid lands on a lot you're winning, so being outbid is visible in a demo.
+    static let marketTargetsYourLots = 0.4
 }

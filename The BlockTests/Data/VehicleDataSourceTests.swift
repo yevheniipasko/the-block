@@ -7,7 +7,7 @@ struct VehicleDataSourceTests {
 
     @Test("DATA-1: all 200 bundled vehicles decode with their nullable fields")
     func decodesBundledDataset() async throws {
-        let vehicles = try await BundledJSONDataSource().loadVehicles()
+        let vehicles = try BundledVehicleLoader().loadVehicles()
 
         #expect(vehicles.count == 200)
         #expect(vehicles.count { $0.reservePrice == nil } == 60)
@@ -53,10 +53,10 @@ struct VehicleDataSourceTests {
 
     @Test("DATA-3: a missing resource throws resourceNotFound")
     func missingResourceThrows() async {
-        let dataSource = BundledJSONDataSource(resourceName: "does-not-exist")
+        let loader = BundledVehicleLoader(resourceName: "does-not-exist")
 
-        await #expect(throws: VehicleDataSourceError.resourceNotFound(name: "does-not-exist")) {
-            try await dataSource.loadVehicles()
+        #expect(throws: VehicleDataSourceError.resourceNotFound(name: "does-not-exist")) {
+            try loader.loadVehicles()
         }
     }
 

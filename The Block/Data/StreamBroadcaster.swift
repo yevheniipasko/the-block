@@ -1,0 +1,42 @@
+import Foundation
+
+/// Fans values out to any number of `AsyncStream` subscribers (spec LIVE-1).
+///
+/// Each call to `stream(startingWith:)` creates an independent stream; a subscriber that stops
+/// iterating (e.g. its SwiftUI `.task` is cancelled) is removed automatically.
+final class StreamBroadcaster<Element: Sendable> {
+
+    private var continuations: [UUID: AsyncStream<Element>.Continuation] = [:]
+
+    /// Number of live subscribers; useful to start/stop work only while someone listens.
+    var subscriberCount: Int { continuations.count }
+
+    /// Returns a new stream that first yields `initial` (if any) and then every broadcast value.
+    func stream(startingWith initial: Element? = nil) -> AsyncStream<Element> {
+        let id = UUID()
+        let (stream, continuation) = AsyncStream<Element>.makeStream(
+            bufferingPolicy: .bufferingNewest(Constants.buffer)
+        )
+        if let initial {
+            continuation.yield(initial)
+        }
+        continuations[id] = continuation
+        continuation.onTermination = { [weak self] _ in
+            Task { @MainActor [self] in self?.continuations[id] = nil }
+        }
+        return stream
+    }
+
+    /// Sends `element` to every current subscriber.
+    func yield(_ element: Element) {
+        for continuation in continuations.values {
+            continuation.yield(element)
+        }
+    }
+
+}
+
+private enum Constants {
+    /// Slow subscribers keep only the newest updates; older ones are superseded anyway.
+    static let buffer = 64
+}

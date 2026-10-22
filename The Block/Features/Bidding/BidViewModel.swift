@@ -224,6 +224,8 @@ private enum Localizable {
             "Buy Now is no longer available."
         case .vehicleNotFound:
             "This vehicle is no longer listed."
+        case .connectionFailed:
+            "Couldn't reach the auction. Check your connection and try again."
         }
     }
 }

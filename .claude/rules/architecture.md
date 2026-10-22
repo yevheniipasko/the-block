@@ -15,7 +15,7 @@ App/ (composition root)
 View ──▶ ViewModel ──▶ VehicleRepositoryProtocol  (impl: VehicleRepository, @Observable,
                               │                    container-scoped = single source of truth)
                               ▼
-                       VehicleDataSourceProtocol  (impl: BundledJSONDataSource)
+                       VehicleDataSourceProtocol  (impl: SimulatedAuctionDataSource — fake socket server)
 
 Domain/ — pure types and rules, no dependencies, used by every layer
 ```
@@ -24,8 +24,8 @@ Domain/ — pure types and rules, no dependencies, used by every layer
 |---|---|---|
 | `App/` | `The_BlockApp`, `AppModule` (container + all registrations + factories), router | contain feature UI or business rules |
 | `Domain/` | `VehicleModel`, `BidModel`, `AuctionStatus`, `BiddingRules` (activity level, adaptive step, min next bid, validation, Buy Now eligibility, floor met), `AuctionClock` | import SwiftUI/Swinject, hold state, do I/O |
-| `Data/` DataSource | Loading + decoding `vehicles.json` into `VehicleDto` (snake_case, nullable fields, timezone-less dates), mapping to `VehicleModel` | contain business rules, return DTOs |
-| `Data/` Repository | Load once, expose `vehicles`, `placeBid` / `buyNow` → apply `BiddingRules`, update state, return result | know about screens or formatting |
+| `Data/` DataSource | The remote side: a live feed `vehicleFeed() -> AsyncThrowingStream<VehicleFeedEvent, Error>` (snapshot, then updates — like a socket) plus `placeBid` / `buyNow` requests. Decodes `VehicleDto` and maps to `VehicleModel` (`BundledVehicleLoader` reads `vehicles.json`) | return DTOs, assume data is static |
+| `Data/` Repository | Consume the feed, cache the latest state, fan it out as `AsyncStream`s (`loadStateUpdates`, `vehicleUpdates(id:)`, `inventoryUpdates`), page queries, forward bids / Buy Now and map errors to `BidRejection` | know about screens or formatting |
 | `Features/<Screen>/` ViewModel | Screen state: search/filters/sort, bid input, validation message, confirmation step; reads repository through its protocol | copy the vehicle array, own business rules, import Swinject |
 | `Features/<Screen>/` View | Layout, bindings, accessibility ids; receives its ViewModel via `init` | resolve from the container, contain logic beyond trivial display conditions |
 | `Shared/` | Formatters (CAD, km, dates), reusable components, design tokens | depend on features |
@@ -39,7 +39,7 @@ The Block/
 │   ├── AppModule.swift                # single DI module: Container, all registrations, ViewModelFactoryProtocol impl
 │   └── Routers/                       # InventoryRouter (+ protocol), InventoryRouterView
 ├── Domain/
-├── Data/       VehicleDataSourceProtocol, BundledJSONDataSource, VehicleRepositoryProtocol, VehicleRepository, vehicles.json
+├── Data/       VehicleDataSourceProtocol, SimulatedAuctionDataSource, BundledVehicleLoader, StreamBroadcaster, VehicleRepositoryProtocol, VehicleRepository, vehicles.json
 │   └── DTOs/   VehicleDto (+ toModel() mapping)
 ├── Features/   Inventory/, Detail/, Bidding/
 └── Shared/
@@ -77,7 +77,7 @@ final class AppModule: ViewModelFactoryProtocol {
         // Data — shared
         container.register(AuctionClockProtocol.self) { _ in SystemAuctionClock() }
             .inObjectScope(.container)
-        container.register(VehicleDataSourceProtocol.self) { _ in BundledJSONDataSource() }
+        container.register(VehicleDataSourceProtocol.self) { _ in SimulatedAuctionDataSource(/* loader, clock, latency, market */) }
             .inObjectScope(.container)
         container.register(VehicleRepositoryProtocol.self) { [unowned self] _ in
             VehicleRepository(dataSource: resolve(VehicleDataSourceProtocol.self),
@@ -130,7 +130,8 @@ Rules:
 
 ## Other rules
 
-- **Single source of truth:** the container-scoped `VehicleRepository`. A bid placed anywhere is visible everywhere because every ViewModel reads from that one instance.
+- **Single source of truth:** the container-scoped `VehicleRepository`, a cache of the data source's live feed.
+- **Data can change at any time.** ViewModels never assume a value they read once stays current: they subscribe to the repository's `AsyncStream`s inside the view's `.task` (cancelled automatically when the view goes away) and update their own state. A Combine-free design: no publishers, no cancellables.
 - **One ViewModel per screen** (Inventory, Detail, Bidding) — needed so each View receives only injected dependencies. Keep them thin; no logic that belongs in `Domain/`.
 - **Navigation:** one `InventoryRouter` (`@Observable`, `NavigationPath`, route enum); `InventoryRouterView` hosts `NavigationStack` / `NavigationSplitView` and builds destination Views with ViewModels the router got from `ViewModelFactoryProtocol`.
 - **Isolation:** avoid `nonisolated`. Everything stays on the main actor (the target's default isolation); value types (Models, Dtos, enums) and injected protocols conform to `Sendable`. Decoding 200 vehicles on the main actor is negligible. Only reach for `nonisolated`/actors when profiling shows real off-main work.

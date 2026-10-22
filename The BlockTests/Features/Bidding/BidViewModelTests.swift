@@ -18,8 +18,8 @@ enum BiddingTestSupport {
         clock: AuctionClockProtocol = FixedClock(now: TestDates.reference),
         actionLatency: Duration = .zero
     ) async -> VehicleRepository {
-        let repository = VehicleRepository(
-            dataSource: StubVehicleDataSource(result: .success(vehicles)),
+        let repository = VehicleRepository.stubbed(
+            result: .success(vehicles),
             clock: clock,
             actionLatency: actionLatency
         )
