@@ -50,6 +50,8 @@ struct VehicleModel: Identifiable, Hashable, Sendable {
     var isYouHighBidder: Bool { yourBid != nil && yourBid == currentBid }
     /// Whether the buyer bought this lot through Buy Now (spec BID-10).
     var isPurchasedByYou: Bool { yourPurchasePrice != nil }
+    /// The buyer bid on this lot but someone else now holds the high bid (spec LIVE-3).
+    var isYouOutbid: Bool { yourBid != nil && !isYouHighBidder && !isPurchasedByYou }
 
 }
 
