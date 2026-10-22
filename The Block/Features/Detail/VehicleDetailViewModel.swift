@@ -37,12 +37,18 @@ final class VehicleDetailViewModel {
     /// Latest known copy of the lot; `nil` when it is not in the inventory.
     private(set) var vehicle: VehicleModel?
 
+    /// Creates the detail state for one lot, starting from the repository's current copy.
     init(vehicleID: VehicleModel.ID, repository: VehicleRepositoryProtocol) {
         self.vehicleID = vehicleID
         self.repository = repository
         self.vehicle = repository.vehicle(id: vehicleID)
     }
 
+    /// Keeps `vehicle` current until the calling task is cancelled (spec LIVE-1, LIVE-3, BID-6).
+    ///
+    /// Assigns every value from `repository.vehicleUpdates(id:)` — the current copy first, then each
+    /// change from your bids or other bidders — so the header, outbid marker, and action bar minimum
+    /// follow the lot live. Called from the view's `.task`, which cancels it when the screen goes away.
     func observeVehicle() async {
         for await update in repository.vehicleUpdates(id: vehicleID) {
             vehicle = update
@@ -63,7 +69,7 @@ final class VehicleDetailViewModel {
         return .bidding(minimumBid: BiddingRules.minimumNextBid(for: vehicle), buyNowPrice: buyNowPrice)
     }
 
-    /// The buyer's own position at `now`: purchased, high bidder, or `nil` (spec BID-6, BID-10).
+    /// The buyer's own position at `now`: purchased, high bidder, outbid, or `nil` (spec BID-6, BID-10, LIVE-3).
     func buyerMarker(at now: Date) -> BuyerMarker? {
         guard let vehicle else { return nil }
         if vehicle.status(at: now) == .ended(.purchasedByYou) {
