@@ -21,6 +21,8 @@ Git stays local: finished branches merge into local `main`; never push, open PRs
 
 Architecture: MVVM + Repository + DataSource, Swinject container owned by a single top-level `AppModule` (no per-feature modules; nothing else touches the container), protocol-injected dependencies, pure Domain rules, Service layer only when the triggers in the rule apply — see `.claude/rules/architecture.md`.
 
+Naming: decoded JSON types are `…Dto` and never leave `Data/`; types the app uses are `…Model` (`VehicleModel`, `BidModel`) — see "DTOs vs. models" in `.claude/rules/architecture.md`.
+
 Spec-driven: read `docs/SPEC.md` before any feature work; acceptance criteria IDs drive tests — see `.claude/rules/spec-driven.md`.
 
 Independent features may run in parallel (subagents or a Workflow, ≤ 4 agents, one worktree each) once spec + data/domain are on `main` — see `.claude/rules/parallel-work.md`.

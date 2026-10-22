@@ -23,8 +23,8 @@ Domain/ — pure types and rules, no dependencies, used by every layer
 | Layer | Owns | Must not |
 |---|---|---|
 | `App/` | `The_BlockApp`, `AppModule` (container + all registrations + factories), router | contain feature UI or business rules |
-| `Domain/` | `Vehicle`, `Bid`, `AuctionStatus`, `BiddingRules` (activity level, adaptive step, min next bid, validation, Buy Now eligibility, floor met), `AuctionClock` | import SwiftUI/Swinject, hold state, do I/O |
-| `Data/` DataSource | Loading + decoding `vehicles.json` (snake_case, nullable fields, timezone-less dates) | contain business rules |
+| `Domain/` | `VehicleModel`, `BidModel`, `AuctionStatus`, `BiddingRules` (activity level, adaptive step, min next bid, validation, Buy Now eligibility, floor met), `AuctionClock` | import SwiftUI/Swinject, hold state, do I/O |
+| `Data/` DataSource | Loading + decoding `vehicles.json` into `VehicleDto` (snake_case, nullable fields, timezone-less dates), mapping to `VehicleModel` | contain business rules, return DTOs |
 | `Data/` Repository | Load once, expose `vehicles`, `placeBid` / `buyNow` → apply `BiddingRules`, update state, return result | know about screens or formatting |
 | `Features/<Screen>/` ViewModel | Screen state: search/filters/sort, bid input, validation message, confirmation step; reads repository through its protocol | copy the vehicle array, own business rules, import Swinject |
 | `Features/<Screen>/` View | Layout, bindings, accessibility ids; receives its ViewModel via `init` | resolve from the container, contain logic beyond trivial display conditions |
@@ -40,9 +40,20 @@ The Block/
 │   └── Routers/                       # InventoryRouter (+ protocol), InventoryRouterView
 ├── Domain/
 ├── Data/       VehicleDataSourceProtocol, BundledJSONDataSource, VehicleRepositoryProtocol, VehicleRepository, vehicles.json
+│   └── DTOs/   VehicleDto (+ toModel() mapping)
 ├── Features/   Inventory/, Detail/, Bidding/
 └── Shared/
 ```
+
+## DTOs vs. models
+
+Decoded wire/file shapes and the types the app uses are separate types with separate suffixes.
+
+- **`…Dto`** — mirrors the JSON exactly (`VehicleDto`): `Decodable`, snake_case `CodingKeys`, raw strings/optionals as stored. Lives in `Data/DTOs/`, `nonisolated`, no logic beyond decoding.
+- **`…Model`** — what the app works with (`VehicleModel`, `BidModel`): typed enums, parsed dates, non-optional where the domain guarantees it. Lives in `Domain/`, no `Codable` requirement.
+- **DTOs never leave `Data/`.** The DataSource decodes `…Dto` and maps it to `…Model` (`VehicleDto.toModel()`, in `Data/DTOs/`) before returning. `VehicleDataSourceProtocol`, `VehicleRepositoryProtocol`, ViewModels, Views, routers, and factories only see `…Model` types. A `Dto` in any signature outside `Data/` is a bug.
+- Mapping is where data cleanup happens (unknown enum values, timezone-less dates, empty arrays); it is unit-tested with Swift Testing.
+- The suffix applies to entity/value structs. Enums, rules, and protocols keep plain names (`AuctionStatus`, `BodyStyle`, `BiddingRules`).
 
 ## Dependency injection (Swinject)
 
@@ -53,8 +64,8 @@ Package: `https://github.com/Swinject/Swinject` (SPM, "Up to Next Major" from 2.
 ```swift
 protocol ViewModelFactoryProtocol: AnyObject {
     func makeInventoryViewModel() -> InventoryViewModel
-    func makeVehicleDetailViewModel(vehicleID: Vehicle.ID) -> VehicleDetailViewModel
-    func makeBidViewModel(vehicleID: Vehicle.ID) -> BidViewModel
+    func makeVehicleDetailViewModel(vehicleID: VehicleModel.ID) -> VehicleDetailViewModel
+    func makeBidViewModel(vehicleID: VehicleModel.ID) -> BidViewModel
 }
 
 // swiftlint:disable force_unwrapping
@@ -91,7 +102,7 @@ final class AppModule: ViewModelFactoryProtocol {
 
     var router: InventoryRouterProtocol { container.resolve(InventoryRouterProtocol.self)! }
 
-    func makeBidViewModel(vehicleID: Vehicle.ID) -> BidViewModel {
+    func makeBidViewModel(vehicleID: VehicleModel.ID) -> BidViewModel {
         container.resolve(BidViewModel.self, argument: vehicleID)!
     }
     // ... other factories
