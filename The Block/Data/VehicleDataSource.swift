@@ -1,39 +1,60 @@
 import Foundation
 
-/// Source of vehicles. Today a bundled JSON file; a remote API would conform later.
-/// Returns app models only — DTOs stay inside `Data/`.
+/// One message on the vehicle feed, as a socket would push it (spec LIVE-1).
+enum VehicleFeedEvent: Sendable {
+    /// Full inventory; always the first event after connecting.
+    case snapshot([VehicleModel])
+    /// One lot changed (a bid, a purchase, another bidder).
+    case updated(VehicleModel)
+}
+
+/// Remote side of the auction: a live feed plus request/response actions.
+///
+/// Returns app models only — DTOs stay inside `Data/`. Today it is simulated in-process
+/// (`SimulatedAuctionDataSource`); a WebSocket + HTTP client would conform later.
 protocol VehicleDataSourceProtocol: Sendable {
-    /// Loads every vehicle, already mapped to app models (spec DATA-1).
+
+    /// Opens the live feed: `.snapshot` first, then `.updated` whenever any lot changes.
     ///
-    /// Auction starts are returned as stored in the source; normalization happens in the repository.
+    /// - Throws (from the stream): the error that prevented the initial snapshot.
+    func vehicleFeed() -> AsyncThrowingStream<VehicleFeedEvent, Error>
+
+    /// Sends a bid for the buyer; the server validates it with `BiddingRules` and also pushes the
+    /// updated lot over the feed.
     ///
-    /// - Throws: An error when the source is missing or any entry fails to decode or map (spec DATA-2).
-    func loadVehicles() async throws -> [VehicleModel]
+    /// - Throws: `BidRejection` when the server refuses the bid.
+    func placeBid(_ amount: Int, on id: VehicleModel.ID) async throws -> VehicleModel
+
+    /// Buys the lot at its Buy Now price; the updated lot is also pushed over the feed.
+    ///
+    /// - Throws: `BidRejection.buyNowUnavailable` / `.vehicleNotFound`.
+    func buyNow(_ id: VehicleModel.ID) async throws -> VehicleModel
+
 }
 
 enum VehicleDataSourceError: Error, Equatable {
     case resourceNotFound(name: String)
 }
 
-/// Loads `vehicles.json` from the app bundle (spec DATA-1, DATA-2).
-struct BundledJSONDataSource: VehicleDataSourceProtocol {
+/// Reads the bundled `vehicles.json` snapshot (spec DATA-1, DATA-2).
+struct BundledVehicleLoader: Sendable {
 
     private let bundle: Bundle
     private let resourceName: String
 
-    /// Creates a data source reading `<resourceName>.json` from `bundle`.
-    ///
-    /// Tests pass their own bundle and resource name to load fixtures.
+    /// - Parameters:
+    ///   - bundle: Bundle containing the JSON; the app bundle by default.
+    ///   - resourceName: File name without the `.json` extension.
     init(bundle: Bundle = .main, resourceName: String = "vehicles") {
         self.bundle = bundle
         self.resourceName = resourceName
     }
 
-    /// Reads the bundled JSON file and decodes it with `VehicleDecoder`.
+    /// Decodes every vehicle in the file.
     ///
-    /// - Throws: `VehicleDataSourceError.resourceNotFound` when the file is not in the bundle,
-    ///   or the underlying read, decoding, or mapping error.
-    func loadVehicles() async throws -> [VehicleModel] {
+    /// - Throws: `VehicleDataSourceError.resourceNotFound`, file read errors, `DecodingError`,
+    ///   or `VehicleMappingError` for an unexpected value.
+    func loadVehicles() throws -> [VehicleModel] {
         guard let url = bundle.url(forResource: resourceName, withExtension: "json") else {
             throw VehicleDataSourceError.resourceNotFound(name: resourceName)
         }
@@ -45,12 +66,7 @@ struct BundledJSONDataSource: VehicleDataSourceProtocol {
 /// Decodes `[VehicleDto]` and maps each entry to `VehicleModel`.
 enum VehicleDecoder {
 
-    /// Decodes a JSON array of vehicles and maps each one to `VehicleModel` (spec DATA-1, DATA-2).
-    ///
-    /// All-or-nothing: one malformed entry fails the whole load, so the app shows an error state
-    /// instead of a partial list (spec DATA-3).
-    ///
-    /// - Throws: `DecodingError` for invalid JSON or `VehicleMappingError` for an unexpected field value.
+    /// Decodes the dataset and maps every DTO; one bad entry fails the whole load (spec DATA-2).
     static func decode(_ data: Data) throws -> [VehicleModel] {
         try JSONDecoder()
             .decode([VehicleDto].self, from: data)
