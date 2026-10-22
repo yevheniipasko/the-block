@@ -45,6 +45,8 @@ Auth/accounts, backend/networking (except placeholder images), persistence acros
   The step and its reason are shown to the buyer (e.g. "Step $1,000 · Hot lot, 14 bids"). Your bid raises the bid count, so the level can change after you bid.
 - **Buy Now ceiling:** a bid must be below `buy_now_price`; at/above → rejected with "Use Buy Now instead".
 - All money is whole CAD, formatted `$24,500`. Odometer in km.
+- **Buyer fees (simulated):** buyer fee $300 under $10,000 · $500 for $10,000–$29,999 · 2 % at $30,000+; plus a flat $99 documentation fee. Estimate only, before taxes and transport (no buyer location without accounts).
+- **Proxy bids live on the "server"** (the simulated data source), like real auctions: your max is never sent to other bidders, and the server answers competing bids for you.
 
 ## Features
 
@@ -194,16 +196,52 @@ Tasks:
 - [ ] `VehicleDetailViewModel` exposes the report + tests
 - [ ] History summary section + full report sheet
 
+### PROXY — max bidding
+
+- **PROXY-1** The bid sheet offers "Set a max bid": you enter a ceiling ≥ the minimum next bid and below the Buy Now price (BID-3/BID-4 rules apply to the max). Confirm places the minimum next bid now and stores the max.
+- **PROXY-2** When a competing bid arrives on a lot where your max is higher, the server immediately places your next minimum bid (by the adaptive step) on your behalf; you stay high bidder. When the competitor's bid reaches or passes your max, you're outbid and the proxy is spent.
+- **PROXY-3** Your active max shows on the detail header, the bid sheet, and "My bids" rows ("Your max $26,000"); auto-bids placed for you are marked in bid history ("You · auto").
+- **PROXY-4** You can raise your max or cancel it from the bid sheet while the lot is not ended; cancelling keeps your current bid. A max below your current bid is rejected.
+- **PROXY-5** A proxy never bids above its max, after the lot ends, or at/above the Buy Now price.
+
+Tasks:
+- [ ] `BiddingRules.proxyResponse(...)` (pure: next auto-bid or nil) + tests at the max / Buy Now / ended boundaries
+- [ ] `SimulatedAuctionDataSource`: store max per lot, answer market bids, push both updates; `setMaxBid` / `cancelMaxBid` endpoints + tests
+- [ ] `VehicleModel.yourMaxBid`; bid sheet max mode; max shown on detail / My bids; HIST "auto" marker
+
+### FEES — total cost estimate
+
+- **FEES-1** The bid sheet and the Buy Now sheet show "Est. total $X" = amount + buyer fee + documentation fee (see Assumptions), with a breakdown on tap; it updates as the amount changes.
+- **FEES-2** The estimate is labelled "Estimate · before taxes and transport".
+- **FEES-3** Fee tiers switch exactly at $10,000 and $30,000.
+
+Tasks:
+- [ ] `FeeSchedule` (pure) + boundary tests
+- [ ] Estimate row + breakdown in bid and Buy Now sheets
+
+### ALERT — outbid banner
+
+- **ALERT-1** When you're outbid on any lot while the app is open, a banner appears over whatever screen is showing: "Outbid on 2021 Ford F-150 · now $31,000" with a "Bid again" action opening that lot's bid sheet.
+- **ALERT-2** The banner auto-dismisses after ~4 s or on swipe; several outbids in a row queue instead of stacking.
+- **ALERT-3** No banner for the lot whose bid sheet is open (the sheet shows its own notice, LIVE-3), and none for outbids already absorbed by your proxy (PROXY-2).
+- **ALERT-4** The banner is announced to VoiceOver.
+
+Tasks:
+- [ ] `OutbidAlertCenter` (subscribes to `inventoryUpdates()`, detects your-bid → outbid transitions, queue) + tests
+- [ ] Banner overlay in `InventoryRouterView`, "Bid again" routes to the bid sheet
+
 ### SAVED — watchlist
 
 - **SAVED-1** A heart on each card and in the detail toolbar saves / unsaves a lot; state shows immediately on both.
 - **SAVED-2** A "Saved (N)" chip in the inventory shows only saved lots, combinable with search, filters, and sort; it's clearable like other filters.
 - **SAVED-3** Saved lots live in memory in the repository (single source of truth) and reset on launch, like bids.
 - **SAVED-4** No saved lots and the chip is on → empty state ("No saved vehicles yet") with a clear action.
+- **SAVED-5** Placing a bid, setting a max, or Buy Now saves the lot automatically (like Copart); you can still unsave it.
 
 Tasks:
 - [ ] Repository: `savedIDs`, `toggleSaved(id:)` (+ stream update), `InventoryQuery.savedOnly` + tests
 - [ ] Heart on card + detail, "Saved (N)" chip, empty state
+- [ ] Auto-save on bid / max / Buy Now + test
 
 ### UX — cross-cutting quality
 
@@ -223,8 +261,6 @@ Tasks:
 
 ## Stretch (only after the above is done and time allows — ask first)
 
-- Simulated competing bids (outbid state + banner).
-- Proxy / max bidding (OPENLANE, Copart, ADESA primitive).
 - Step also drops one activity level after each 6 h without a new bid (closer to a live auctioneer; needs a synthetic last-bid time for dataset lots).
 - Anti-sniping: a bid in the last minutes extends the timer (OPENLANE does this).
 - Condition grade explainer.
