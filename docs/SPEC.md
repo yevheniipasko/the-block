@@ -266,7 +266,7 @@ Tasks:
 - **UX-1** iPhone: stack navigation. iPad: split view (list + detail side by side).
 - **UX-2** Dark mode and Dynamic Type (up to accessibility sizes) without clipped content.
 - **UX-3** VoiceOver: cards and bid controls have meaningful labels; status and prices read naturally.
-- **UX-4** All tapped/asserted elements carry `<screen>.<element>` accessibility identifiers (for Maestro).
+- **UX-4** All tapped/asserted elements carry `<screen>.<element>` accessibility identifiers (for XCUITest).
 - **UX-5** Every wait is visible: first inventory load shows a loading state (not an empty list); next page shows a loading row; failures show an error with retry (full-screen on first load, inline row on later pages); images show a placeholder while loading and a fallback on failure; placing a bid / Buy Now shows an in-progress state on the confirm button (inputs disabled, no double submit) during the simulated ~0.6 s round trip.
 - **UX-6** Loaded images are cached in memory by URL: scrolling back or reopening a lot shows the image without a placeholder flash or a new request.
 
@@ -274,7 +274,7 @@ Tasks:
 - [x] Design tokens + formatters in `Shared/` (Spacing, Formatting, status display, `AuctionStatusBadge`, `VehicleImage`, `LoadingStateView` / `ErrorStateView` / `PageStatusRow`)
 - [ ] In-memory image cache behind `VehicleImage` (`NSCache` by URL) + test
 - [ ] Accessibility pass
-- [ ] 4 Maestro smoke flows (see `.claude/rules/maestro-testing.md`)
+- [x] XCUITest smoke tests: browse/search, open detail, valid bid, below-minimum, live outbid (see `.claude/rules/ui-testing.md`)
 - [ ] Submission README
 
 ## Postponed (designed, deliberately not built — see DECISIONS)

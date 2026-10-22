@@ -98,15 +98,32 @@ struct VehicleDetailView: View {
             .accessibilityIdentifier(identifier)
     }
 
+    private var priceLabelText: some View {
+        Text(viewModel.priceLabel)
+            .font(.subheadline)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: true, vertical: false)
+    }
+
+    private var priceAmountText: some View {
+        Text(viewModel.priceAmount)
+            .font(.title.bold().monospacedDigit())
+            .fixedSize(horizontal: true, vertical: false)
+    }
+
     /// Current or starting bid, bid count, floor state (never the amount), and Buy Now price.
     private func priceBlock(_ vehicle: VehicleModel) -> some View {
         VStack(alignment: .leading, spacing: Spacing.xSmall) {
-            HStack(alignment: .firstTextBaseline, spacing: Spacing.small) {
-                Text(viewModel.priceLabel)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                Text(viewModel.priceAmount)
-                    .font(.title.bold().monospacedDigit())
+            // Side by side when it fits, stacked at large text sizes, so the amount never wraps mid-number.
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .firstTextBaseline, spacing: Spacing.small) {
+                    priceLabelText
+                    priceAmountText
+                }
+                VStack(alignment: .leading, spacing: Spacing.xxSmall) {
+                    priceLabelText
+                    priceAmountText
+                }
             }
             .accessibilityElement(children: .combine)
             .accessibilityIdentifier("detail.currentBid")

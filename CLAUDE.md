@@ -31,7 +31,7 @@ Log decisions, time, and AI usage in `docs/DECISIONS.md` as you go — see `.cla
 
 After a feature is built and tests pass, add `///` doc comments to its methods in a separate commit — see `.claude/rules/code-comments.md`.
 
-UI flows are tested with Maestro (`maestro/flows/`), logic with Swift Testing; no XCUITest — see `.claude/rules/maestro-testing.md`.
+UI journeys are tested with native XCUITest (`The BlockUITests`, launched with `-market off|fast`), logic with Swift Testing — see `.claude/rules/ui-testing.md`.
 
 ## Build / run / test
 
