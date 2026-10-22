@@ -168,9 +168,9 @@ Tasks:
 
 Tasks:
 - [x] `BidPosition` (winning / outbid / won / bought / lost) — pure, derived from `VehicleModel` + `AuctionStatus`, tested
-- [ ] `MyBidsViewModel` (subscribes to `inventoryUpdates()`, filters lots with `yourBid` or `yourPurchasePrice`, groups by position) + tests
-- [ ] Router route + `ViewModelFactoryProtocol.makeMyBidsViewModel()`
-- [ ] My bids view, empty state, toolbar entry with outbid badge
+- [x] `MyBidsViewModel` (subscribes to `inventoryUpdates()`, filters lots with `yourBid` or `yourPurchasePrice`, groups by position) + tests
+- [x] Router route + `ViewModelFactoryProtocol.makeMyBidsViewModel()`
+- [x] My bids view, empty state, toolbar entry with outbid badge
 - [x] Demo seed in `SimulatedAuctionDataSource` snapshot (one leading, one outbid, both active) + test
 
 ### FEES — total cost estimate
