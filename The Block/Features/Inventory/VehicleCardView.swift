@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// One inventory row: photo, title, price, bids, odometer, location, status, Buy Now, and
-/// your own position on the lot (spec LIST-1, BID-6, UX-2, UX-3).
+/// your own position on the lot (spec LIST-1, BID-6, LIVE-3, UX-2, UX-3).
 ///
 /// Lays out photo and details side by side; at accessibility text sizes the photo moves
 /// above the details so nothing clips.
@@ -84,6 +84,11 @@ struct VehicleCardView: View {
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.green)
                 .accessibilityIdentifier("list.highBidderBadge")
+        } else if vehicle.isYouOutbid {
+            Label(Localizable.outbid, systemImage: "exclamationmark.triangle.fill")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.red)
+                .accessibilityIdentifier("list.outbidBadge")
         }
     }
 
@@ -113,6 +118,8 @@ struct VehicleCardView: View {
             parts.append(Localizable.purchased(Formatting.currency(purchasePrice)))
         } else if vehicle.isYouHighBidder {
             parts.append(Localizable.highBidder)
+        } else if vehicle.isYouOutbid {
+            parts.append(Localizable.outbid)
         }
         return parts.joined(separator: ". ")
     }
@@ -130,6 +137,7 @@ private enum Localizable {
     static let currentBid = "Current bid"
     static let startingAt = "Starting at"
     static let highBidder = "You're the high bidder"
+    static let outbid = "You've been outbid"
     static func buyNow(_ price: String) -> String { "Buy Now \(price)" }
     static func purchased(_ price: String) -> String { "Purchased by you for \(price)" }
 }
