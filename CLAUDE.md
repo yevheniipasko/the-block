@@ -29,6 +29,8 @@ Independent features may run in parallel (subagents or a Workflow, ≤ 4 agents,
 
 Log decisions, time, and AI usage in `docs/DECISIONS.md` as you go — see `.claude/rules/decisions-log.md`. Commits are one line, no body, no AI co-author/attribution trailers — see `.claude/rules/commits.md`.
 
+After a feature is built and tests pass, add `///` doc comments to its methods in a separate commit — see `.claude/rules/code-comments.md`.
+
 UI flows are tested with Maestro (`maestro/flows/`), logic with Swift Testing; no XCUITest — see `.claude/rules/maestro-testing.md`.
 
 ## Build / run / test

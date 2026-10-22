@@ -28,7 +28,8 @@ No separate per-feature plan files — the task checklist lives under each featu
    - logic → Swift Testing: `@Test("BID-3: bid below minimum is rejected")`
    - key user journeys → a small set of Maestro flows tagged with the IDs they cover (see `maestro-testing.md`); not every criterion needs a UI flow.
 3. If implementation forces a decision the spec does not cover, or contradicts it, update `SPEC.md` in the same branch, log it in `DECISIONS.md`, and call it out to the user.
-4. Feature done = all its criteria covered by passing tests + checklist complete.
+4. Once tests pass, add doc comments to the feature's methods in a separate commit — see `code-comments.md`.
+5. Feature done = all its criteria covered by passing tests + checklist complete + methods commented.
 
 ## Rules
 
