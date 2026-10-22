@@ -12,6 +12,7 @@ enum DetailActionBarState: Hashable, Sendable {
 /// The buyer's own position on a lot, shown in the header (spec BID-6, BID-10).
 enum BuyerMarker: Hashable, Sendable {
     case highBidder
+    case outbid
     case purchased
 }
 
@@ -24,22 +25,35 @@ struct SpecRow: Identifiable, Hashable, Sendable {
 
 /// Detail screen state for one vehicle (spec DETAIL-*).
 ///
-/// Reads the vehicle live from the repository, so bids and purchases show up immediately
-/// (spec BID-6). Business rules stay in `BiddingRules`; this type only shapes them for display.
+/// Keeps its own copy of the vehicle, refreshed from `repository.vehicleUpdates(id:)` while the
+/// screen observes it, so your bids and other bidders' bids show up live (spec BID-6, LIVE-1,
+/// LIVE-3). Business rules stay in `BiddingRules`; this type only shapes them for display.
 @Observable
 final class VehicleDetailViewModel {
 
     let vehicleID: VehicleModel.ID
     @ObservationIgnored let repository: VehicleRepositoryProtocol
 
-    /// Creates the detail state for one lot, read live from the shared repository.
+    /// Latest known copy of the lot; `nil` when it is not in the inventory.
+    private(set) var vehicle: VehicleModel?
+
+    /// Creates the detail state for one lot, starting from the repository's current copy.
     init(vehicleID: VehicleModel.ID, repository: VehicleRepositoryProtocol) {
         self.vehicleID = vehicleID
         self.repository = repository
+        self.vehicle = repository.vehicle(id: vehicleID)
     }
 
-    /// Latest repository copy, so bids placed elsewhere show up immediately (spec BID-6).
-    var vehicle: VehicleModel? { repository.vehicle(id: vehicleID) }
+    /// Keeps `vehicle` current until the calling task is cancelled (spec LIVE-1, LIVE-3, BID-6).
+    ///
+    /// Assigns every value from `repository.vehicleUpdates(id:)` — the current copy first, then each
+    /// change from your bids or other bidders — so the header, outbid marker, and action bar minimum
+    /// follow the lot live. Called from the view's `.task`, which cancels it when the screen goes away.
+    func observeVehicle() async {
+        for await update in repository.vehicleUpdates(id: vehicleID) {
+            vehicle = update
+        }
+    }
 
     /// What the bottom action bar shows at `now` (spec DETAIL-6, TIME-4, BID-11).
     ///
@@ -55,13 +69,16 @@ final class VehicleDetailViewModel {
         return .bidding(minimumBid: BiddingRules.minimumNextBid(for: vehicle), buyNowPrice: buyNowPrice)
     }
 
-    /// The buyer's own position at `now`: purchased, high bidder, or `nil` (spec BID-6, BID-10).
+    /// The buyer's own position at `now`: purchased, high bidder, outbid, or `nil` (spec BID-6, BID-10, LIVE-3).
     func buyerMarker(at now: Date) -> BuyerMarker? {
         guard let vehicle else { return nil }
         if vehicle.status(at: now) == .ended(.purchasedByYou) {
             return .purchased
         }
-        return vehicle.isYouHighBidder ? .highBidder : nil
+        if vehicle.isYouHighBidder {
+            return .highBidder
+        }
+        return vehicle.isYouOutbid ? .outbid : nil
     }
 
     /// "Current bid" once the lot has bids, otherwise "Starting at" (spec DETAIL-2).
