@@ -181,7 +181,7 @@ Tasks:
 
 Tasks:
 - [x] `FeeSchedule` (pure) + boundary tests
-- [ ] Estimate row + breakdown in bid and Buy Now sheets
+- [x] Estimate row + breakdown in bid and Buy Now sheets
 
 ### ALERT — outbid banner
 
