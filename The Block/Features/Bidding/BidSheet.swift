@@ -62,8 +62,8 @@ struct BidSheet: View {
 
 }
 
-/// Amount entry with outbid notice, live minimum explanation, quick-add buttons and inline validation
-/// (spec BID-1 … BID-4, LIVE-3).
+/// Amount entry with outbid notice, live minimum explanation, quick-add buttons, inline validation
+/// and the live total estimate (spec BID-1 … BID-4, LIVE-3, FEES-1).
 private struct BidEntryView: View {
 
     let viewModel: BidViewModel
@@ -98,6 +98,10 @@ private struct BidEntryView: View {
             }
 
             quickAddButtons
+
+            if let estimate = viewModel.bidEstimate {
+                FeeEstimateView(estimate: estimate, identifierPrefix: "bid")
+            }
 
             Button {
                 isAmountFocused = false
@@ -168,7 +172,7 @@ private struct BidEntryView: View {
 
 }
 
-/// Confirmation step: vehicle, amount, binding notice, then "Confirm bid" (spec BID-5, UX-5).
+/// Confirmation step: vehicle, amount, total estimate, binding notice, then "Confirm bid" (spec BID-5, FEES-1, UX-5).
 private struct BidReviewView: View {
 
     let viewModel: BidViewModel
@@ -187,6 +191,10 @@ private struct BidReviewView: View {
                 }
             }
             .accessibilityElement(children: .combine)
+
+            if let estimate = viewModel.bidEstimate {
+                FeeEstimateView(estimate: estimate, identifierPrefix: "bid.review")
+            }
 
             Label(Localizable.bindingNotice, systemImage: "exclamationmark.shield")
                 .font(.callout)

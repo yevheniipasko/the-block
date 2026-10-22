@@ -156,6 +156,22 @@ final class BidViewModel {
         updateAmountText(String(base + steps * bidStep))
     }
 
+    // MARK: - Fee estimate
+
+    /// Estimated total for the entered amount, or `nil` while the field is empty or zero (spec FEES-1).
+    ///
+    /// Follows every keystroke and quick-add, including amounts that don't pass validation yet,
+    /// so the buyer sees the cost while typing.
+    var bidEstimate: FeeEstimate? {
+        guard let amount, amount > 0 else { return nil }
+        return FeeSchedule.estimate(for: amount)
+    }
+
+    /// Estimated total for buying at the lot's Buy Now price, or `nil` when it has none (spec FEES-1).
+    var buyNowEstimate: FeeEstimate? {
+        vehicle?.buyNowPrice.map { FeeSchedule.estimate(for: $0) }
+    }
+
     // MARK: - Validation
 
     /// Whether the lot can no longer take bids, so the sheet hides its controls (spec BID-7).

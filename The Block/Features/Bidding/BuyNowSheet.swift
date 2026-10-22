@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Buy Now confirmation sheet (spec BID-10, BID-11, UX-5).
+/// Buy Now confirmation sheet (spec BID-10, BID-11, FEES-1, UX-5).
 ///
 /// Shows the price and that buying ends the auction; unavailable lots explain why and offer
 /// no confirm button. On success it shows "Purchased by you" briefly, then calls `onFinish`.
@@ -72,6 +72,10 @@ struct BuyNowSheet: View {
                 }
             }
             .accessibilityElement(children: .combine)
+
+            if let estimate = viewModel.buyNowEstimate {
+                FeeEstimateView(estimate: estimate, identifierPrefix: "buyNow")
+            }
 
             Label(Localizable.endsAuctionNotice, systemImage: "bolt.fill")
                 .font(.callout)

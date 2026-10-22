@@ -181,7 +181,7 @@ Tasks:
 
 Tasks:
 - [x] `FeeSchedule` (pure) + boundary tests
-- [ ] Estimate row + breakdown in bid and Buy Now sheets
+- [x] Estimate row + breakdown in bid and Buy Now sheets
 
 ### ALERT — outbid banner
 
@@ -191,8 +191,8 @@ Tasks:
 - **ALERT-4** The banner is announced to VoiceOver.
 
 Tasks:
-- [ ] `OutbidAlertCenter` (subscribes to `inventoryUpdates()`, detects your-bid → outbid transitions, queue) + tests
-- [ ] Banner overlay in `InventoryRouterView`, "Bid again" routes to the bid sheet
+- [x] `OutbidAlertCenter` (subscribes to `inventoryUpdates()`, detects your-bid → outbid transitions, queue) + tests
+- [x] Banner overlay in `InventoryRouterView`, "Bid again" routes to the bid sheet
 
 ### UX — cross-cutting quality
 
