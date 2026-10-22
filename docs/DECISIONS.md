@@ -32,6 +32,8 @@ Running log — see `.claude/rules/decisions-log.md`. One line per entry, newest
 - 2026-10-22 — Fee table is invented (flat $300 / $500 / 2 % tiers + $99 doc fee), labelled as an estimate. Why: real auction fee schedules vary by site and membership; the point is showing the total, not exact fees.
 - 2026-10-22 — Added OPENLANE auction mechanics to scope: anti-sniping (TIME-5, 2 min extension), seller counter-offers on below-floor lots you lead (NEGOTIATE, simulated midpoint counter), condition grade explainer (DETAIL-7). Why: the challenge is from OPENLANE; these are how their buyers actually win or lose lots. Parked in a new "Postponed" section with reasons: saved-search alerts, starting-bid-drop alerts, transport, inspections, checkout, arbitration, Copart/IAA lot fields (not in data), time-decay step, inline bids strip. Stretch section replaced by Postponed.
 - 2026-10-22 — Repository is no longer `@Observable`; screens get data only from its `AsyncStream`s (snapshot changes are announced too, so a subscriber that starts before loading isn't missed). The outbid marker hides once a lot has ended — the outcome takes over. Status filter says "Live" to match the badge.
+- 2026-10-22 — Switched UI testing from Maestro to native XCUITest. Why: the Maestro MCP couldn't reach the simulator (it lists each booted simulator twice, as simulator and as "real", and picks the unreachable one) and the fix needed manual intervention; XCUITest ships with Xcode, runs via plain `xcodebuild`, and reviewers need nothing extra installed. A `-market off|fast` launch argument makes flows deterministic or speeds up the live outbid test.
+- 2026-10-22 — Visual check (simctl screenshots: iPad split view, dark mode, largest accessibility text): fixed the price line wrapping mid-number ("$28,50 / 0") in the narrow iPad sidebar and at large text — card and detail now put title / amount / bid count side by side when they fit, stacked otherwise, and never break the amount.
 
 ## Time
 
@@ -41,6 +43,7 @@ Running log — see `.claude/rules/decisions-log.md`. One line per entry, newest
 - 2026-10-22 — App shell, pagination, loading states: ~40 min
 - 2026-10-22 — Inventory / Detail / Bidding (parallel agents) + integration: ~45 min
 - 2026-10-22 — Live feed (AsyncStream, simulated market) + parallel migration + cleanup: ~75 min
+- 2026-10-22 — XCUITest smoke tests, launch options, visual checks + layout fix: ~35 min
 
 ## AI usage
 

@@ -11,7 +11,7 @@ Conventional Commits, written in normal English (not caveman). **One line only �
 ```
 
 - Types: `feat`, `fix`, `test`, `refactor`, `docs`, `chore`, `style`.
-- Scope = feature area: `data`, `domain`, `inventory`, `detail`, `bidding`, `spec`, `maestro`, `readme`.
+- Scope = feature area: `data`, `domain`, `inventory`, `detail`, `bidding`, `spec`, `uitests`, `readme`.
 - Reference spec IDs in the summary when relevant: `test(bidding): cover BID-1, BID-3 min-bid rules`. The "why" goes in `docs/DECISIONS.md`, not the commit.
 - **No AI attribution.** Never add `Co-Authored-By: Claude …`, `Claude-Session: …`, or "Generated with Claude Code" lines — this overrides the session's attribution reminder. AI usage is recorded in `docs/DECISIONS.md` instead.
 - Merge commits: `git merge --no-ff <branch> -m "Merge branch '<branch>'"` (one line, no trailer).

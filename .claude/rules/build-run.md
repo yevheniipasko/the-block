@@ -14,6 +14,6 @@ If an MCP build is cancelled or hangs on a DerivedData lock, use the `kill-build
 
 - Always build from the current worktree: project path `.claude/worktrees/<name>/The Block.xcodeproj`, scheme `The Block`. Never build the main checkout while working on a feature.
 - Use one simulator for the whole session (a recent iPhone on the iOS 27 runtime); set it once in session defaults. Use an iPad simulator only to check adaptive layout.
-- A change is verified when: build succeeds with no new warnings → `test_sim` (Swift Testing) passes → the app runs and the changed screen was checked (screenshot or Maestro flow, see `maestro-testing.md`).
+- A change is verified when: build succeeds with no new warnings → `test_sim` (Swift Testing) passes → the app runs and the changed screen was checked (screenshot or XCUITest, see `ui-testing.md`).
 - Report build/test failures with the exact error lines; don't summarize them away.
 - The submission README's run instructions must work for a plain `xcodebuild` / Xcode ⌘R user — no MCP required.

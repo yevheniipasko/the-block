@@ -13,7 +13,7 @@ Only after `docs/SPEC.md` is approved and the shared foundation is merged to `ma
 3. in parallel:  ┌ inventory (list, search, filters)
                  ├ detail
                  └ bidding (bid sheet + VM)  — needs Repository.placeBid from step 2
-4. maestro flows + README + polish           — after 3 is integrated
+4. UI tests + README + polish                — after 3 is integrated
 ```
 
 Good parallel tasks: separate features in separate folders, test writing for already-merged code, independent reviews (e.g. `code-review` + accessibility audit). Don't parallelize tightly coupled edits to the same files or anything still undefined in the spec.
@@ -22,7 +22,7 @@ Good parallel tasks: separate features in separate folders, test writing for alr
 
 - **Every implementing agent gets its own worktree** (`isolation: "worktree"`, or a worktree under `.claude/worktrees/<name>` per `worktrees.md`) and its own branch. Never two agents in one worktree.
 - **Shared files are owned by the orchestrator:** `docs/SPEC.md`, `docs/DECISIONS.md`, `Domain/`, `Data/VehicleRepository.swift`, `App/`, `Shared/` tokens. Agents that need a change there report it back instead of editing; the orchestrator applies it on `main` (or a dedicated branch) and agents rebase.
-- **Simulators:** each agent builds with its own worktree's `.xcodeproj` (separate DerivedData) and uses its **own simulator** (different device name/UDID in its session defaults). Maestro flows run on one device at a time — run them sequentially in step 4, not inside parallel agents.
+- **Simulators:** each agent builds with its own worktree's `.xcodeproj` (separate DerivedData) and uses its **own simulator** (different device name/UDID in its session defaults). UI tests run on one device at a time — run them sequentially in step 4, not inside parallel agents.
 - Read-only agents (review, investigation) need no worktree.
 
 ## Agent brief (what every spawned agent receives)
