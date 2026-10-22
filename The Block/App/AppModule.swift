@@ -6,8 +6,11 @@ import Swinject
 final class AppModule: ViewModelFactoryProtocol {
 
     private let container = Container()
+    private let launchOptions: LaunchOptions
 
-    init() {
+    /// - Parameter launchOptions: Launch-time switches (UI tests); `.standard` for a normal launch.
+    init(launchOptions: LaunchOptions = .standard) {
+        self.launchOptions = launchOptions
         registerData()
         registerViewModels()
         registerRouters()
@@ -55,10 +58,7 @@ final class AppModule: ViewModelFactoryProtocol {
                 loadSnapshot: { try loader.loadVehicles() },
                 clock: resolve(AuctionClockProtocol.self),
                 latency: Constants.actionLatency,
-                market: SimulatedAuctionDataSource.Market(
-                    interval: Constants.marketInterval,
-                    targetsYourLotsProbability: Constants.marketTargetsYourLots
-                ),
+                market: launchOptions.marketSettings,
                 generator: SystemRandomNumberGenerator()
             )
         }
@@ -122,8 +122,4 @@ private enum Constants {
     static let pageLatency: Duration = .milliseconds(350)
     /// Simulated network delay for placing a bid or buying now.
     static let actionLatency: Duration = .milliseconds(600)
-    /// Pause between simulated competing bids from other buyers (spec LIVE-2).
-    static let marketInterval: Duration = .seconds(6)
-    /// Chance a competing bid lands on a lot you're winning, so being outbid is visible in a demo.
-    static let marketTargetsYourLots = 0.4
 }
