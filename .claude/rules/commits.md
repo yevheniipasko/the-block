@@ -25,5 +25,5 @@ Conventional Commits, written in normal English (not caveman):
 
 ## Safety
 
-- Commit only when asked or when a feature is done per `worktrees.md`; never push or merge without asking.
+- Commit only when asked or when a feature is done per `worktrees.md`; merges are local; never push without asking (see `git-remote.md`).
 - Never commit secrets, DerivedData, `.serena/` caches, or simulator artifacts.

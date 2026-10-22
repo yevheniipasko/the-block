@@ -17,6 +17,8 @@ Current state: fresh Xcode template (`ContentView`, `The_BlockApp`, empty test t
 
 Feature work happens in separate git worktrees under `.claude/worktrees/` — see `.claude/rules/worktrees.md`.
 
+Git stays local: finished branches merge into local `main`; never push, open PRs, or change remotes without asking first — see `.claude/rules/git-remote.md` (also enforced as "ask" in `.claude/settings.json`).
+
 Architecture: MVVM + Repository + DataSource, Swinject container owned by a single top-level `AppModule` (no per-feature modules; nothing else touches the container), protocol-injected dependencies, pure Domain rules, Service layer only when the triggers in the rule apply — see `.claude/rules/architecture.md`.
 
 Spec-driven: read `docs/SPEC.md` before any feature work; acceptance criteria IDs drive tests — see `.claude/rules/spec-driven.md`.

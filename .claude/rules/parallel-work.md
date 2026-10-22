@@ -36,6 +36,6 @@ Good parallel tasks: separate features in separate folders, test writing for alr
 ## Integration (orchestrator)
 
 1. Review each agent's branch (diff + `code-review`), verify build/tests yourself — don't trust the report alone.
-2. Ask the user how to integrate (per `worktrees.md`), then merge one branch at a time, rebuilding and re-running tests after each.
+2. Merge into local `main` one branch at a time (per `worktrees.md` / `git-remote.md` — no push, no PR), rebuilding and re-running tests after each.
 3. Log decisions, time, and AI usage from agent reports into `docs/DECISIONS.md` — including that the work was parallelized and how.
 4. Remove finished worktrees and merged branches.
