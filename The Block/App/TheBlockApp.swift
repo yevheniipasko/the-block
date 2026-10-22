@@ -7,7 +7,7 @@ struct TheBlockApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            InventoryRouterView(router: appModule.router)
                 .task { await appModule.start() }
         }
     }

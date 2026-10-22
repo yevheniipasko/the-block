@@ -45,7 +45,7 @@ struct VehicleRepositoryTests {
         let id = UUID()
         let repository = await makeRepository([.fixture(id: id, currentBid: 23_000, bidCount: 14)])
 
-        let updated = try repository.placeBid(24_000, on: id).get()
+        let updated = try await repository.placeBid(24_000, on: id).get()
 
         #expect(updated.currentBid == 24_000)
         #expect(updated.bidCount == 15)
@@ -59,7 +59,7 @@ struct VehicleRepositoryTests {
         let repository = await makeRepository([.fixture(id: id, currentBid: 23_000, bidCount: 14)])
         let before = repository.vehicle(id: id)
 
-        let result = repository.placeBid(23_500, on: id)
+        let result = await repository.placeBid(23_500, on: id)
 
         #expect(result.failure == .belowMinimum(minimum: 24_000))
         #expect(repository.vehicle(id: id) == before)
@@ -74,7 +74,7 @@ struct VehicleRepositoryTests {
         let ended = VehicleModel.fixture(id: id, auctionStart: endedStart)
         let repository = await makeRepository([ended, anchor])
 
-        #expect(repository.placeBid(50_000, on: id).failure == .auctionEnded)
+        #expect(await repository.placeBid(50_000, on: id).failure == .auctionEnded)
     }
 
     @Test("BID-10: Buy Now marks the lot purchased by you")
@@ -84,7 +84,7 @@ struct VehicleRepositoryTests {
         let repository = await makeRepository([vehicle])
         // The only vehicle is the anchor, so it starts exactly at launch → active.
 
-        let updated = try repository.buyNow(id).get()
+        let updated = try await repository.buyNow(id).get()
 
         #expect(updated.isPurchasedByYou)
         #expect(updated.status(at: launch) == .ended(.purchasedByYou))
@@ -95,15 +95,27 @@ struct VehicleRepositoryTests {
         let id = UUID()
         let repository = await makeRepository([.fixture(id: id, buyNowPrice: nil)])
 
-        #expect(repository.buyNow(id).failure == .buyNowUnavailable)
+        #expect(await repository.buyNow(id).failure == .buyNowUnavailable)
+    }
+
+    @Test("LIST-7 / BID-6: pages reflect bids placed after loading")
+    func pagesSeeLiveBids() async throws {
+        let id = UUID()
+        let repository = await makeRepository([.fixture(id: id, currentBid: 23_000, bidCount: 14)])
+        await repository.placeBid(24_000, on: id)
+
+        let page = try await repository.fetchPage(InventoryQuery(), after: nil, limit: 20)
+
+        #expect(page.vehicles.first?.currentBid == 24_000)
+        #expect(page.totalCount == 1)
     }
 
     @Test("Unknown vehicle IDs are rejected")
     func unknownVehicle() async {
         let repository = await makeRepository([.fixture()])
 
-        #expect(repository.placeBid(1_000, on: UUID()).failure == .vehicleNotFound)
-        #expect(repository.buyNow(UUID()).failure == .vehicleNotFound)
+        #expect(await repository.placeBid(1_000, on: UUID()).failure == .vehicleNotFound)
+        #expect(await repository.buyNow(UUID()).failure == .vehicleNotFound)
     }
 
 }
