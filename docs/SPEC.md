@@ -55,7 +55,7 @@ Auth/accounts, backend/networking (except placeholder images), persistence acros
 
 Tasks:
 - [ ] Bundle `vehicles.json` in the app target
-- [ ] `Vehicle` + enums (body style, transmission, drivetrain, fuel, title status)
+- [ ] `VehicleDto` (decoding) + `VehicleModel` + enums (body style, transmission, drivetrain, fuel, title status); DataSource maps Dto → Model
 - [ ] Swinject via SPM; single `AppModule` (container, registrations, `ViewModelFactoryProtocol`) — see `.claude/rules/architecture.md`
 - [ ] `VehicleDataSourceProtocol` + `BundledJSONDataSource`
 - [ ] `VehicleRepositoryProtocol` + `VehicleRepository` (load, expose vehicles, state: loading / loaded / failed)

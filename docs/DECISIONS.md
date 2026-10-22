@@ -15,6 +15,7 @@ Running log — see `.claude/rules/decisions-log.md`. One line per entry, newest
 - 2026-10-22 — Bids in memory, reset on launch. Why: no backend; predictable demo. Alt: SwiftData (cut, time).
 - 2026-10-22 — Floor (reserve) amount hidden, only met / not met / no floor shown. Why: mirrors real auctions; still transparent to the buyer.
 - 2026-10-22 — Adaptive bid step = price base ($200 / $500 / $1,000 at $10k / $30k) × activity (quiet ½, active 1×, hot 2× by bid count). Why: live auctioneers drop the increment when interest stalls and price tiers are universal (Copart UK table); bid count is the only activity signal in the data. Alt: flat $500 (matches the data's $500 grid — every current bid is a $500 multiple), price-only tiers, or time-decay on silence (moved to Stretch).
+- 2026-10-22 — Decoded JSON types are `…Dto` and stay in `Data/`; app types are `…Model` (`VehicleModel`, `BidModel`), mapped in the DataSource. Why: file/wire shape (snake_case, raw strings, timezone-less dates) stays out of Domain and UI; swapping to a real API only touches Dtos + mapping. Alt: one `Codable` `Vehicle` used everywhere (fewer types, but couples app to JSON shape).
 
 ## Time
 
@@ -27,3 +28,4 @@ Running log — see `.claude/rules/decisions-log.md`. One line per entry, newest
 - 2026-10-22 — Claude Code researched Copart/IAAI/ADESA bidding (auction duration, increments, Buy Now); I designed the activity-based step idea, Claude turned it into the table.
 - 2026-10-22 — Claude Code researched OPENLANE Canada / ADESA buyer flows (states, proxy bids, Buy Now); I chose OPENLANE states with 72 h duration and Buy Now as core. Claude's first timing draft had an arithmetic error (claimed ~26 ended at 7 days; actually 0) — caught by recomputing against the data.
 - 2026-10-22 — Claude Code profiled `vehicles.json` (date spread, bid/date correlation, bid multiples) to ground timing and increment assumptions, then drafted SPEC.md for my review.
+- 2026-10-22 — I set the Dto/Model naming rule; Claude Code wrote it into `architecture.md` and chose plain names for enums/rules.
