@@ -44,9 +44,12 @@ fastlane/test_output
 *~
 
 # Claude Code: .claude/ is tracked, except worktrees and local settings
-# (.serena has its own .gitignore)
 .claude/worktrees/
 .claude/settings.local.json
+
+# Serena: keep project.yml + memories/; cache and local overrides are per-machine
+.serena/cache/
+.serena/project.local.yml
 
 # Secrets
 .env
