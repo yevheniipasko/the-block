@@ -1,0 +1,17 @@
+# Smoke: app launches and the inventory list loads.
+appId: com.softie.dev.The-Block
+name: Smoke - inventory loads
+tags:
+  - smoke
+---
+- launchApp:
+    stopApp: true
+    arguments:
+      market: "off"
+- extendedWaitUntil:
+    visible: "Inventory"
+    timeout: 20000
+- extendedWaitUntil:
+    visible:
+      id: "list.row.*"
+    timeout: 20000
