@@ -27,7 +27,7 @@ Auth/accounts, backend/networking (except placeholder images), persistence acros
 - **Auction duration: 72 h** from normalized start. Result at launch: ~36 ended, ~89 active, ~75 upcoming; states roll over while the app runs.
 - **Upcoming lots accept bids** (like OPENLANE's pre-sale proxy bids / Copart preliminary bids). This also explains why some upcoming lots already have bids in the dataset. Buy Now is available only while Active.
 - **Ended outcomes:**
-  - you are the high bidder or bought it → **"Purchased by you"**
+  - you bought it via Buy Now, or you are the high bidder and the floor is met (or no floor) → **"Purchased by you"**
   - bids and floor met (or no floor) → **"Sold"**
   - bids but floor not met → **"Pending – below floor"** (seller decides; not simulated)
   - no bids → **"No sale"**
@@ -54,13 +54,13 @@ Auth/accounts, backend/networking (except placeholder images), persistence acros
 - **DATA-3** If loading fails, the app shows an error state with a retry, not an empty list.
 
 Tasks:
-- [ ] Bundle `vehicles.json` in the app target
-- [ ] `VehicleDto` (decoding) + `VehicleModel` + enums (body style, transmission, drivetrain, fuel, title status); DataSource maps Dto → Model
-- [ ] Swinject via SPM; single `AppModule` (container, registrations, `ViewModelFactoryProtocol`) — see `.claude/rules/architecture.md`
-- [ ] `VehicleDataSourceProtocol` + `BundledJSONDataSource`
-- [ ] `VehicleRepositoryProtocol` + `VehicleRepository` (load, expose vehicles, state: loading / loaded / failed)
-- [ ] Container smoke test (every registration resolves)
-- [ ] Decoding tests against the real JSON + a malformed fixture
+- [x] Bundle `vehicles.json` in the app target
+- [x] `VehicleDto` (decoding) + `VehicleModel` + enums (body style, transmission, drivetrain, fuel, title status); DataSource maps Dto → Model
+- [x] Swinject via SPM; single `AppModule` (container, data registrations; `ViewModelFactoryProtocol` added with the first screen) — see `.claude/rules/architecture.md`
+- [x] `VehicleDataSourceProtocol` + `BundledJSONDataSource`
+- [x] `VehicleRepositoryProtocol` + `VehicleRepository` (load, expose vehicles, state: loading / loaded / failed)
+- [x] Container smoke test (every registration resolves)
+- [x] Decoding tests against the real JSON + a malformed fixture
 
 ### TIME — auction timing
 
@@ -70,10 +70,10 @@ Tasks:
 - **TIME-4** A lot that changes state while viewed (upcoming → active, active → ended) updates its UI and actions without relaunch.
 
 Tasks:
-- [ ] `AuctionClock` (offset from dataset, injectable `now` for tests)
-- [ ] `AuctionStatus` + ended outcome
+- [x] `AuctionClock` (offset from dataset, injectable `now` for tests)
+- [x] `AuctionStatus` + ended outcome
 - [ ] Countdown formatter + `TimelineView`-driven label
-- [ ] Tests with fixed `now` at each boundary
+- [x] Tests with fixed `now` at each boundary
 
 ### LIST — browse & search
 
@@ -121,12 +121,12 @@ Tasks:
 - **BID-11** Buy Now is unavailable on Upcoming and Ended lots (UI hidden/disabled + repository rejects).
 
 Tasks:
-- [ ] `BiddingRules` (activity level, adaptive step, min next bid, validation, Buy Now eligibility) — pure, tested
-- [ ] `VehicleRepository.placeBid` / `buyNow` (validate via rules, update state, return result)
+- [x] `BiddingRules` (activity level, adaptive step, min next bid, validation, Buy Now eligibility) — pure, tested
+- [x] `VehicleRepository.placeBid` / `buyNow` (validate via rules, update state, return result)
 - [ ] `BidViewModel` + bid sheet + confirmation
 - [ ] Buy Now confirmation
 - [ ] High-bidder / purchased badges in list + detail
-- [ ] Rule + repository tests
+- [x] Rule + repository tests
 
 ### UX — cross-cutting quality
 

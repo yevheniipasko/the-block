@@ -16,11 +16,17 @@ Running log — see `.claude/rules/decisions-log.md`. One line per entry, newest
 - 2026-10-22 — Floor (reserve) amount hidden, only met / not met / no floor shown. Why: mirrors real auctions; still transparent to the buyer.
 - 2026-10-22 — Adaptive bid step = price base ($200 / $500 / $1,000 at $10k / $30k) × activity (quiet ½, active 1×, hot 2× by bid count). Why: live auctioneers drop the increment when interest stalls and price tiers are universal (Copart UK table); bid count is the only activity signal in the data. Alt: flat $500 (matches the data's $500 grid — every current bid is a $500 multiple), price-only tiers, or time-decay on silence (moved to Stretch).
 - 2026-10-22 — Decoded JSON types are `…Dto` and stay in `Data/`; app types are `…Model` (`VehicleModel`, `BidModel`), mapped in the DataSource. Why: file/wire shape (snake_case, raw strings, timezone-less dates) stays out of Domain and UI; swapping to a real API only touches Dtos + mapping. Alt: one `Codable` `Vehicle` used everywhere (fewer types, but couples app to JSON shape).
+- 2026-10-22 — Ended outcome when you are high bidder but the floor isn't met → "Pending – below floor", not "Purchased by you". Why: a winning bid below floor is not a sale; spec wording made precise.
+- 2026-10-22 — No `nonisolated`: all types stay on the main actor (target default), value types and injected protocols are `Sendable`. Why: simpler mental model; decoding 200 records on main is negligible. Alt: `nonisolated` models/decoders (more annotations, no measurable gain).
+- 2026-10-22 — DTO mapping fails loudly on unknown enum values / bad dates with field + lot (`VehicleMappingError`). Why: bad data surfaces as an error state, never a crash or silently dropped vehicle.
+- 2026-10-22 — `AppModule` resolves through a `preconditionFailure` helper instead of force unwraps / `swiftlint:disable`. Why: lint stays clean; a missing registration still fails fast on first launch.
+- 2026-10-22 — Removed the template XCUITest file; UI coverage comes from Maestro. Why: the template tests added ~80 s to every test run.
 
 ## Time
 
 - 2026-10-22 — Setup: project rules, workflow, repo structure: ~30 min
 - 2026-10-22 — Spec draft: ~15 min
+- 2026-10-22 — Data + domain + DI + tests (28 tests): ~45 min
 
 ## AI usage
 
@@ -29,3 +35,4 @@ Running log — see `.claude/rules/decisions-log.md`. One line per entry, newest
 - 2026-10-22 — Claude Code researched OPENLANE Canada / ADESA buyer flows (states, proxy bids, Buy Now); I chose OPENLANE states with 72 h duration and Buy Now as core. Claude's first timing draft had an arithmetic error (claimed ~26 ended at 7 days; actually 0) — caught by recomputing against the data.
 - 2026-10-22 — Claude Code profiled `vehicles.json` (date spread, bid/date correlation, bid multiples) to ground timing and increment assumptions, then drafted SPEC.md for my review.
 - 2026-10-22 — I set the Dto/Model naming rule; Claude Code wrote it into `architecture.md` and chose plain names for enums/rules.
+- 2026-10-22 — Claude Code implemented the data/domain layer and Swift Testing suite against spec IDs; I redirected it mid-way to drop `nonisolated` in favour of `Sendable` and to adopt the Dto/Model split. Swinject was added by scripting the 4 SPM objects into `project.pbxproj` after the `xcodeproj` gem (1.22) failed on Xcode's synchronized groups.
