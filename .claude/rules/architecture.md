@@ -49,7 +49,7 @@ The Block/
 
 Decoded wire/file shapes and the types the app uses are separate types with separate suffixes.
 
-- **`…Dto`** — mirrors the JSON exactly (`VehicleDto`): `Decodable`, snake_case `CodingKeys`, raw strings/optionals as stored. Lives in `Data/DTOs/`, `nonisolated`, no logic beyond decoding.
+- **`…Dto`** — mirrors the JSON exactly (`VehicleDto`): `Decodable`, snake_case `CodingKeys`, raw strings/optionals as stored. Lives in `Data/DTOs/`, `Sendable`, no logic beyond decoding and its `toModel()` mapping.
 - **`…Model`** — what the app works with (`VehicleModel`, `BidModel`): typed enums, parsed dates, non-optional where the domain guarantees it. Lives in `Domain/`, no `Codable` requirement.
 - **DTOs never leave `Data/`.** The DataSource decodes `…Dto` and maps it to `…Model` (`VehicleDto.toModel()`, in `Data/DTOs/`) before returning. `VehicleDataSourceProtocol`, `VehicleRepositoryProtocol`, ViewModels, Views, routers, and factories only see `…Model` types. A `Dto` in any signature outside `Data/` is a bug.
 - Mapping is where data cleanup happens (unknown enum values, timezone-less dates, empty arrays); it is unit-tested with Swift Testing.
@@ -68,7 +68,6 @@ protocol ViewModelFactoryProtocol: AnyObject {
     func makeBidViewModel(vehicleID: VehicleModel.ID) -> BidViewModel
 }
 
-// swiftlint:disable force_unwrapping
 final class AppModule: ViewModelFactoryProtocol {
     private let container = Container()
 
@@ -76,20 +75,19 @@ final class AppModule: ViewModelFactoryProtocol {
 
     private func registerDependencies() {
         // Data — shared
-        container.register(AuctionClockProtocol.self) { _ in AuctionClock() }
+        container.register(AuctionClockProtocol.self) { _ in SystemAuctionClock() }
             .inObjectScope(.container)
         container.register(VehicleDataSourceProtocol.self) { _ in BundledJSONDataSource() }
             .inObjectScope(.container)
-        container.register(VehicleRepositoryProtocol.self) { r in
-            VehicleRepository(dataSource: r.resolve(VehicleDataSourceProtocol.self)!,
-                              clock: r.resolve(AuctionClockProtocol.self)!)
+        container.register(VehicleRepositoryProtocol.self) { [unowned self] _ in
+            VehicleRepository(dataSource: resolve(VehicleDataSourceProtocol.self),
+                              clock: resolve(AuctionClockProtocol.self))
         }
         .inObjectScope(.container)              // one instance → bids visible everywhere
 
         // ViewModels — fresh per screen
-        container.register(BidViewModel.self) { r, vehicleID in
-            BidViewModel(vehicleID: vehicleID,
-                         repository: r.resolve(VehicleRepositoryProtocol.self)!)
+        container.register(BidViewModel.self) { [unowned self] _, vehicleID in
+            BidViewModel(vehicleID: vehicleID, repository: resolve(VehicleRepositoryProtocol.self))
         }
         // ... InventoryViewModel, VehicleDetailViewModel
 
@@ -100,14 +98,23 @@ final class AppModule: ViewModelFactoryProtocol {
         .inObjectScope(.container)
     }
 
-    var router: InventoryRouterProtocol { container.resolve(InventoryRouterProtocol.self)! }
+    var router: InventoryRouterProtocol { resolve(InventoryRouterProtocol.self) }
 
     func makeBidViewModel(vehicleID: VehicleModel.ID) -> BidViewModel {
-        container.resolve(BidViewModel.self, argument: vehicleID)!
+        guard let viewModel = container.resolve(BidViewModel.self, argument: vehicleID) else {
+            preconditionFailure("AppModule: no registration for BidViewModel")
+        }
+        return viewModel
     }
     // ... other factories
+
+    private func resolve<Service>(_ type: Service.Type) -> Service {
+        guard let service = container.resolve(type) else {
+            preconditionFailure("AppModule: no registration for \(type)")
+        }
+        return service
+    }
 }
-// swiftlint:enable force_unwrapping
 ```
 
 Rules:
@@ -117,7 +124,7 @@ Rules:
 - If `AppModule` grows past ~150 lines, group registrations into private methods (`registerData()`, `registerViewModels()`, `registerRouters()`) — still one module, not separate module types.
 - **Every injected dependency is a protocol:** `VehicleDataSourceProtocol`, `VehicleRepositoryProtocol`, `InventoryRouterProtocol`, `ViewModelFactoryProtocol`, `AuctionClockProtocol` (for a fixed `now` in tests). Naming: `<Type>Protocol`. ViewModels are concrete `@Observable` classes — no ViewModel protocols.
 - **Scopes:** DataSource, Repository, clock, routers → `.container` (shared). ViewModels → `.transient`. Runtime values (vehicle ID) → Swinject arguments (`register(_:) { r, arg in }` / `resolve(_:argument:)`).
-- **Force-unwrapped `resolve` is allowed only inside `AppModule`**, where a missing registration is a programmer error caught on first launch; wrap the file in `// swiftlint:disable force_unwrapping`.
+- **No force unwraps, no `swiftlint:disable`.** `AppModule` resolves through one private `resolve(_:)` helper that calls `preconditionFailure` with the missing type — a missing registration is a programmer error caught on first launch.
 - **Observation through protocols:** `protocol VehicleRepositoryProtocol: AnyObject` exposing `vehicles` etc.; the concrete `@Observable` class still drives SwiftUI updates when accessed via the existential.
 - **Tests don't use the container** — construct ViewModels/Repository directly with fake protocol implementations. One smoke test verifies `AppModule` builds the router and every factory method returns a ViewModel.
 
@@ -126,7 +133,7 @@ Rules:
 - **Single source of truth:** the container-scoped `VehicleRepository`. A bid placed anywhere is visible everywhere because every ViewModel reads from that one instance.
 - **One ViewModel per screen** (Inventory, Detail, Bidding) — needed so each View receives only injected dependencies. Keep them thin; no logic that belongs in `Domain/`.
 - **Navigation:** one `InventoryRouter` (`@Observable`, `NavigationPath`, route enum); `InventoryRouterView` hosts `NavigationStack` / `NavigationSplitView` and builds destination Views with ViewModels the router got from `ViewModelFactoryProtocol`.
-- **Isolation:** Domain and DataSource types are `nonisolated` (and `Sendable` where needed); Repository, ViewModels, routers, and `AppModule` are on the main actor (default isolation). Resolve only on the main actor.
+- **Isolation:** avoid `nonisolated`. Everything stays on the main actor (the target's default isolation); value types (Models, Dtos, enums) and injected protocols conform to `Sendable`. Decoding 200 vehicles on the main actor is negligible. Only reach for `nonisolated`/actors when profiling shows real off-main work.
 - **Business rules are pure functions in `Domain/`**, tested directly with Swift Testing against spec IDs (see `spec-driven.md`).
 - **Dependencies point inward:** App → Features → Data → Domain. Domain depends on nothing.
 

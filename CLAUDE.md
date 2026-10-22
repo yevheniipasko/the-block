@@ -53,7 +53,7 @@ Module name is `The_Block` (`@testable import The_Block`).
 ## Project settings that matter
 
 - Deployment target iOS 27.0, Swift 5 language mode.
-- `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor` (app target only; test targets are nonisolated by default) and `SWIFT_APPROACHABLE_CONCURRENCY = YES` (all targets): app types are implicitly `@MainActor` unless marked `nonisolated`. Mark pure model/decoding/helper types `nonisolated` when they must be used off the main actor.
+- `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor` (app target only; test targets are nonisolated by default) and `SWIFT_APPROACHABLE_CONCURRENCY = YES` (all targets): app types are implicitly `@MainActor`. Avoid `nonisolated`; keep types on the main actor and make value types / injected protocols `Sendable`. Test suites touching app types are `@MainActor`.
 - Targets use `PBXFileSystemSynchronizedRootGroup`: files added under `The Block/`, `The BlockTests/`, `The BlockUITests/` are picked up automatically — do not edit `project.pbxproj` to add sources/resources.
 
 ## Data (`Resources/data/vehicles.json`)
