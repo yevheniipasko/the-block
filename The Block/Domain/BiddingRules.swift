@@ -12,6 +12,9 @@ enum ActivityLevel: Hashable, Sendable {
     /// 10+ bids.
     case hot
 
+    /// Buckets a bid count into an activity level (spec BID-9): 0 opening, 1–3 quiet, 4–9 active, 10+ hot.
+    ///
+    /// Negative counts are treated as opening.
     init(bidCount: Int) {
         switch bidCount {
         case ...0: self = .opening
@@ -23,6 +26,7 @@ enum ActivityLevel: Hashable, Sendable {
 
 }
 
+/// Why a bid or Buy Now was refused; the repository leaves the lot unchanged in every case (spec BID-8).
 enum BidRejection: Error, Hashable, Sendable {
     case auctionEnded
     case belowMinimum(minimum: Int)
@@ -34,7 +38,11 @@ enum BidRejection: Error, Hashable, Sendable {
 /// Pure auction rules (spec BID-1, BID-3, BID-4, BID-7, BID-9, BID-11).
 enum BiddingRules {
 
-    /// Step for the current price before the activity multiplier.
+    /// Price-tier step before the activity multiplier (spec BID-9).
+    ///
+    /// $200 below $10,000, $500 from $10,000 to $29,999, $1,000 from $30,000.
+    ///
+    /// - Parameter currentBid: Current bid in whole CAD dollars.
     static func baseStep(forCurrentBid currentBid: Int) -> Int {
         switch currentBid {
         case ..<10_000: 200
@@ -43,7 +51,11 @@ enum BiddingRules {
         }
     }
 
-    /// Adaptive step = price base × activity multiplier (quiet ½, active 1×, hot 2×).
+    /// Adaptive bid step: price-tier base × activity multiplier (spec BID-9).
+    ///
+    /// Quiet lots halve the base, hot lots double it; opening and active lots use the base as is.
+    ///
+    /// - Returns: The increment above `currentBid`, in whole CAD dollars.
     static func step(currentBid: Int, bidCount: Int) -> Int {
         let base = baseStep(forCurrentBid: currentBid)
         switch ActivityLevel(bidCount: bidCount) {
@@ -53,6 +65,11 @@ enum BiddingRules {
         }
     }
 
+    /// Minimum amount the next bid must reach for this lot (spec BID-1, BID-3).
+    ///
+    /// The starting bid when there are no bids yet; otherwise the current bid plus the adaptive step.
+    ///
+    /// - Returns: Minimum valid next bid in whole CAD dollars.
     static func minimumNextBid(for vehicle: VehicleModel) -> Int {
         guard let currentBid = vehicle.currentBid, vehicle.bidCount > 0 else {
             return vehicle.startingBid
@@ -60,7 +77,13 @@ enum BiddingRules {
         return currentBid + step(currentBid: currentBid, bidCount: vehicle.bidCount)
     }
 
-    /// Checks a bid amount; upcoming lots accept bids (pre-sale bidding), ended lots don't.
+    /// Checks whether `amount` is a valid bid on `vehicle` at `now`.
+    ///
+    /// Rejects, in order: ended lots (spec BID-7), amounts below the minimum next bid (spec BID-3),
+    /// and amounts at or above the Buy Now price (spec BID-4). Upcoming lots accept bids
+    /// (pre-sale bidding, per spec Assumptions).
+    ///
+    /// - Returns: `.success` when the bid can be placed, otherwise the first rejection that applies.
     static func validateBid(_ amount: Int, on vehicle: VehicleModel, at now: Date) -> Result<Void, BidRejection> {
         if vehicle.status(at: now).isEnded {
             return .failure(.auctionEnded)
@@ -75,7 +98,9 @@ enum BiddingRules {
         return .success(())
     }
 
-    /// Buy Now is offered only while the auction is active and the lot has a price.
+    /// Whether Buy Now is offered for `vehicle` at `now` (spec BID-10, BID-11).
+    ///
+    /// Only active lots with a Buy Now price qualify; upcoming and ended lots never do.
     static func canBuyNow(_ vehicle: VehicleModel, at now: Date) -> Bool {
         guard vehicle.buyNowPrice != nil else { return false }
         if case .active = vehicle.status(at: now) { return true }
