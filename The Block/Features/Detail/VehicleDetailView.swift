@@ -10,6 +10,13 @@ struct VehicleDetailView: View {
     let onBuyNow: () -> Void
 
     var body: some View {
+        // Live updates for as long as the screen is shown; `.task` cancels them on disappear (LIVE-1).
+        content
+            .task { await viewModel.observeVehicle() }
+    }
+
+    @ViewBuilder
+    private var content: some View {
         if let vehicle = viewModel.vehicle {
             ScrollView {
                 VStack(alignment: .leading, spacing: Spacing.large) {
@@ -69,21 +76,26 @@ struct VehicleDetailView: View {
         TimelineView(.periodic(from: .now, by: 1)) { context in
             switch viewModel.buyerMarker(at: context.date) {
             case .highBidder:
-                markerLabel(Localizable.highBidder, systemImage: "hand.thumbsup.fill", tint: .green)
+                markerLabel(Localizable.highBidder, systemImage: "hand.thumbsup.fill", tint: .green,
+                            identifier: "detail.buyerMarker")
+            case .outbid:
+                markerLabel(Localizable.outbid, systemImage: "exclamationmark.triangle.fill", tint: .orange,
+                            identifier: "detail.outbidMarker")
             case .purchased:
-                markerLabel(Localizable.purchased, systemImage: "checkmark.seal.fill", tint: .accentColor)
+                markerLabel(Localizable.purchased, systemImage: "checkmark.seal.fill", tint: .accentColor,
+                            identifier: "detail.buyerMarker")
             case nil:
                 EmptyView()
             }
         }
     }
 
-    /// Tinted label for the buyer's position (high bidder / purchased).
-    private func markerLabel(_ title: String, systemImage: String, tint: Color) -> some View {
+    /// Tinted label for the buyer's position (high bidder / outbid / purchased).
+    private func markerLabel(_ title: String, systemImage: String, tint: Color, identifier: String) -> some View {
         Label(title, systemImage: systemImage)
             .font(.subheadline.weight(.semibold))
             .foregroundStyle(tint)
-            .accessibilityIdentifier("detail.buyerMarker")
+            .accessibilityIdentifier(identifier)
     }
 
     /// Current or starting bid, bid count, floor state (never the amount), and Buy Now price.
@@ -134,6 +146,7 @@ private enum Localizable {
     static let notFoundMessage = "This lot is no longer available."
     static func lot(_ lot: String) -> String { "Lot \(lot)" }
     static let highBidder = "You're the high bidder"
+    static let outbid = "You've been outbid"
     static let purchased = "Purchased by you"
     static let separator = "·"
     static func buyNowPrice(_ price: String) -> String { "Buy Now \(price)" }
