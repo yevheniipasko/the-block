@@ -191,8 +191,8 @@ Tasks:
 - **ALERT-4** The banner is announced to VoiceOver.
 
 Tasks:
-- [ ] `OutbidAlertCenter` (subscribes to `inventoryUpdates()`, detects your-bid → outbid transitions, queue) + tests
-- [ ] Banner overlay in `InventoryRouterView`, "Bid again" routes to the bid sheet
+- [x] `OutbidAlertCenter` (subscribes to `inventoryUpdates()`, detects your-bid → outbid transitions, queue) + tests
+- [x] Banner overlay in `InventoryRouterView`, "Bid again" routes to the bid sheet
 
 ### UX — cross-cutting quality
 
