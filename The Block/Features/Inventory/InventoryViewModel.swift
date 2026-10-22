@@ -119,6 +119,12 @@ final class InventoryViewModel {
 
     // MARK: - Live data
 
+    /// Follows the feed's load state until cancelled (spec LIVE-1, LIVE-4, UX-5).
+    ///
+    /// Each time the state becomes `.loaded` (first connect or a reconnect after a failure),
+    /// collects the provinces for the filter and restarts paging from page one. Repeated
+    /// `.loaded` values, e.g. after re-subscribing, keep the rows already loaded.
+    /// Run from the view's `.task`, so it stops when the screen goes away.
     func observeLoadState() async {
         for await state in repository.loadStateUpdates() {
             let wasLoaded = isInventoryLoaded
@@ -129,6 +135,12 @@ final class InventoryViewModel {
         }
     }
 
+    /// Replaces loaded rows in place whenever their lot changes, until cancelled (spec LIVE-1, LIVE-3, BID-6).
+    ///
+    /// Rows keep their page order and the result count stays from the last page, so the list
+    /// doesn't jump while you watch; changes to lots that aren't loaded are ignored. On start it
+    /// refreshes loaded rows from the repository to pick up changes missed while unsubscribed.
+    /// Run from the view's `.task`, so it stops when the screen goes away.
     func observeInventoryChanges() async {
         let updates = repository.inventoryUpdates()
         // Catch up on changes made while nobody was listening (e.g. a bid placed on the detail screen).
@@ -170,7 +182,9 @@ final class InventoryViewModel {
         await loadTask?.value
     }
 
-    /// Retries a failed repository load, then loads page one (spec DATA-3).
+    /// Reconnects the feed after a failed load (spec DATA-3, LIVE-4).
+    ///
+    /// `observeLoadState()` sees the new `.loaded` state and loads page one.
     func retryLoad() async {
         await repository.load()
     }
@@ -218,6 +232,7 @@ final class InventoryViewModel {
 
     // MARK: - Private
 
+    /// Swaps in the new copy of a loaded lot at its current position; unknown lots are ignored.
     private func replaceRow(with vehicle: VehicleModel) {
         guard let index = vehicles.firstIndex(where: { $0.id == vehicle.id }) else { return }
         vehicles[index] = vehicle
@@ -266,6 +281,7 @@ final class InventoryViewModel {
         }
     }
 
+    /// Replaces rows with page one, or appends a later page's rows that aren't loaded yet.
     private func apply(_ page: InventoryPage, isFirstPage: Bool) {
         if isFirstPage {
             vehicles = page.vehicles

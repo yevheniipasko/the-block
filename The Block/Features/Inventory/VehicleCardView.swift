@@ -73,6 +73,7 @@ struct VehicleCardView: View {
         }
     }
 
+    /// Your position on the lot: purchased, high bidder, or outbid (spec BID-6, BID-10, LIVE-3).
     @ViewBuilder private var yourPositionMarker: some View {
         if let purchasePrice = vehicle.yourPurchasePrice {
             Label(Localizable.purchased(Formatting.currency(purchasePrice)), systemImage: "bag.fill")
