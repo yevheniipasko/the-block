@@ -150,7 +150,7 @@ Tasks:
 - [x] Feed / market / stream tests
 - [ ] Inventory: subscribe to `loadStateUpdates()` + `inventoryUpdates()`, refresh loaded rows, outbid marker
 - [ ] Detail: subscribe to `vehicleUpdates(id:)`, outbid marker
-- [ ] Bidding: subscribe to `vehicleUpdates(id:)`, live minimum + outbid notice in the open sheet
+- [x] Bidding: subscribe to `vehicleUpdates(id:)`, live minimum + outbid notice in the open sheet
 - [ ] Remove `@Observable` reads of the repository once all screens use streams
 
 ### MYBIDS — your bids & purchases *(built after LIVE is merged)*
