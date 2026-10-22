@@ -96,7 +96,7 @@ extension VehicleDto {
             startingBid: startingBid,
             reservePrice: reservePrice,
             buyNowPrice: buyNowPrice,
-            images: images.compactMap(URL.init(string:)),
+            images: images.compactMap { Self.renderableImageURL($0) },
             sellingDealership: sellingDealership,
             lot: lot,
             currentBid: currentBid,
@@ -110,6 +110,17 @@ extension VehicleDto {
             throw VehicleMappingError.invalidField(name: field, value: raw, lot: lot)
         }
         return value
+    }
+
+    /// Rewrites placehold.co URLs to PNG; the service returns SVG by default, which `AsyncImage` can't draw.
+    ///
+    /// `https://placehold.co/800x600/1a1a2e/eaeaea?text=…` → `…/eaeaea/png?text=…`. Other URLs pass through.
+    private static func renderableImageURL(_ raw: String) -> URL? {
+        guard var components = URLComponents(string: raw) else { return nil }
+        if components.host == "placehold.co", !components.path.hasSuffix("/png") {
+            components.path += "/png"
+        }
+        return components.url
     }
 
     /// Parses an `auction_start` string, which has no timezone (e.g. `2026-04-05T14:00:00`), as local time.

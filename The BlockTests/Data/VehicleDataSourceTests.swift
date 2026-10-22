@@ -27,6 +27,13 @@ struct VehicleDataSourceTests {
         #expect(components == DateComponents(year: 2026, month: 4, day: 5, hour: 14, minute: 0))
     }
 
+    @Test("DETAIL-1: placeholder image URLs are rewritten to PNG so AsyncImage can render them")
+    func placeholderImagesUsePNG() throws {
+        let vehicle = try #require(try VehicleDecoder.decode(Self.json(auctionStart: "2026-04-05T14:00:00")).first)
+
+        #expect(vehicle.images.first?.absoluteString == "https://placehold.co/800x600/png")
+    }
+
     @Test("DATA-2: malformed auction_start throws a mapping error instead of crashing")
     func malformedDateThrows() {
         #expect(throws: VehicleMappingError.invalidField(name: "auction_start", value: "April 5th", lot: "A-0043")) {
