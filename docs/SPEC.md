@@ -103,10 +103,10 @@ Tasks:
 - **DETAIL-6** Bottom action bar is always reachable: "Place bid" (Upcoming/Active), "Buy Now $X" (Active, when priced); ended lots show the outcome instead of actions.
 
 Tasks:
-- [ ] `VehicleDetailViewModel` (thin, injected `VehicleRepositoryProtocol`) + detail view sections
-- [ ] Gallery
-- [ ] Condition grade + title status components
-- [ ] Bottom action bar
+- [x] `VehicleDetailViewModel` (thin, injected `VehicleRepositoryProtocol`) + detail view sections
+- [x] Gallery
+- [x] Condition grade + title status components
+- [x] Bottom action bar
 
 ### BID — bidding & Buy Now
 
@@ -125,8 +125,8 @@ Tasks:
 Tasks:
 - [x] `BiddingRules` (activity level, adaptive step, min next bid, validation, Buy Now eligibility) — pure, tested
 - [x] `VehicleRepository.placeBid` / `buyNow` (validate via rules, update state, return result)
-- [ ] `BidViewModel` + bid sheet + confirmation
-- [ ] Buy Now confirmation
+- [x] `BidViewModel` + bid sheet + confirmation
+- [x] Buy Now confirmation
 - [ ] High-bidder / purchased badges in list + detail
 - [x] Rule + repository tests
 
