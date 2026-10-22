@@ -12,8 +12,17 @@ struct AuctionSchedule: Sendable {
     /// Index in the sorted start times that is mapped to launch time.
     static let anchorIndex = 120
 
+    /// Constant shift added to every dataset start.
     let offset: TimeInterval
 
+    /// Computes the offset that moves the anchor start onto `launchDate` (spec TIME-1).
+    ///
+    /// The anchor is the start at `anchorIndex` in sorted order; with fewer starts the last one is used,
+    /// and an empty list gives a zero offset.
+    ///
+    /// - Parameters:
+    ///   - datasetStarts: Raw `auction_start` values from the dataset, in any order.
+    ///   - launchDate: The moment the anchor start should map to, usually app launch time.
     init(datasetStarts: [Date], launchDate: Date) {
         let sorted = datasetStarts.sorted()
         guard !sorted.isEmpty else {
@@ -24,6 +33,7 @@ struct AuctionSchedule: Sendable {
         offset = launchDate.timeIntervalSince(anchor)
     }
 
+    /// Shifts a dataset start into real time by the schedule's offset (spec TIME-1).
     func normalized(_ datasetStart: Date) -> Date {
         datasetStart.addingTimeInterval(offset)
     }
