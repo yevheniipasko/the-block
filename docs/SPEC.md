@@ -83,13 +83,15 @@ Tasks:
 - **LIST-4** Sort: Ending soonest (default — active by end time, then upcoming by start, ended last), Price low→high, Price high→low, Newest year, Lowest km.
 - **LIST-5** No results → empty state naming the query/filters with a "Clear" action.
 - **LIST-6** Result count is visible ("142 vehicles").
+- **LIST-7** Inventory loads in pages of 20 through a cursor, imitating a paginated API: next page loads when the list nears its end, with a loading row; changing search/filters/sort restarts from page one; a stale cursor (lot no longer matches) silently restarts; a failed page shows an inline retry. Bids placed after loading are reflected in loaded rows.
 
 Tasks:
-- [ ] `InventoryViewModel` (query, filters, sort → derived results)
+- [x] `InventoryQuery` (search/filters/sort, pure) + `Paginator` + `VehicleRepository.fetchPage` with simulated latency
+- [ ] `InventoryViewModel` (query → paged results by cursor, loaded IDs read live from repository)
 - [ ] Card + list/grid view (adaptive columns on iPad)
 - [ ] Filter sheet + active-filter chips
 - [ ] Empty / error / loading states
-- [ ] Filter/search/sort tests
+- [ ] ViewModel paging tests (first page, next page, reset on query change, stale cursor, failure)
 
 ### DETAIL — vehicle detail
 
@@ -134,9 +136,10 @@ Tasks:
 - **UX-2** Dark mode and Dynamic Type (up to accessibility sizes) without clipped content.
 - **UX-3** VoiceOver: cards and bid controls have meaningful labels; status and prices read naturally.
 - **UX-4** All tapped/asserted elements carry `<screen>.<element>` accessibility identifiers (for Maestro).
+- **UX-5** Every wait is visible: first inventory load shows a loading state (not an empty list); next page shows a loading row; failures show an error with retry (full-screen on first load, inline row on later pages); images show a placeholder while loading and a fallback on failure; placing a bid / Buy Now shows an in-progress state on the confirm button (inputs disabled, no double submit) during the simulated ~0.6 s round trip.
 
 Tasks:
-- [ ] Design tokens + formatters in `Shared/`
+- [x] Design tokens + formatters in `Shared/` (Spacing, Formatting, status display, `AuctionStatusBadge`, `VehicleImage`, `LoadingStateView` / `ErrorStateView` / `PageStatusRow`)
 - [ ] Accessibility pass
 - [ ] 4 Maestro smoke flows (see `.claude/rules/maestro-testing.md`)
 - [ ] Submission README

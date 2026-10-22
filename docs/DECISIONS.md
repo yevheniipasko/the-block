@@ -21,6 +21,9 @@ Running log — see `.claude/rules/decisions-log.md`. One line per entry, newest
 - 2026-10-22 — DTO mapping fails loudly on unknown enum values / bad dates with field + lot (`VehicleMappingError`). Why: bad data surfaces as an error state, never a crash or silently dropped vehicle.
 - 2026-10-22 — `AppModule` resolves through a `preconditionFailure` helper instead of force unwraps / `swiftlint:disable`. Why: lint stays clean; a missing registration still fails fast on first launch.
 - 2026-10-22 — Removed the template XCUITest file; UI coverage comes from Maestro. Why: the template tests added ~80 s to every test run.
+- 2026-10-22 — Inventory uses imitated cursor pagination (pages of 20, keyset cursor = last vehicle ID, ~350 ms simulated latency). Search/filter/sort run "server-side" in the repository against live state, then the page is cut; the ViewModel keeps loaded IDs and reads vehicles live so bids show instantly. Why: realistic API shape for a 200+ lot marketplace, and filtering client-side over partial pages would be wrong. Alt: offset paging (shifts when lots change state), load-all (no paging story).
+- 2026-10-22 — App shell (router, `ViewModelFactoryProtocol`, shared formatters/badge/image) built before features so parallel feature work never edits shared files. Placeholder image URLs return SVG, which `AsyncImage` can't render; they're rewritten to PNG in the Dto mapping.
+- 2026-10-22 — Bids and Buy Now are async with ~600 ms simulated latency, validated on arrival. Why: makes in-progress / no-double-submit states real and testable, like a network call would. Shared loading/error/page-status components live in `Shared/` so every screen shows waits the same way.
 
 ## Time
 
