@@ -1,6 +1,58 @@
-node_modules/
-.env
-.env.local
+# macOS
 .DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Xcode user state
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+*.xccheckout
+
+# Build output
+build/
+DerivedData/
+*.ipa
+*.dSYM.zip
+*.dSYM
+*.hmap
+*.moved-aside
+
+# Test / profiling results
+*.xcresult
+*.gcno
+*.gcda
+*.trace
+
+# Swift Package Manager
+.build/
+.swiftpm/
+# Package.resolved is committed so dependency versions stay pinned
+# (Xcode stores it in The Block.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/)
+
+# fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# Editors / tooling
+.vscode/
+.idea/
+*.swp
+*~
+
+# Claude Code: .claude/ is tracked, except worktrees and local settings
+# (.serena has its own .gitignore)
+.claude/worktrees/
+.claude/settings.local.json
+
+# Secrets
+.env
+.env.*
+*.xcconfig.local
+
+# Resources/ tooling (also covered by Resources/.gitignore)
+node_modules/
 *.log
-*.bak

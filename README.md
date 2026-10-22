@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/the_block_repo.png" alt="The Block challenge hero image" width="960" />
+  <img src="Resources/docs/the_block_repo.png" alt="The Block challenge hero image" width="960" />
 </p>
 
 # The Block
@@ -14,7 +14,7 @@ We're hiring for a team that builds fast, thinks independently, and takes owners
 
 ## The Challenge
 
-Build the **buyer side of a vehicle auction platform as a web or mobile application**. We've included a dataset of 200 vehicles in [`data/vehicles.json`](data/vehicles.json), each listed by a selling dealership.
+Build the **buyer side of a vehicle auction platform as a web or mobile application**. We've included a dataset of 200 vehicles in [`Resources/data/vehicles.json`](Resources/data/vehicles.json), each listed by a selling dealership.
 
 A buyer should be able to browse inventory, inspect vehicle details, and place bids. That's the core experience. How you structure the product and how far you take it is up to you.
 
@@ -64,7 +64,7 @@ These are optional. Only do them if the basics are solid.
 3. Include a **README** in your repo with setup instructions and notable decisions
 4. When you're finished, share the link to your repo with your contact at **OPENLANE**
 
-We've included a [submission template](SUBMISSION.md) if you want a starting point.
+We've included a [submission template](Resources/SUBMISSION.md) if you want a starting point.
 
 We should be able to clone your repo and have it running locally by following your README.
 
@@ -76,7 +76,7 @@ This is not a speed run. We care more about your decisions and tradeoffs than th
 
 ## What Happens Next
 
-After you submit, we'll schedule a **45-60 minute walkthrough** where you'll screen-share and walk us through what you built. More details are in [`WALKTHROUGH.md`](WALKTHROUGH.md).
+After you submit, we'll schedule a **45-60 minute walkthrough** where you'll screen-share and walk us through what you built. More details are in [`Resources/WALKTHROUGH.md`](Resources/WALKTHROUGH.md).
 
 ## How We Evaluate
 
@@ -92,7 +92,7 @@ We're not checking boxes. Here's what we care about:
 
 ## The Data
 
-The vehicle dataset is at [`data/vehicles.json`](data/vehicles.json). Each vehicle includes:
+The vehicle dataset is at [`Resources/data/vehicles.json`](Resources/data/vehicles.json). Each vehicle includes:
 
 - Lot number, VIN, make, model, year, and trim
 - Specs (engine, transmission, drivetrain, fuel type, odometer)
