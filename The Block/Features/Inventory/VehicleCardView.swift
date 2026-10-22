@@ -59,18 +59,42 @@ struct VehicleCardView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
+    /// Price title, amount, and bid count on one line when they fit; otherwise stacked, so the
+    /// amount never wraps mid-number in a narrow sidebar or at accessibility text sizes (spec UX-1, UX-2).
     private var priceLine: some View {
-        HStack(alignment: .firstTextBaseline, spacing: Spacing.xSmall) {
-            Text(priceTitle)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            Text(Formatting.currency(price))
-                .font(.subheadline.weight(.semibold))
-                .monospacedDigit()
-            Text(InventoryLabels.bidCount(vehicle.bidCount))
-                .font(.caption)
-                .foregroundStyle(.secondary)
+        ViewThatFits(in: .horizontal) {
+            HStack(alignment: .firstTextBaseline, spacing: Spacing.xSmall) {
+                priceTitleText
+                priceAmountText
+                bidCountText
+            }
+            VStack(alignment: .leading, spacing: Spacing.xxSmall) {
+                priceTitleText
+                priceAmountText
+                bidCountText
+            }
         }
+    }
+
+    private var priceTitleText: some View {
+        Text(priceTitle)
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: true, vertical: false)
+    }
+
+    private var priceAmountText: some View {
+        Text(Formatting.currency(price))
+            .font(.subheadline.weight(.semibold))
+            .monospacedDigit()
+            .fixedSize(horizontal: true, vertical: false)
+    }
+
+    private var bidCountText: some View {
+        Text(InventoryLabels.bidCount(vehicle.bidCount))
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: true, vertical: false)
     }
 
     /// Your position on the lot: purchased, high bidder, or outbid (spec BID-6, BID-10, LIVE-3).
