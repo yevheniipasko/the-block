@@ -21,6 +21,8 @@ Architecture: MVVM + Repository + DataSource, pure Domain rules, Service layer o
 
 Spec-driven: read `docs/SPEC.md` before any feature work; acceptance criteria IDs drive tests — see `.claude/rules/spec-driven.md`.
 
+Independent features may run in parallel (subagents or a Workflow, ≤ 4 agents, one worktree each) once spec + data/domain are on `main` — see `.claude/rules/parallel-work.md`.
+
 Log decisions, time, and AI usage in `docs/DECISIONS.md` as you go — see `.claude/rules/decisions-log.md`. Commit conventions in `.claude/rules/commits.md`.
 
 UI flows are tested with Maestro (`maestro/flows/`), logic with Swift Testing; no XCUITest — see `.claude/rules/maestro-testing.md`.
