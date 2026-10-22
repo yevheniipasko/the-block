@@ -42,9 +42,13 @@ struct VehicleModel: Identifiable, Hashable, Sendable {
     /// Price paid through Buy Now, if the buyer bought this vehicle.
     var yourPurchasePrice: Int?
 
+    /// Display name: year, make, model, and trim.
     var title: String { "\(year) \(make) \(model) \(trim)" }
+    /// When the auction closes: the normalized start plus the 72 h duration (spec TIME-2).
     var auctionEnd: Date { auctionStart.addingTimeInterval(AuctionSchedule.duration) }
+    /// Whether the buyer's latest bid is still the current bid (spec BID-6).
     var isYouHighBidder: Bool { yourBid != nil && yourBid == currentBid }
+    /// Whether the buyer bought this lot through Buy Now (spec BID-10).
     var isPurchasedByYou: Bool { yourPurchasePrice != nil }
 
 }

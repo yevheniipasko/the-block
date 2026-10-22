@@ -7,6 +7,7 @@ enum AuctionStatus: Hashable, Sendable {
     case active(endsAt: Date)
     case ended(EndedOutcome)
 
+    /// Whether the auction has ended, whatever the outcome.
     var isEnded: Bool {
         if case .ended = self { return true }
         return false
@@ -14,6 +15,7 @@ enum AuctionStatus: Hashable, Sendable {
 
 }
 
+/// How an ended auction finished, from the buyer's point of view (spec Assumptions: Ended outcomes).
 enum EndedOutcome: Hashable, Sendable {
     /// Bought through Buy Now, or won as high bidder with the floor met.
     case purchasedByYou
@@ -35,12 +37,22 @@ enum FloorState: Hashable, Sendable {
 
 extension VehicleModel {
 
+    /// Whether the current bid meets the floor (`reservePrice`); `.noFloor` when the lot has none.
+    ///
+    /// A lot with a floor but no bids is `.notMet`. Shown in the header (spec DETAIL-2) and
+    /// recomputed after the buyer bids (spec BID-6).
     var floorState: FloorState {
         guard let reservePrice else { return .noFloor }
         guard let currentBid, currentBid >= reservePrice else { return .notMet }
         return .met
     }
 
+    /// Auction status at `now` (spec TIME-2).
+    ///
+    /// Upcoming before `auctionStart`, active until `auctionEnd` (start + 72 h), ended after that.
+    /// A Buy Now purchase ends the lot immediately as `.purchasedByYou`, whatever the time (spec BID-10).
+    ///
+    /// - Parameter now: The moment to evaluate, normally `AuctionClockProtocol.now`.
     func status(at now: Date) -> AuctionStatus {
         if isPurchasedByYou {
             return .ended(.purchasedByYou)
@@ -54,6 +66,10 @@ extension VehicleModel {
         return .ended(endedOutcome)
     }
 
+    /// Outcome of a lot whose time has run out (spec TIME-2, Assumptions: Ended outcomes).
+    ///
+    /// No bids → no sale; floor not met → pending below floor; otherwise purchased by you
+    /// when you are the high bidder, else sold.
     private var endedOutcome: EndedOutcome {
         guard bidCount > 0 else { return .noSale }
         guard floorState != .notMet else { return .pendingBelowFloor }
