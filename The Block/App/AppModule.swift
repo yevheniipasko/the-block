@@ -22,6 +22,9 @@ final class AppModule: ViewModelFactoryProtocol {
     /// App-wide router, created once and shared.
     var router: InventoryRouterProtocol { resolve(InventoryRouterProtocol.self) }
 
+    /// App-wide outbid banner state, created once and shared (spec ALERT-1).
+    var outbidAlertCenter: OutbidAlertCenter { resolve(OutbidAlertCenter.self) }
+
     /// Loads the inventory; called once when the app's root view appears.
     func start() async {
         await repository.load()
@@ -90,6 +93,11 @@ final class AppModule: ViewModelFactoryProtocol {
             BidViewModel(vehicleID: vehicleID, repository: repository)
         }
         .inObjectScope(.transient)
+
+        container.register(OutbidAlertCenter.self) { [unowned self] _ in
+            OutbidAlertCenter(repository: repository)
+        }
+        .inObjectScope(.container)
     }
 
     private func registerRouters() {
