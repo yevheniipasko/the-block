@@ -82,6 +82,7 @@ final class MyBidsViewModel {
 
     // MARK: - Private
 
+    /// Rebuilds the groups every `tickInterval` until the task is cancelled.
     private func tickUntilCancelled() async {
         while (try? await Task.sleep(for: tickInterval)) != nil {
             refreshPositions()

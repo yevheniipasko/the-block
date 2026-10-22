@@ -14,6 +14,7 @@ protocol ViewModelFactoryProtocol: AnyObject {
     func makeInventoryViewModel() -> InventoryViewModel
     func makeVehicleDetailViewModel(vehicleID: VehicleModel.ID) -> VehicleDetailViewModel
     func makeBidViewModel(vehicleID: VehicleModel.ID) -> BidViewModel
+    /// The app-wide "My bids" ViewModel; the router asks once and keeps it (spec MYBIDS-1, MYBIDS-6).
     func makeMyBidsViewModel() -> MyBidsViewModel
 }
 
@@ -24,7 +25,9 @@ protocol InventoryRouterProtocol: AnyObject {
     var detailViewModel: VehicleDetailViewModel? { get }
     var presentedSheet: BiddingSheet? { get }
     var bidViewModel: BidViewModel? { get }
+    /// Lives as long as the router, so the toolbar's outbid badge stays current (spec MYBIDS-6).
     var myBidsViewModel: MyBidsViewModel { get }
+    /// Whether "My bids" is pushed over the inventory list (spec MYBIDS-1).
     var isShowingMyBids: Bool { get }
 
     /// Shows a vehicle's detail, or clears it with `nil` (spec UX-1).

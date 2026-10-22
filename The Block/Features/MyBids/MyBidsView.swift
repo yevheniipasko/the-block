@@ -98,6 +98,7 @@ private struct MyBidsRow: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
+    /// Caption title followed by a bold CAD amount, e.g. `Your bid $20,000`.
     private func amountLine(title: String, amount: Int) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: Spacing.xSmall) {
             Text(title)
@@ -118,6 +119,7 @@ private struct MyBidsRow: View {
         vehicle.yourPurchasePrice == nil ? Localizable.yourBid : Localizable.paid
     }
 
+    /// VoiceOver summary: title, lot, current bid, your amount, position (spec UX-3).
     private var accessibilityLabel: String {
         var parts = [
             vehicle.title,

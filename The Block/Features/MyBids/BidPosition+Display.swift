@@ -25,6 +25,7 @@ extension BidPosition {
         }
     }
 
+    /// SF Symbol shown next to the row badge.
     var systemImage: String {
         switch self {
         case .winning: "checkmark.seal.fill"
@@ -35,6 +36,7 @@ extension BidPosition {
         }
     }
 
+    /// Badge colour: green winning, red outbid, accent for owned lots, secondary when lost.
     var tint: Color {
         switch self {
         case .winning: .green
