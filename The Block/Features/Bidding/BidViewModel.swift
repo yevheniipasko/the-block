@@ -33,6 +33,7 @@ final class BidViewModel {
 
     @ObservationIgnored private let logger = Logger(subsystem: "TheBlock", category: "BidViewModel")
 
+    /// Creates the state for one vehicle and pre-fills the entry with its minimum next bid (spec BID-1).
     init(vehicleID: VehicleModel.ID, repository: VehicleRepositoryProtocol) {
         self.vehicleID = vehicleID
         self.repository = repository
@@ -40,6 +41,7 @@ final class BidViewModel {
         self.amountText = minimum.map(String.init) ?? ""
     }
 
+    /// Latest repository copy of the lot; `nil` if it is no longer listed.
     var vehicle: VehicleModel? { repository.vehicle(id: vehicleID) }
 
     // MARK: - Bid entry
@@ -47,6 +49,7 @@ final class BidViewModel {
     /// Entered amount in whole dollars, or `nil` when the field is empty.
     var amount: Int? { Int(amountText) }
 
+    /// Minimum next bid for the lot's live state (spec BID-1).
     var minimumBid: Int? { vehicle.map { BiddingRules.minimumNextBid(for: $0) } }
 
     /// Adaptive step the quick-add buttons use for this lot (spec BID-9).
@@ -111,6 +114,7 @@ final class BidViewModel {
         rejectionMessage ?? validationRejection.map { Localizable.message(for: $0) }
     }
 
+    /// Whether "Review bid" is enabled: editing, and the entry passes validation (spec BID-3, BID-4).
     var canReview: Bool { phase == .editing && validationRejection == nil }
 
     /// Whether a request is in flight; the sheet then locks its inputs and dismissal (spec UX-5).
@@ -171,6 +175,7 @@ final class BidViewModel {
         }
     }
 
+    /// Logs a refused request, shows its reason and returns to editing so nothing is left half-updated (spec BID-8).
     private func handle(_ rejection: BidRejection) {
         logger.info("[BidViewModel] request rejected: \(String(describing: rejection), privacy: .public)")
         rejectionMessage = Localizable.notPlaced(Localizable.message(for: rejection))

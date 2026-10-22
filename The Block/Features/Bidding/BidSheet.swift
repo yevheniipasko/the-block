@@ -147,10 +147,12 @@ private struct BidEntryView: View {
         Binding(get: { viewModel.amountText }, set: { viewModel.updateAmountText($0) })
     }
 
+    /// Dollar value a quick-add button adds: `steps` × the lot's adaptive step (spec BID-2).
     private func quickAddAmount(steps: Int) -> String {
         Formatting.currency(steps * (viewModel.bidStep ?? 0))
     }
 
+    /// Button title, e.g. `+$1,000`.
     private func quickAddTitle(steps: Int) -> String {
         "+\(quickAddAmount(steps: steps))"
     }
