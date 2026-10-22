@@ -4,6 +4,7 @@ import SwiftUI
 struct InventoryRouterView: View {
 
     let router: InventoryRouterProtocol
+    let alertCenter: OutbidAlertCenter
 
     var body: some View {
         NavigationSplitView {
@@ -29,6 +30,40 @@ struct InventoryRouterView: View {
                     BuyNowSheet(viewModel: bidViewModel, onFinish: router.dismissSheet)
                 }
             }
+        }
+        .overlay(alignment: .top) { outbidBanner }
+        .animation(.snappy, value: alertCenter.current)
+        .task { await alertCenter.observe() }
+        .onChange(of: suppressedLotID, initial: true) { _, lotID in
+            alertCenter.suppressedLotID = lotID
+        }
+    }
+
+    /// Outbid banner over every screen (spec ALERT-1). It doesn't cover an open sheet, which is
+    /// accepted: the sheet's own lot is suppressed and its outbid notice shows inside the sheet (ALERT-3).
+    @ViewBuilder
+    private var outbidBanner: some View {
+        if let alert = alertCenter.current {
+            OutbidBannerView(
+                alert: alert,
+                onBidAgain: {
+                    alertCenter.dismiss()
+                    router.presentBid(for: alert.lotID)
+                },
+                onDismiss: alertCenter.dismiss
+            )
+            .id(alert.id)
+            .transition(.move(edge: .top).combined(with: .opacity))
+        }
+    }
+
+    /// Lot whose open sheet shows its own outbid notice (spec ALERT-3). The success screen shows
+    /// none, so an outbid landing there still raises the banner, visible once the sheet closes.
+    private var suppressedLotID: VehicleModel.ID? {
+        guard let sheet = router.presentedSheet, router.bidViewModel?.phase != .succeeded else { return nil }
+        switch sheet {
+        case .bid(let id), .buyNow(let id):
+            return id
         }
     }
 
