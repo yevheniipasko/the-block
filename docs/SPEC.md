@@ -87,11 +87,11 @@ Tasks:
 
 Tasks:
 - [x] `InventoryQuery` (search/filters/sort, pure) + `Paginator` + `VehicleRepository.fetchPage` with simulated latency
-- [ ] `InventoryViewModel` (query → paged results by cursor, loaded IDs read live from repository)
+- [x] `InventoryViewModel` (query → paged results by cursor, loaded IDs read live from repository)
 - [ ] Card + list/grid view (adaptive columns on iPad)
-- [ ] Filter sheet + active-filter chips
-- [ ] Empty / error / loading states
-- [ ] ViewModel paging tests (first page, next page, reset on query change, stale cursor, failure)
+- [x] Filter sheet + active-filter chips
+- [x] Empty / error / loading states
+- [x] ViewModel paging tests (first page, next page, reset on query change, stale cursor, failure)
 
 ### DETAIL — vehicle detail
 
