@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Place-bid sheet (spec BID-1 … BID-9, UX-5).
+/// Place-bid sheet (spec BID-1 … BID-9, LIVE-3, UX-5).
 ///
 /// Entry → review → submit → brief success, then `onFinish` dismisses. While a bid is in
 /// flight every control is disabled and the sheet can't be swiped away.
@@ -29,6 +29,7 @@ struct BidSheet: View {
         .interactiveDismissDisabled(viewModel.isSubmitting)
         .sensoryFeedback(.success, trigger: viewModel.phase) { _, new in new == .succeeded }
         .sensoryFeedback(.error, trigger: viewModel.rejectionMessage) { _, new in new != nil }
+        .task { await viewModel.observeVehicle() }
         .task(id: viewModel.phase) {
             guard viewModel.phase == .succeeded else { return }
             try? await Task.sleep(for: Constants.successDisplayDuration)
@@ -61,7 +62,8 @@ struct BidSheet: View {
 
 }
 
-/// Amount entry with minimum explanation, quick-add buttons and inline validation (spec BID-1 … BID-4).
+/// Amount entry with outbid notice, live minimum explanation, quick-add buttons and inline validation
+/// (spec BID-1 … BID-4, LIVE-3).
 private struct BidEntryView: View {
 
     let viewModel: BidViewModel
@@ -72,6 +74,13 @@ private struct BidEntryView: View {
             if let vehicle = viewModel.vehicle {
                 Text(vehicle.title)
                     .font(.headline)
+            }
+
+            if viewModel.isOutbid {
+                Label(Localizable.outbidNotice, systemImage: "arrow.up.circle.fill")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.orange)
+                    .accessibilityIdentifier("bid.outbidNotice")
             }
 
             Text(viewModel.minimumExplanation)
@@ -261,6 +270,7 @@ private enum Localizable {
     static let endedTitle = "This auction has ended"
     static let endedDetail = "Bidding is closed for this lot."
     static let successTitle = "You're the high bidder"
+    static let outbidNotice = "You've been outbid. Bid again to take the lead."
 
     static func successDetail(_ amount: String) -> String { "Your bid of \(amount) was placed." }
     static func quickAddAccessibility(_ amount: String) -> String { "Add \(amount)" }

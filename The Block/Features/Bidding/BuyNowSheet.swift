@@ -28,6 +28,7 @@ struct BuyNowSheet: View {
         .interactiveDismissDisabled(viewModel.isSubmitting)
         .sensoryFeedback(.success, trigger: viewModel.phase) { _, new in new == .succeeded }
         .sensoryFeedback(.error, trigger: viewModel.rejectionMessage) { _, new in new != nil }
+        .task { await viewModel.observeVehicle() }
         .task(id: viewModel.phase) {
             guard viewModel.phase == .succeeded else { return }
             try? await Task.sleep(for: Constants.successDisplayDuration)
