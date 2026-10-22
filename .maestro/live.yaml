@@ -1,0 +1,39 @@
+# Live: bid on the first lot, become high bidder, then get outbid by the simulated market.
+appId: com.softie.dev.The-Block
+name: Live - bid then outbid
+tags:
+  - live
+---
+- launchApp:
+    stopApp: true
+    arguments:
+      market: "fast"
+- extendedWaitUntil:
+    visible:
+      id: "list.row.*"
+    timeout: 20000
+- tapOn:
+    id: "list.row.*"
+    index: 0
+- extendedWaitUntil:
+    visible:
+      id: "detail.placeBidButton"
+    timeout: 10000
+- tapOn:
+    id: "detail.placeBidButton"
+- tapOn:
+    id: "bid.reviewButton"
+- tapOn:
+    id: "bid.confirmButton"
+# The fast market may outbid within a second, so the high-bidder marker is best-effort.
+- extendedWaitUntil:
+    visible:
+      id: "detail.buyerMarker"
+    timeout: 3000
+    optional: true
+- takeScreenshot: live-1-after-bid
+- extendedWaitUntil:
+    visible:
+      id: "detail.outbidMarker"
+    timeout: 120000
+- takeScreenshot: live-2-outbid

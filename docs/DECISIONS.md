@@ -35,6 +35,7 @@ Running log — see `.claude/rules/decisions-log.md`. One line per entry, newest
 - 2026-10-22 — Switched UI testing from Maestro to native XCUITest. Why: the Maestro MCP couldn't reach the simulator (it lists each booted simulator twice, as simulator and as "real", and picks the unreachable one) and the fix needed manual intervention; XCUITest ships with Xcode, runs via plain `xcodebuild`, and reviewers need nothing extra installed. A `-market off|fast` launch argument makes flows deterministic or speeds up the live outbid test.
 - 2026-10-22 — Visual check (simctl screenshots: iPad split view, dark mode, largest accessibility text): fixed the price line wrapping mid-number ("$28,50 / 0") in the narrow iPad sidebar and at large text — card and detail now put title / amount / bid count side by side when they fit, stacked otherwise, and never break the amount.
 - 2026-10-22 — App icon drawn by a Pillow script (`Resources/scripts/generate_app_icon.py`, gavel on sound block, navy/amber) with light, dark and tinted variants. Why: reproducible, no design tool or licensed artwork. Alt: hand-made asset in Figma (cut, time).
+- 2026-10-22 — Maestro flows (`.maestro/`: smoke, live outbid) kept in the repo as optional exploratory checks; XCUITest stays the UI suite of record. Why: quick to run and already written during visual checks. Alt: drop them (lose a cheap live-update demo).
 
 ## Time
 
@@ -46,6 +47,7 @@ Running log — see `.claude/rules/decisions-log.md`. One line per entry, newest
 - 2026-10-22 — Live feed (AsyncStream, simulated market) + parallel migration + cleanup: ~75 min
 - 2026-10-22 — XCUITest smoke tests, launch options, visual checks + layout fix: ~35 min
 - 2026-10-22 — App icon: 10 min
+- 2026-10-22 — Maestro flows recovered, verified, committed: 10 min
 
 ## AI usage
 
@@ -60,3 +62,4 @@ Running log — see `.claude/rules/decisions-log.md`. One line per entry, newest
 - 2026-10-22 — Claude Code split OPENLANE features into build-now (anti-sniping, counter-offers, grade explainer) vs. Postponed with reasons; I asked to list the rest as postponed rather than drop them.
 - 2026-10-22 — Built the screens in parallel: Claude Code acted as orchestrator (shell, shared files, integration) and ran 3 feature subagents (Inventory, Detail, Bidding) plus a docs agent, each in its own git worktree and simulator; then a second parallel round to move the screens onto live streams. Orchestrator re-ran tests on every branch after merging latest main before merging. Caught along the way: an empty UI test bundle breaking `xcodebuild test`, SVG placeholder images, a stale `.git/index.lock`, a reconnect bug in `load()` (found by a test), and a test that deadlocked by busy-waiting on the main actor (fixed; test runs now have a 60 s per-test limit).
 - 2026-10-22 — Claude Code wrote the icon generator script and tuned the composition after previewing the render.
+- 2026-10-22 — Claude Code found the Maestro flows it had written in an earlier session's scratchpad, added `-market` launch args, made the high-bidder check optional after the fast market outbid before it ran, and verified both flows pass.
