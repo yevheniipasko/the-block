@@ -10,6 +10,7 @@ struct FeeEstimateView: View {
     /// Accessibility id prefix, e.g. `bid` → `bid.estimateRow`, `bid.estimateBreakdown`.
     let identifierPrefix: String
 
+    /// Whether the fee breakdown is showing; collapsed by default to keep the sheet short.
     @State private var isExpanded = false
 
     var body: some View {
@@ -38,6 +39,7 @@ struct FeeEstimateView: View {
         .background(.fill.quaternary, in: RoundedRectangle(cornerRadius: CornerRadius.medium))
     }
 
+    /// Tappable "Est. total $X" line with a chevron that flips when the breakdown is open.
     private var totalLine: some View {
         HStack(alignment: .firstTextBaseline, spacing: Spacing.small) {
             ViewThatFits(in: .horizontal) {
@@ -73,6 +75,7 @@ struct FeeEstimateView: View {
             .fixedSize(horizontal: true, vertical: false)
     }
 
+    /// Amount, buyer fee, documentation fee and total, shown after tapping the total (spec FEES-1).
     private var breakdown: some View {
         VStack(alignment: .leading, spacing: Spacing.xSmall) {
             breakdownLine(Localizable.amount, estimate.amount)
@@ -103,6 +106,7 @@ struct FeeEstimateView: View {
         .accessibilityElement(children: .combine)
     }
 
+    /// Dollar value that never wraps mid-number at large text sizes (spec UX-2).
     private func breakdownValue(_ value: Int) -> some View {
         Text(Formatting.currency(value))
             .monospacedDigit()
