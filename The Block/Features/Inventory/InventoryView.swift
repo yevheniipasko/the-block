@@ -23,9 +23,8 @@ struct InventoryView: View {
             .sheet(isPresented: $isFilterSheetPresented) {
                 InventoryFilterSheet(viewModel: viewModel)
             }
-            .onChange(of: viewModel.isInventoryLoaded, initial: true) {
-                viewModel.startIfNeeded()
-            }
+            .task { await viewModel.observeLoadState() }
+            .task { await viewModel.observeInventoryChanges() }
     }
 
     @ViewBuilder private var content: some View {
@@ -88,7 +87,7 @@ struct InventoryView: View {
         }
     }
 
-    /// Names what produced no results, e.g. `Nothing matches “bronco” · Active · SUV.`
+    /// Names what produced no results, e.g. `Nothing matches “bronco” · Live · SUV.`
     private var emptyDescription: String {
         var terms: [String] = []
         let search = viewModel.query.searchText

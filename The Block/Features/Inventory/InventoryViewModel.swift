@@ -4,8 +4,9 @@ import OSLog
 
 /// Inventory screen state: search, filters, sort, and cursor-paged results (spec LIST-*).
 ///
-/// Stores only the loaded vehicle IDs, in page order, and reads each row live from the
-/// repository so bids placed elsewhere show up without a reload (spec LIST-7, BID-6).
+/// Owns the loaded rows in page order. The view's `.task` runs `observeLoadState()` and
+/// `observeInventoryChanges()`, so the first page starts when the feed connects and a loaded row
+/// is replaced in place whenever its lot changes (spec LIVE-1, LIST-7, BID-6).
 @Observable
 final class InventoryViewModel {
 
@@ -48,7 +49,12 @@ final class InventoryViewModel {
         }
     }
 
-    private(set) var loadedIDs: [VehicleModel.ID] = []
+    /// Loaded rows in page order; kept current by `observeInventoryChanges()`.
+    private(set) var vehicles: [VehicleModel] = []
+    /// Latest feed state from `observeLoadState()`.
+    private(set) var loadState: LoadState = .idle
+    /// Provinces present in the inventory, alphabetically, for the province filter.
+    private(set) var availableProvinces: [String] = []
     private(set) var totalCount: Int?
     private(set) var pageStatus: PageStatus = .idle
 
@@ -58,7 +64,6 @@ final class InventoryViewModel {
     @ObservationIgnored private let repository: VehicleRepositoryProtocol
     @ObservationIgnored private var searchTask: Task<Void, Never>?
     @ObservationIgnored private var nextCursor: PageCursor?
-    @ObservationIgnored private var hasStarted = false
     @ObservationIgnored private let logger = Logger(subsystem: "TheBlock", category: "InventoryViewModel")
 
     /// - Parameter repository: Shared repository; rows and pages are always read from it.
@@ -68,24 +73,19 @@ final class InventoryViewModel {
 
     // MARK: - Derived state
 
-    /// Loaded rows, read live from the repository in page order.
-    var vehicles: [VehicleModel] {
-        loadedIDs.compactMap { repository.vehicle(id: $0) }
+    /// IDs of the loaded rows, in page order.
+    var loadedIDs: [VehicleModel.ID] {
+        vehicles.map(\.id)
     }
 
-    /// Whether the repository has finished its initial load.
+    /// Whether the feed has delivered its snapshot.
     var isInventoryLoaded: Bool {
-        repository.loadState == .loaded
+        loadState == .loaded
     }
 
     /// The repository's current time, for status text outside a `TimelineView`.
     var now: Date {
         repository.now
-    }
-
-    /// Provinces present in the inventory, alphabetically, for the province filter.
-    var availableProvinces: [String] {
-        Set(repository.vehicles.map(\.province)).sorted()
     }
 
     /// Active filters in a stable display order (status, body, fuel, province, Buy Now).
@@ -106,7 +106,7 @@ final class InventoryViewModel {
 
     /// Screen-level state: full-screen loading/error until the first page arrives (spec UX-5).
     var content: Content {
-        switch repository.loadState {
+        switch loadState {
         case .idle, .loading:
             return .loading
         case .failed(let message):
@@ -117,27 +117,53 @@ final class InventoryViewModel {
         }
     }
 
-    // MARK: - Paging
+    // MARK: - Live data
 
-    /// Loads page one once the repository is ready; later calls do nothing.
-    func startIfNeeded() {
-        guard isInventoryLoaded, !hasStarted else { return }
-        restart()
+    /// Follows the feed's load state until cancelled (spec LIVE-1, LIVE-4, UX-5).
+    ///
+    /// Each time the state becomes `.loaded` (first connect or a reconnect after a failure),
+    /// collects the provinces for the filter and restarts paging from page one. Repeated
+    /// `.loaded` values, e.g. after re-subscribing, keep the rows already loaded.
+    /// Run from the view's `.task`, so it stops when the screen goes away.
+    func observeLoadState() async {
+        for await state in repository.loadStateUpdates() {
+            let wasLoaded = isInventoryLoaded
+            loadState = state
+            guard state == .loaded, !wasLoaded else { continue }
+            availableProvinces = Set(repository.vehicles.map(\.province)).sorted()
+            restart()
+        }
     }
+
+    /// Replaces loaded rows in place whenever their lot changes, until cancelled (spec LIVE-1, LIVE-3, BID-6).
+    ///
+    /// Rows keep their page order and the result count stays from the last page, so the list
+    /// doesn't jump while you watch; changes to lots that aren't loaded are ignored. On start it
+    /// refreshes loaded rows from the repository to pick up changes missed while unsubscribed.
+    /// Run from the view's `.task`, so it stops when the screen goes away.
+    func observeInventoryChanges() async {
+        let updates = repository.inventoryUpdates()
+        // Catch up on changes made while nobody was listening (e.g. a bid placed on the detail screen).
+        vehicles = vehicles.map { repository.vehicle(id: $0.id) ?? $0 }
+        for await vehicle in updates {
+            replaceRow(with: vehicle)
+        }
+    }
+
+    // MARK: - Paging
 
     /// Cancels any in-flight request and loads page one for the current query.
     ///
     /// Already loaded rows stay visible until the new page replaces them, so filter
     /// changes and pull-to-refresh don't flash an empty list.
     func restart() {
-        hasStarted = true
         nextCursor = nil
         startLoading(after: nil)
     }
 
     /// Loads the next page when `id` is the last loaded row (spec LIST-7).
     func loadNextPageIfNeeded(currentID id: VehicleModel.ID) {
-        guard id == loadedIDs.last, let nextCursor, pageStatus == .idle else { return }
+        guard id == vehicles.last?.id, let nextCursor, pageStatus == .idle else { return }
         startLoading(after: nextCursor)
     }
 
@@ -156,11 +182,11 @@ final class InventoryViewModel {
         await loadTask?.value
     }
 
-    /// Retries a failed repository load, then loads page one (spec DATA-3).
+    /// Reconnects the feed after a failed load (spec DATA-3, LIVE-4).
+    ///
+    /// `observeLoadState()` sees the new `.loaded` state and loads page one.
     func retryLoad() async {
         await repository.load()
-        guard isInventoryLoaded else { return }
-        restart()
     }
 
     // MARK: - Filters
@@ -206,6 +232,12 @@ final class InventoryViewModel {
 
     // MARK: - Private
 
+    /// Swaps in the new copy of a loaded lot at its current position; unknown lots are ignored.
+    private func replaceRow(with vehicle: VehicleModel) {
+        guard let index = vehicles.firstIndex(where: { $0.id == vehicle.id }) else { return }
+        vehicles[index] = vehicle
+    }
+
     /// Applies `searchText` to `query` once typing pauses for `Constants.searchDebounce` (spec LIST-2).
     private func scheduleSearch() {
         searchTask?.cancel()
@@ -242,21 +274,20 @@ final class InventoryViewModel {
             guard !Task.isCancelled, !(error is CancellationError) else { return }
             logger.error("[InventoryViewModel] page load failed: \(String(describing: error), privacy: .public)")
             if cursor == nil {
-                loadedIDs = []
+                vehicles = []
                 totalCount = nil
             }
             pageStatus = .failed
         }
     }
 
-    /// Replaces rows with page one, or appends a later page's IDs that aren't loaded yet.
+    /// Replaces rows with page one, or appends a later page's rows that aren't loaded yet.
     private func apply(_ page: InventoryPage, isFirstPage: Bool) {
-        let ids = page.vehicles.map(\.id)
         if isFirstPage {
-            loadedIDs = ids
+            vehicles = page.vehicles
         } else {
             let known = Set(loadedIDs)
-            loadedIDs += ids.filter { !known.contains($0) }
+            vehicles += page.vehicles.filter { !known.contains($0.id) }
         }
         nextCursor = page.nextCursor
         totalCount = page.totalCount

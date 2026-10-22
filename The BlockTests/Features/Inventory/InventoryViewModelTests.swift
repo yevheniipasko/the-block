@@ -45,79 +45,15 @@ private final class FlakyPageRepository: VehicleRepositoryProtocol {
 @MainActor
 struct InventoryViewModelTests {
 
-    /// 45 active lots with distinct prices (10_000, 10_100, …) and Buy Now prices.
-    private let fleet: [VehicleModel] = (0..<45).map { index in
-        .fixture(startingBid: 10_000 + index * 100, buyNowPrice: 50_000)
-    }
+    private let fleet = inventoryFleet
+    private let observers = InventoryObservers()
 
     private func makeRepository(_ vehicles: [VehicleModel]) async -> VehicleRepository {
-        let repository = VehicleRepository.stubbed(
-            result: .success(vehicles),
-            clock: FixedClock(now: TestDates.reference)
-        )
-        await repository.load()
-        return repository
+        await makeInventoryStack(vehicles, clock: FixedClock(now: TestDates.reference)).repository
     }
 
-    /// Fleet sorted by price so page order is deterministic.
-    private func makeStartedViewModel(
-        repository: VehicleRepositoryProtocol
-    ) async -> InventoryViewModel {
-        let viewModel = InventoryViewModel(repository: repository)
-        viewModel.query.sort = .priceLowToHigh
-        await settle(viewModel)
-        return viewModel
-    }
-
-    /// Waits until no page request is in flight, following restarts.
-    private func settle(_ viewModel: InventoryViewModel) async {
-        while viewModel.pageStatus == .loading, let task = viewModel.loadTask {
-            await task.value
-        }
-    }
-
-    private func loadNextPage(_ viewModel: InventoryViewModel) async {
-        guard let last = viewModel.loadedIDs.last else { return }
-        viewModel.loadNextPageIfNeeded(currentID: last)
-        await settle(viewModel)
-    }
-
-    @Test("DATA-3 / UX-5: screen shows loading until the repository and first page are ready")
-    func loadingUntilFirstPage() async {
-        let repository = VehicleRepository.stubbed(
-            result: .success(fleet),
-            clock: FixedClock(now: TestDates.reference)
-        )
-        let viewModel = InventoryViewModel(repository: repository)
-        #expect(viewModel.content == .loading)
-
-        viewModel.startIfNeeded()
-        #expect(viewModel.loadTask == nil)
-
-        await repository.load()
-        #expect(viewModel.content == .loading)
-
-        viewModel.startIfNeeded()
-        await settle(viewModel)
-        #expect(viewModel.content == .results)
-    }
-
-    @Test("DATA-3: a failed repository load shows an error, and retry loads page one")
-    func repositoryFailureAndRetry() async {
-        let repository = VehicleRepository.stubbed(
-            result: .failure(StubError()),
-            clock: FixedClock(now: TestDates.reference)
-        )
-        await repository.load()
-        let viewModel = InventoryViewModel(repository: repository)
-
-        guard case .loadFailed = viewModel.content else {
-            Issue.record("Expected loadFailed, got \(viewModel.content)")
-            return
-        }
-        await viewModel.retryLoad()
-        await settle(viewModel)
-        #expect(viewModel.pageStatus != .loading)
+    private func makeStartedViewModel(repository: VehicleRepositoryProtocol) async -> InventoryViewModel {
+        await makeStartedInventory(repository: repository, observers: observers)
     }
 
     @Test("LIST-6 / LIST-7: first page loads 20 rows and the total count")
@@ -214,7 +150,8 @@ struct InventoryViewModelTests {
         let repository = FlakyPageRepository(base: await makeRepository(fleet))
         repository.failPages = true
         let viewModel = InventoryViewModel(repository: repository)
-        viewModel.startIfNeeded()
+        observers.start(viewModel)
+        await waitUntil { viewModel.isInventoryLoaded }
         await settle(viewModel)
         #expect(viewModel.content == .firstPageFailed)
 
@@ -232,6 +169,7 @@ struct InventoryViewModelTests {
         let id = try #require(viewModel.loadedIDs.first)
 
         _ = try await repository.placeBid(10_000, on: id).get()
+        await waitUntil { viewModel.vehicles.first?.bidCount == 1 }
 
         let row = try #require(viewModel.vehicles.first)
         #expect(row.id == id)
@@ -315,7 +253,7 @@ struct InventoryViewModelTests {
     @Test("LIST-3: provinces offered by the filter are the distinct inventory provinces")
     func availableProvinces() async {
         let repository = await makeRepository(fleet)
-        let viewModel = InventoryViewModel(repository: repository)
+        let viewModel = await makeStartedViewModel(repository: repository)
 
         #expect(viewModel.availableProvinces == ["Ontario"])
     }

@@ -17,7 +17,7 @@ enum InventoryLabels {
         }
     }
 
-    /// Status filter title, e.g. `Upcoming`, `Active`, `Ended`.
+    /// Status filter title, e.g. `Upcoming`, `Live`, `Ended`.
     static func title(for status: StatusFilter) -> String {
         switch status {
         case .upcoming: Localizable.upcoming
@@ -70,7 +70,7 @@ private enum Localizable {
     static let newestYear = "Newest year"
     static let lowestMileage = "Lowest km"
     static let upcoming = "Upcoming"
-    static let active = "Active"
+    static let active = "Live"
     static let ended = "Ended"
     static let buyNow = "Buy Now available"
     static let oneVehicle = "1 vehicle"

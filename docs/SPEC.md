@@ -154,7 +154,7 @@ Tasks:
 - [x] `VehicleRepository` consumes the feed, caches, fans out streams; `StreamBroadcaster`
 - [x] `isYouOutbid`, `BidRejection.connectionFailed`
 - [x] Feed / market / stream tests
-- [ ] Inventory: subscribe to `loadStateUpdates()` + `inventoryUpdates()`, refresh loaded rows, outbid marker
+- [x] Inventory: subscribe to `loadStateUpdates()` + `inventoryUpdates()`, refresh loaded rows, outbid marker
 - [x] Detail: subscribe to `vehicleUpdates(id:)`, outbid marker
 - [x] Bidding: subscribe to `vehicleUpdates(id:)`, live minimum + outbid notice in the open sheet
 - [ ] Remove `@Observable` reads of the repository once all screens use streams
