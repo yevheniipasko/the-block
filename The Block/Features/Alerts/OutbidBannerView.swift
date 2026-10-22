@@ -29,7 +29,7 @@ struct OutbidBannerView: View {
                 .accessibilityIdentifier("alert.bidAgainButton")
         }
         .padding(Spacing.medium)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: CornerRadius.medium))
+        .background(.thickMaterial, in: RoundedRectangle(cornerRadius: CornerRadius.medium))
         .overlay {
             RoundedRectangle(cornerRadius: CornerRadius.medium)
                 .strokeBorder(.orange.opacity(Constants.borderOpacity))
