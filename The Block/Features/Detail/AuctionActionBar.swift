@@ -22,6 +22,7 @@ struct AuctionActionBar: View {
         }
     }
 
+    /// Bid / Buy Now buttons for live lots, or the outcome label for ended ones.
     @ViewBuilder
     private func content(for state: DetailActionBarState) -> some View {
         switch state {
@@ -40,6 +41,7 @@ struct AuctionActionBar: View {
         }
     }
 
+    /// "Place bid · Min $X" plus "Buy Now $X" when offered; laid out by the caller.
     @ViewBuilder
     private func buttons(minimumBid: Int, buyNowPrice: Int?) -> some View {
         Button(action: onPlaceBid) {

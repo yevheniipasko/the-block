@@ -32,6 +32,7 @@ final class VehicleDetailViewModel {
     let vehicleID: VehicleModel.ID
     @ObservationIgnored let repository: VehicleRepositoryProtocol
 
+    /// Creates the detail state for one lot, read live from the shared repository.
     init(vehicleID: VehicleModel.ID, repository: VehicleRepositoryProtocol) {
         self.vehicleID = vehicleID
         self.repository = repository
@@ -40,6 +41,11 @@ final class VehicleDetailViewModel {
     /// Latest repository copy, so bids placed elsewhere show up immediately (spec BID-6).
     var vehicle: VehicleModel? { repository.vehicle(id: vehicleID) }
 
+    /// What the bottom action bar shows at `now` (spec DETAIL-6, TIME-4, BID-11).
+    ///
+    /// Upcoming and active lots offer a bid from `BiddingRules.minimumNextBid`; Buy Now is added
+    /// only when `BiddingRules.canBuyNow` allows it. Ended lots return their outcome instead.
+    /// - Returns: `nil` when the vehicle is missing.
     func actionBar(at now: Date) -> DetailActionBarState? {
         guard let vehicle else { return nil }
         if case .ended(let outcome) = vehicle.status(at: now) {
@@ -49,6 +55,7 @@ final class VehicleDetailViewModel {
         return .bidding(minimumBid: BiddingRules.minimumNextBid(for: vehicle), buyNowPrice: buyNowPrice)
     }
 
+    /// The buyer's own position at `now`: purchased, high bidder, or `nil` (spec BID-6, BID-10).
     func buyerMarker(at now: Date) -> BuyerMarker? {
         guard let vehicle else { return nil }
         if vehicle.status(at: now) == .ended(.purchasedByYou) {
@@ -57,21 +64,25 @@ final class VehicleDetailViewModel {
         return vehicle.isYouHighBidder ? .highBidder : nil
     }
 
+    /// "Current bid" once the lot has bids, otherwise "Starting at" (spec DETAIL-2).
     var priceLabel: String {
         guard let vehicle, vehicle.bidCount > 0, vehicle.currentBid != nil else { return Localizable.startingAt }
         return Localizable.currentBid
     }
 
+    /// Current bid, or the starting bid when there are no bids, as CAD.
     var priceAmount: String {
         guard let vehicle else { return "" }
         return Formatting.currency(vehicle.currentBid ?? vehicle.startingBid)
     }
 
+    /// Bid count with the right plural, e.g. `1 bid`, `14 bids`.
     var bidCountText: String {
         let count = vehicle?.bidCount ?? 0
         return count == 1 ? Localizable.oneBid : Localizable.bids(count)
     }
 
+    /// Spec grid rows in display order; the VIN is shown separately with a copy button (spec DETAIL-3).
     var specRows: [SpecRow] {
         guard let vehicle else { return [] }
         return [
@@ -86,13 +97,16 @@ final class VehicleDetailViewModel {
         ]
     }
 
+    /// Condition grade as `x.x / 5` (spec DETAIL-4).
     var conditionGradeText: String {
         guard let vehicle else { return "" }
         return String(format: "%.1f / 5", vehicle.conditionGrade)
     }
 
+    /// Whether the lot has damage notes; `false` shows "No damage reported" (spec DETAIL-4).
     var hasDamageNotes: Bool { !(vehicle?.damageNotes.isEmpty ?? true) }
 
+    /// Rebuilt and salvage titles are flagged with warning styling (spec DETAIL-4).
     var isTitleFlagged: Bool {
         guard let vehicle else { return false }
         return vehicle.titleStatus != .clean
@@ -100,6 +114,7 @@ final class VehicleDetailViewModel {
 
     var titleStatusText: String { vehicle?.titleStatus.rawValue.capitalized ?? "" }
 
+    /// Seller location as `City, Province` (spec DETAIL-5).
     var locationText: String {
         guard let vehicle else { return "" }
         return "\(vehicle.city), \(vehicle.province)"

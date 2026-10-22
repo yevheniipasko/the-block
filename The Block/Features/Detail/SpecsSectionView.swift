@@ -26,6 +26,7 @@ struct SpecsSectionView: View {
         }
     }
 
+    /// One label-over-value cell in the specs grid.
     private func specCell(label: String, value: String) -> some View {
         VStack(alignment: .leading, spacing: Spacing.xxSmall) {
             Text(label)

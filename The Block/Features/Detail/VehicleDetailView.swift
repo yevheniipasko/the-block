@@ -48,6 +48,7 @@ struct VehicleDetailView: View {
 
     // MARK: - Header (DETAIL-2)
 
+    /// Lot, title, status badge, buyer marker, and price block.
     private func header(_ vehicle: VehicleModel) -> some View {
         VStack(alignment: .leading, spacing: Spacing.small) {
             Text(Localizable.lot(vehicle.lot))
@@ -77,6 +78,7 @@ struct VehicleDetailView: View {
         }
     }
 
+    /// Tinted label for the buyer's position (high bidder / purchased).
     private func markerLabel(_ title: String, systemImage: String, tint: Color) -> some View {
         Label(title, systemImage: systemImage)
             .font(.subheadline.weight(.semibold))
@@ -84,6 +86,7 @@ struct VehicleDetailView: View {
             .accessibilityIdentifier("detail.buyerMarker")
     }
 
+    /// Current or starting bid, bid count, floor state (never the amount), and Buy Now price.
     private func priceBlock(_ vehicle: VehicleModel) -> some View {
         VStack(alignment: .leading, spacing: Spacing.xSmall) {
             HStack(alignment: .firstTextBaseline, spacing: Spacing.small) {
@@ -114,6 +117,7 @@ struct VehicleDetailView: View {
 
     // MARK: - Seller (DETAIL-5)
 
+    /// Selling dealership and its city/province.
     private func seller(_ vehicle: VehicleModel) -> some View {
         DetailSectionCard(title: Localizable.sellerTitle) {
             Label(vehicle.sellingDealership, systemImage: "building.2")
