@@ -1,5 +1,4 @@
 import Foundation
-import Observation
 import OSLog
 
 /// Progress of the inventory load; `.failed` carries a user-facing message (spec DATA-3).
@@ -52,7 +51,6 @@ protocol VehicleRepositoryProtocol: AnyObject {
 
 /// `VehicleRepositoryProtocol` backed by `VehicleDataSourceProtocol`'s feed; bids and purchases
 /// reset on app launch (spec Assumptions).
-@Observable
 final class VehicleRepository: VehicleRepositoryProtocol {
 
     private(set) var loadState: LoadState = .idle {
@@ -60,13 +58,13 @@ final class VehicleRepository: VehicleRepositoryProtocol {
     }
     private(set) var vehicles: [VehicleModel] = []
 
-    @ObservationIgnored private let dataSource: VehicleDataSourceProtocol
-    @ObservationIgnored private let clock: AuctionClockProtocol
-    @ObservationIgnored private let pageLatency: Duration
-    @ObservationIgnored private let loadStates = StreamBroadcaster<LoadState>()
-    @ObservationIgnored private let changes = StreamBroadcaster<VehicleModel>()
-    @ObservationIgnored private var feedTask: Task<Void, Never>?
-    @ObservationIgnored private let logger = Logger(subsystem: "TheBlock", category: "VehicleRepository")
+    private let dataSource: VehicleDataSourceProtocol
+    private let clock: AuctionClockProtocol
+    private let pageLatency: Duration
+    private let loadStates = StreamBroadcaster<LoadState>()
+    private let changes = StreamBroadcaster<VehicleModel>()
+    private var feedTask: Task<Void, Never>?
+    private let logger = Logger(subsystem: "TheBlock", category: "VehicleRepository")
 
     /// - Parameters:
     ///   - dataSource: Live feed and bid / Buy Now endpoints.
@@ -163,7 +161,13 @@ final class VehicleRepository: VehicleRepositoryProtocol {
     private func handle(_ event: VehicleFeedEvent) {
         switch event {
         case .snapshot(let snapshot):
+            // Announce lots that are new or changed, so subscribers that started before the
+            // (re)connection receive them too.
+            let previous = Dictionary(vehicles.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
             vehicles = snapshot
+            for vehicle in snapshot where previous[vehicle.id] != vehicle {
+                changes.yield(vehicle)
+            }
             loadState = .loaded
         case .updated(let vehicle):
             apply(vehicle)
