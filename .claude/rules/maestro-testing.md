@@ -43,9 +43,10 @@ Edge cases and rules are covered by Swift Testing, not extra flows. Add a flow b
 ## Running
 
 - Build and install on the simulator first (XcodeBuildMCP `build_run_sim`, pointing at the worktree's `.xcodeproj`).
-- Prefer the Maestro MCP: `list_devices` → `inspect_screen` (to find ids) → `run` with `files` or `dir: maestro/flows`.
-- CLI equivalent: `maestro test maestro/flows` (all) or `maestro test --include-tags smoke maestro/flows`.
-- Use `inspect_screen` / `take_screenshot` to debug a failing step before changing the flow.
+- **Run flows with the CLI, always passing the simulator UDID:**
+  `maestro --device <UDID> test maestro/flows` (all) or `maestro --device <UDID> test --include-tags smoke maestro/flows`.
+- The Maestro MCP `run` tool currently fails here with "Device became unreachable during deviceInfo": its `list_devices` reports each booted simulator twice (as `simulator` and as `real` with the same id) and resolves to the unreachable "real" entry. Several Maestro MCP servers from other sessions also share the driver port. Use the MCP only for read-only `inspect_screen` / `take_screenshot` if they work; fall back to `maestro --device <UDID> hierarchy` and `xcrun simctl io <UDID> screenshot <path>`.
+- Debug a failing step (hierarchy / screenshot) before changing the flow.
 
 ## When to run
 
