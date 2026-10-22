@@ -17,7 +17,7 @@ A buyer can browse a live vehicle auction inventory, judge a vehicle with confid
 
 ## Out of scope
 
-Auth/accounts, backend/networking (except placeholder images), persistence across launches, seller/dealer tooling, checkout/payments (Buy Now marks the lot purchased, nothing more), notifications, Closing/Pending negotiation phases, other bidders acting in real time (see Stretch).
+Auth/accounts, backend/networking (except placeholder images), persistence across launches, seller/dealer tooling, checkout/payments (Buy Now marks the lot purchased, nothing more), push notifications (alerts are in-app only), the Closing phase, everything under Postponed.
 
 ## Assumptions
 
@@ -25,12 +25,14 @@ Auth/accounts, backend/networking (except placeholder images), persistence acros
 - **Demo seed:** at launch you already lead on one active lot and are outbid on another, so "My bids" and the outbid state are visible without setup. Seeded positions are demo data, called out in the README.
 - **Bids and purchases live in memory** in the repository; they reset on app launch. Keeps the demo predictable.
 - **Time normalization:** dataset `auction_start` values (2026‑03‑31 … 2026‑04‑06, no timezone) are parsed as local time and shifted by one constant offset so that **app launch time lands at the 121st of 200 sorted start times** (60th percentile). Relative spacing is preserved.
+- **Anti-sniping:** any bid in the last 2 min of an active lot pushes its end to 2 min after that bid (OPENLANE extends timers the same way).
+- **Seller counter-offer (simulated):** when a lot ends below floor with you as high bidder, the seller counters at the midpoint between your bid and the floor, rounded up to $100. Your counter-counter is accepted only if it reaches the floor.
 - **Auction duration: 72 h** from normalized start. Result at launch: ~36 ended, ~89 active, ~75 upcoming; states roll over while the app runs.
 - **Upcoming lots accept bids** (like OPENLANE's pre-sale proxy bids / Copart preliminary bids). This also explains why some upcoming lots already have bids in the dataset. Buy Now is available only while Active.
 - **Ended outcomes:**
   - you bought it via Buy Now, or you are the high bidder and the floor is met (or no floor) → **"Purchased by you"**
   - bids and floor met (or no floor) → **"Sold"**
-  - bids but floor not met → **"Pending – below floor"** (seller decides; not simulated)
+  - bids but floor not met → **"Pending – below floor"** (if you lead, the seller counters — see NEGOTIATE; otherwise not simulated)
   - no bids → **"No sale"**
 - **Floor price (= `reserve_price`):** amount never shown; buyer sees "Floor met", "Floor not met", or "No floor".
 - **Minimum next bid:** no bids → `starting_bid`; otherwise `current_bid + step`.
@@ -71,11 +73,13 @@ Tasks:
 - **TIME-2** Status: `upcoming` when now < start; `active` when now ∈ [start, start + 72 h); `ended` otherwise, with outcome per Assumptions.
 - **TIME-3** Countdowns update while on screen: Upcoming "Starts in …", Active "Ends in …" (`d h` > 1 day, `h m` > 1 h, `m s` under 1 h); "Ending soon" emphasis under 1 h.
 - **TIME-4** A lot that changes state while viewed (upcoming → active, active → ended) updates its UI and actions without relaunch.
+- **TIME-5** Anti-sniping: a bid (yours, market, or proxy) in the last 2 min of an active lot extends its end to bid time + 2 min; the countdown shows an "Extended" tag and every screen uses the new end.
 
 Tasks:
 - [x] `AuctionClock` (offset from dataset, injectable `now` for tests)
 - [x] `AuctionStatus` + ended outcome
 - [ ] Countdown formatter + `TimelineView`-driven label
+- [ ] Anti-sniping: `AuctionSchedule.extendedEnd(...)` (pure) + per-lot end in `VehicleModel`, applied by the data source + boundary tests (TIME-5)
 - [x] Tests with fixed `now` at each boundary
 
 ### LIST — browse & search
@@ -107,12 +111,14 @@ Tasks:
 - **DETAIL-4** Condition: grade (x.x / 5 with visual scale), condition report, damage notes list or "No damage reported", title status — rebuilt/salvage visually flagged.
 - **DETAIL-5** Seller: selling dealership, city, province.
 - **DETAIL-6** Bottom action bar is always reachable: "Place bid" (Upcoming/Active), "Buy Now $X" (Active, when priced); ended lots show the outcome instead of actions.
+- **DETAIL-7** Tapping the condition grade opens an explainer: the 0–5 scale with what each band means for a buyer (e.g. 4.0+ "light wear, retail-ready"; under 2.0 "major reconditioning"), highlighting this lot's band.
 
 Tasks:
 - [x] `VehicleDetailViewModel` (thin, injected `VehicleRepositoryProtocol`) + detail view sections
 - [x] Gallery
 - [x] Condition grade + title status components
 - [x] Bottom action bar
+- [ ] Condition grade explainer sheet (DETAIL-7)
 
 ### BID — bidding & Buy Now
 
@@ -230,6 +236,18 @@ Tasks:
 - [ ] `OutbidAlertCenter` (subscribes to `inventoryUpdates()`, detects your-bid → outbid transitions, queue) + tests
 - [ ] Banner overlay in `InventoryRouterView`, "Bid again" routes to the bid sheet
 
+### NEGOTIATE — counter-offers below floor
+
+- **NEGOTIATE-1** When a lot you lead ends "Pending – below floor", the seller sends a counter-offer a few seconds later (see Assumptions); detail shows "Seller countered at $X" with Accept / Decline / Counter, and the ALERT banner announces it.
+- **NEGOTIATE-2** Accept → lot ends "Purchased by you" at the counter price. Decline → "No sale".
+- **NEGOTIATE-3** Counter (once): your amount must be above your bid and below the seller's counter; at/above the floor → "Purchased by you", otherwise the seller declines → "No sale".
+- **NEGOTIATE-4** An unanswered offer expires after 10 min → "No sale". Open offers appear in "My bids" as an **Offer received** group above Winning.
+
+Tasks:
+- [ ] `NegotiationRules` (counter amount, counter-counter outcome, expiry) — pure + tests
+- [ ] Data source: offer event on the feed, accept / decline / counter endpoints + tests
+- [ ] Offer panel in detail action bar, My bids group, banner
+
 ### SAVED — watchlist
 
 - **SAVED-1** A heart on each card and in the detail toolbar saves / unsaves a lot; state shows immediately on both.
@@ -259,8 +277,16 @@ Tasks:
 - [ ] 4 Maestro smoke flows (see `.claude/rules/maestro-testing.md`)
 - [ ] Submission README
 
-## Stretch (only after the above is done and time allows — ask first)
+## Postponed (designed, deliberately not built — see DECISIONS)
 
-- Step also drops one activity level after each 6 h without a new bid (closer to a live auctioneer; needs a synthetic last-bid time for dataset lots).
-- Anti-sniping: a bid in the last minutes extends the timer (OPENLANE does this).
-- Condition grade explainer.
+OPENLANE / Copart / IAA buyer features considered and parked, with the reason:
+
+- **Saved searches with match alerts** (OPENLANE) — name a query, get told when new lots match. Needs push notifications and a stream of new listings; our inventory is fixed at 200 lots.
+- **Starting-bid drop alert on saved lots** (OPENLANE) — needs a simulated seller lowering prices; adds seller behaviour for one alert.
+- **Transport booking and estimate** (OPENLANE) — needs the buyer's location (no accounts) and a rate table; belongs to checkout, which the brief excludes.
+- **Pre-/post-sale inspection orders** (OPENLANE, DataScan) — an add-on purchase flow; checkout is out of scope.
+- **Payment / checkout after a win** (OPENLANE) — excluded by the brief.
+- **Arbitration / dispute after purchase** — post-sale process, no buyer-side value in a prototype.
+- **Keys present, run & drive, primary/secondary damage, estimated retail value** (Copart, IAA) — not in the dataset; would be invented.
+- **Step drops one activity level after each 6 h without a bid** — needs a synthetic last-bid time for dataset lots.
+- **Inline "Your bids" strip in the inventory** (other implementation) — duplicates MYBIDS.
