@@ -1,3 +1,14 @@
+//
+//  InventoryRouterView.swift
+//  The Block
+//
+//  Root navigation view: hosts inventory, detail, My bids, the bid / Buy Now
+//  sheets, and the outbid banner.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import SwiftUI
 
 /// Root navigation: split view on iPad, collapsing to a stack on iPhone (spec UX-1).

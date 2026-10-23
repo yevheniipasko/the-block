@@ -1,3 +1,14 @@
+//
+//  InventoryTestSupport.swift
+//  The Block
+//
+//  Shared inventory test helpers: a 45-lot fleet, stream observers, repository stacks, and
+//  bounded waits used by the LIST-* and LIVE-* inventory tests.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 @testable import The_Block
 

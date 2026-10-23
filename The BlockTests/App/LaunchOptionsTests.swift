@@ -1,3 +1,14 @@
+//
+//  LaunchOptionsTests.swift
+//  The Block
+//
+//  Tests for parsing the -market launch argument and the simulated-market settings
+//  each mode maps to (UX-4, LIVE-2).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Testing
 @testable import The_Block
 

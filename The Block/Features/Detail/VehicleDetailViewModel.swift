@@ -1,3 +1,14 @@
+//
+//  VehicleDetailViewModel.swift
+//  The Block
+//
+//  Detail screen state and display shaping: live lot copy, action bar state,
+//  buyer marker, price text and spec rows (spec DETAIL-*, BID-6).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 import Observation
 

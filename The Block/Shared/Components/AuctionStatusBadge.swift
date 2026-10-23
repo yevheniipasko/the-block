@@ -1,3 +1,14 @@
+//
+//  AuctionStatusBadge.swift
+//  The Block
+//
+//  Reusable status pill with a live countdown, driven by the shared
+//  AuctionTicker.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import SwiftUI
 
 /// Status pill plus a live countdown for one vehicle (spec TIME-3, TIME-4).

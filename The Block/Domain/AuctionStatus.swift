@@ -1,3 +1,13 @@
+//
+//  AuctionStatus.swift
+//  The Block
+//
+//  Auction status, ended-outcome, and floor-state value types.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 
 /// Where a vehicle's auction is at a given moment (spec TIME-2).

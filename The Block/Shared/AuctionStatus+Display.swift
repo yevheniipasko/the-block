@@ -1,3 +1,14 @@
+//
+//  AuctionStatus+Display.swift
+//  The Block
+//
+//  Display wording and colours for AuctionStatus, EndedOutcome, and
+//  FloorState, shared by list and detail screens.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import SwiftUI
 
 /// Buyer-facing wording and colours for auction states, shared by list and detail.

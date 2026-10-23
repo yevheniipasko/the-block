@@ -1,3 +1,14 @@
+//
+//  AuctionActionBar.swift
+//  The Block
+//
+//  Pinned bottom bar on the detail screen: Place bid / Buy Now buttons, or the
+//  outcome once the lot has ended (spec DETAIL-6).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import SwiftUI
 
 /// Bottom action bar: place bid / Buy Now, or the outcome once ended (spec DETAIL-6, TIME-4).

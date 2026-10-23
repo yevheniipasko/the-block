@@ -1,3 +1,14 @@
+//
+//  OutbidAlertCenterTests.swift
+//  The Block
+//
+//  Tests for OutbidAlertCenter: alert on winning → outbid, queueing, auto-dismiss, and
+//  suppression for the lot whose bid sheet is open (ALERT-1…ALERT-3).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 import Testing
 @testable import The_Block

@@ -1,3 +1,14 @@
+//
+//  MyBidsToolbarItem.swift
+//  The Block
+//
+//  Inventory toolbar button that opens "My bids", with a badge counting
+//  lots you've been outbid on.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import SwiftUI
 
 /// Inventory toolbar entry that opens "My bids", badged with the number of lots you're outbid on

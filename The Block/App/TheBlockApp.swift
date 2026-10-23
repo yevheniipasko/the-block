@@ -1,3 +1,14 @@
+//
+//  TheBlockApp.swift
+//  The Block
+//
+//  App entry point: creates the AppModule and auction ticker and shows the
+//  root navigation view.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import SwiftUI
 
 @main

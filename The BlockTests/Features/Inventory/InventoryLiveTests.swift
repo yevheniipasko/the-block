@@ -1,3 +1,14 @@
+//
+//  InventoryLiveTests.swift
+//  The Block
+//
+//  Tests for the inventory screen on the live feed: load-state stream, retry, in-place row
+//  updates, outbid rows (LIVE-1…LIVE-4, DATA-3, BID-6, UX-5).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 import Testing
 @testable import The_Block

@@ -1,3 +1,14 @@
+//
+//  LoadingStates.swift
+//  The Block
+//
+//  Reusable full-screen loading and error states, and the paging status
+//  row shown at the end of a list.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import SwiftUI
 
 /// Full-screen loading state for a first load (spec UX-5).

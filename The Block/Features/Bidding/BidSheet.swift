@@ -1,3 +1,14 @@
+//
+//  BidSheet.swift
+//  The Block
+//
+//  Place-bid sheet: amount entry, review/confirm step and the success state
+//  shared with the Buy Now sheet (spec BID-1 … BID-9, LIVE-3).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import SwiftUI
 
 /// Place-bid sheet (spec BID-1 … BID-9, LIVE-3, UX-5).

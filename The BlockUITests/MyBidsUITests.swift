@@ -1,3 +1,14 @@
+//
+//  MyBidsUITests.swift
+//  The Block
+//
+//  XCUITest journey for My bids with the market off: open it from the toolbar, see the
+//  seeded groups, open a lot (MYBIDS-1…MYBIDS-3, MYBIDS-6, MYBIDS-7).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import XCTest
 
 /// "My bids" journey on the real app with the market off, so the two demo positions seeded at

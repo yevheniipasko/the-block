@@ -1,3 +1,14 @@
+//
+//  BidViewModelTests.swift
+//  The Block
+//
+//  Tests for BidViewModel entry, validation, review / confirm, and rejections (BID-1…BID-5,
+//  BID-7, BID-8, UX-5); also provides MutableClock and BiddingTestSupport.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 import Testing
 @testable import The_Block

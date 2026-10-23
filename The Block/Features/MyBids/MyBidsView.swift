@@ -1,3 +1,14 @@
+//
+//  MyBidsView.swift
+//  The Block
+//
+//  "My bids" screen: lots you bid on or bought, grouped by position,
+//  plus its empty state and row layout.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import SwiftUI
 
 /// Every lot you bid on or bought, grouped by your position (spec MYBIDS-1 … MYBIDS-5).

@@ -1,3 +1,14 @@
+//
+//  InventoryFilterSheet.swift
+//  The Block
+//
+//  Filter sheet for the inventory list: status, body style, fuel type,
+//  province, and Buy Now toggles bound to InventoryViewModel.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import SwiftUI
 
 /// Filter sheet: status, body style, fuel type, province, and Buy Now (spec LIST-3).

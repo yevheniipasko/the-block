@@ -1,3 +1,14 @@
+//
+//  SpecsSectionView.swift
+//  The Block
+//
+//  Detail screen specs card: adaptive grid of vehicle specs plus a copyable VIN
+//  (spec DETAIL-3).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import SwiftUI
 import UIKit
 

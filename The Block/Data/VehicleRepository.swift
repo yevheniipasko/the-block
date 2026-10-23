@@ -1,3 +1,14 @@
+//
+//  VehicleRepository.swift
+//  The Block
+//
+//  Vehicle repository: caches the live feed, fans out updates as streams, pages
+//  inventory queries, and forwards bids / Buy Now to the data source.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 import OSLog
 

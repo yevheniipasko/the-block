@@ -1,3 +1,14 @@
+//
+//  OutbidBannerView.swift
+//  The Block
+//
+//  Notification-style outbid banner with a "Bid again" shortcut,
+//  swipe-up dismissal and a VoiceOver announcement (spec ALERT-1, ALERT-4).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import SwiftUI
 
 /// Compact, notification-style banner telling the buyer they were outbid, with a shortcut back

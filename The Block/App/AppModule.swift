@@ -1,3 +1,14 @@
+//
+//  AppModule.swift
+//  The Block
+//
+//  Composition root: the single Swinject module that registers every dependency
+//  and builds the screen ViewModels.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 import Swinject
 

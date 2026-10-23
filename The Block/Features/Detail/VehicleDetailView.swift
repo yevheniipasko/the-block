@@ -1,3 +1,14 @@
+//
+//  VehicleDetailView.swift
+//  The Block
+//
+//  Vehicle detail screen: gallery, header with price and buyer marker, specs,
+//  condition, seller, and the pinned action bar (spec DETAIL-*).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import SwiftUI
 
 /// Vehicle detail: gallery, header, specs, condition, seller, and a pinned action bar (spec DETAIL-*).

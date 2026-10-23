@@ -1,3 +1,14 @@
+//
+//  OutbidAlertCenter.swift
+//  The Block
+//
+//  App-wide outbid alert queue: watches every lot and raises a banner when
+//  the buyer goes from winning to outbid (spec ALERT-1 … ALERT-3).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 import Observation
 

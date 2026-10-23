@@ -1,3 +1,14 @@
+//
+//  ExtrasDomainTests.swift
+//  The Block
+//
+//  Tests for the buyer's bid position, the fee schedule, and the demo seed of starting
+//  positions (MYBIDS-2, MYBIDS-7, FEES-1, FEES-3).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 import Testing
 @testable import The_Block

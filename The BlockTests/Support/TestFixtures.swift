@@ -1,3 +1,14 @@
+//
+//  TestFixtures.swift
+//  The Block
+//
+//  Shared test fixtures: fixed clock, stub data source and repository, seeded RNG,
+//  reference dates, and the VehicleModel fixture.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 @testable import The_Block
 

@@ -1,3 +1,14 @@
+//
+//  SimulatedAuctionDataSource.swift
+//  The Block
+//
+//  In-process fake auction server: live vehicle feed, bid / Buy Now endpoints,
+//  and a simulated market placing competing bids.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 import OSLog
 

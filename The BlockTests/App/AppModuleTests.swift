@@ -1,3 +1,14 @@
+//
+//  AppModuleTests.swift
+//  The Block
+//
+//  Smoke tests for the AppModule composition root: the real data stack loads the
+//  bundled inventory and the repository is a single shared instance.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Testing
 @testable import The_Block
 

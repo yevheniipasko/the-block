@@ -1,3 +1,14 @@
+//
+//  FeeSchedule.swift
+//  The Block
+//
+//  Simulated buyer-fee tiers and the total-cost estimate shown in the bid and
+//  Buy Now sheets.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 
 /// What the buyer would pay on top of the hammer price (spec FEES-1).

@@ -1,3 +1,13 @@
+//
+//  DemoSeed.swift
+//  The Block
+//
+//  Seeds one leading and one outbid demo position into the launch snapshot.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 
 /// Gives the buyer two positions at launch so "My bids" and the outbid state are visible

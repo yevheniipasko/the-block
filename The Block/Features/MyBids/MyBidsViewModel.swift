@@ -1,3 +1,14 @@
+//
+//  MyBidsViewModel.swift
+//  The Block
+//
+//  "My bids" state: groups your lots by bid position and keeps them live
+//  from the repository feed and a clock tick.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 import Observation
 

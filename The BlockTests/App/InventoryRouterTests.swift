@@ -1,3 +1,14 @@
+//
+//  InventoryRouterTests.swift
+//  The Block
+//
+//  Tests for InventoryRouter navigation state: detail selection, bid / Buy Now sheets,
+//  and My bids (UX-1, BID-1, BID-10, MYBIDS-1, MYBIDS-5).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 import Testing
 @testable import The_Block

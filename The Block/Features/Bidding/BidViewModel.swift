@@ -1,3 +1,14 @@
+//
+//  BidViewModel.swift
+//  The Block
+//
+//  State for the bid and Buy Now sheets: live lot copy, amount entry, validation,
+//  fee estimates and the submit flow (spec BID-*, LIVE-3, FEES-1).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 import Observation
 import OSLog

@@ -1,3 +1,14 @@
+//
+//  LiveFeedTests.swift
+//  The Block
+//
+//  Tests for the simulated live feed and repository streams: snapshot, competing bids,
+//  per-lot and inventory updates, reconnect, broadcaster cleanup (LIVE-1, LIVE-2, DATA-3).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 import Testing
 @testable import The_Block

@@ -1,3 +1,14 @@
+//
+//  BiddingRules.swift
+//  The Block
+//
+//  Pure bidding rules: activity levels, adaptive step, minimum next bid, bid
+//  validation, and Buy Now eligibility.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 
 /// How busy bidding on a lot is, judged by bid count (the data has no bidder IDs or bid times).

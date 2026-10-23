@@ -1,3 +1,13 @@
+//
+//  PhotoGalleryView.swift
+//  The Block
+//
+//  Swipeable photo gallery with a page indicator for the detail screen (spec DETAIL-1).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import SwiftUI
 
 /// Swipeable 4:3 photo gallery with a page indicator (spec DETAIL-1).

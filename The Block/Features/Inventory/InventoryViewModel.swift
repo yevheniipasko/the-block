@@ -1,3 +1,14 @@
+//
+//  InventoryViewModel.swift
+//  The Block
+//
+//  Inventory screen state: search debounce, filters, sort, cursor paging,
+//  and live row updates from the vehicle repository.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 import Observation
 import OSLog

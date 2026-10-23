@@ -1,3 +1,14 @@
+//
+//  InventoryViewModelTests.swift
+//  The Block
+//
+//  Tests for InventoryViewModel paging, query restarts, page failures and retry, filter chips,
+//  and search debounce (LIST-2…LIST-7, BID-6, UX-5).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 import Testing
 @testable import The_Block

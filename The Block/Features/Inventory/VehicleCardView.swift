@@ -1,3 +1,14 @@
+//
+//  VehicleCardView.swift
+//  The Block
+//
+//  Inventory row card: photo, title, price, bids, odometer, location,
+//  auction status, Buy Now, and your bid position.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import SwiftUI
 
 /// One inventory row: photo, title, price, bids, odometer, location, status, Buy Now, and

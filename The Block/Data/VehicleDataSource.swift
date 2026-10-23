@@ -1,3 +1,14 @@
+//
+//  VehicleDataSource.swift
+//  The Block
+//
+//  Data source protocol and feed events, plus the loader and decoder for the
+//  bundled `vehicles.json`.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 
 /// One message on the vehicle feed, as a socket would push it (spec LIVE-1).

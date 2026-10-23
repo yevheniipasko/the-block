@@ -1,3 +1,14 @@
+//
+//  BuyNowViewModelTests.swift
+//  The Block
+//
+//  Tests for Buy Now through BidViewModel: success, unavailable reasons, and a lot ending
+//  during the request (BID-8, BID-10, BID-11).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 import Testing
 @testable import The_Block

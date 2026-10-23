@@ -1,3 +1,14 @@
+//
+//  SmokeUITests.swift
+//  The Block
+//
+//  XCUITest smoke flows: browse / search, detail, valid bid, below-minimum rejection, live outbid
+//  (LIST-1/2/5/6, DETAIL-2/6, BID-1/3/5/6, LIVE-2/3, UX-4/5).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import XCTest
 
 /// End-to-end smoke flows on the real app (spec UX-4). The simulated market is switched off

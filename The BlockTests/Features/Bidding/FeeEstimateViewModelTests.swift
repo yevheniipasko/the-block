@@ -1,3 +1,13 @@
+//
+//  FeeEstimateViewModelTests.swift
+//  The Block
+//
+//  Tests for the bid and Buy Now fee estimates BidViewModel exposes (FEES-1, FEES-3).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 import Testing
 @testable import The_Block

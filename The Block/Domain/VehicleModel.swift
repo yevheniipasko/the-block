@@ -1,3 +1,13 @@
+//
+//  VehicleModel.swift
+//  The Block
+//
+//  The app's vehicle model and its enumerated attribute types.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 
 /// A vehicle listed in the auction, as the app works with it.

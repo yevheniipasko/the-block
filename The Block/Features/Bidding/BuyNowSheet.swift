@@ -1,3 +1,14 @@
+//
+//  BuyNowSheet.swift
+//  The Block
+//
+//  Buy Now confirmation sheet: price, fee estimate, binding notice, or the reason
+//  Buy Now is unavailable (spec BID-10, BID-11).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import SwiftUI
 
 /// Buy Now confirmation sheet (spec BID-10, BID-11, FEES-1, UX-5).

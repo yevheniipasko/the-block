@@ -1,3 +1,14 @@
+//
+//  InventoryRouter.swift
+//  The Block
+//
+//  App navigation state (selected vehicle, presented sheet, My bids) and the
+//  ViewModel factory protocol the router builds screens with.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 import Observation
 

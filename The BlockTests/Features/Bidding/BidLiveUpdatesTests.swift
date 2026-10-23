@@ -1,3 +1,14 @@
+//
+//  BidLiveUpdatesTests.swift
+//  The Block
+//
+//  Tests for an open bid / Buy Now sheet following the live feed: competing bids, lot ending,
+//  Buy Now turning unavailable, connection failures (LIVE-3, LIVE-4, BID-7, BID-11).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 import Testing
 @testable import The_Block

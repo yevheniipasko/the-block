@@ -1,3 +1,14 @@
+//
+//  VehicleDetailViewModelTests.swift
+//  The Block
+//
+//  Tests for VehicleDetailViewModel: action bar, live bid / Buy Now state, header, specs,
+//  condition, location (DETAIL-2…DETAIL-6, TIME-4, BID-6, BID-10, LIVE-1, LIVE-3).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 import Testing
 @testable import The_Block

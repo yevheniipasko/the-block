@@ -1,3 +1,14 @@
+//
+//  VehicleImage.swift
+//  The Block
+//
+//  Network-loaded vehicle photo with a progress placeholder and a
+//  fallback icon when loading fails.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import SwiftUI
 
 /// Network vehicle photo with a loading placeholder and a failure fallback (spec DETAIL-1).

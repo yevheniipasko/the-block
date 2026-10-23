@@ -1,3 +1,14 @@
+//
+//  InventoryView.swift
+//  The Block
+//
+//  Inventory list screen: search, sort menu, filter chips, paged results,
+//  and loading, error, and empty states.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import SwiftUI
 
 /// Inventory list with search, filters, sort, and cursor paging (spec LIST-*, UX-*).

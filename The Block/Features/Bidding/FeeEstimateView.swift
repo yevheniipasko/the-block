@@ -1,3 +1,14 @@
+//
+//  FeeEstimateView.swift
+//  The Block
+//
+//  "Est. total" row with an expandable buyer/documentation fee breakdown,
+//  shared by the bid and Buy Now sheets (spec FEES-1, FEES-2).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import SwiftUI
 
 /// "Est. total $X" row with a tap-to-expand fee breakdown and the estimate caption (spec FEES-1, FEES-2).

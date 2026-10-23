@@ -1,3 +1,14 @@
+//
+//  InventoryLabels.swift
+//  The Block
+//
+//  Buyer-facing labels for inventory sort orders, filter chips,
+//  result counts, and bid counts.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 
 /// Buyer-facing names for inventory sort orders, filters, and counts (spec LIST-3 … LIST-6).

@@ -1,3 +1,14 @@
+//
+//  AuctionTicker.swift
+//  The Block
+//
+//  Shared once-per-second clock that auction views observe instead of
+//  running a timer per row.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 import Observation
 

@@ -1,3 +1,14 @@
+//
+//  MyBidsViewModelTests.swift
+//  The Block
+//
+//  Tests for MyBidsViewModel grouping, live regrouping, outbid badge, and empty state
+//  (MYBIDS-2, MYBIDS-4…MYBIDS-7).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 import Testing
 @testable import The_Block

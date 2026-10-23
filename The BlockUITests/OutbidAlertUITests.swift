@@ -1,3 +1,14 @@
+//
+//  OutbidAlertUITests.swift
+//  The Block
+//
+//  XCUITest journey for the outbid banner with a fast market: bid, get outbid, tap
+//  Bid again (ALERT-1, ALERT-3).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import XCTest
 
 /// Outbid banner on the real app with a fast market (spec ALERT-1, ALERT-3).

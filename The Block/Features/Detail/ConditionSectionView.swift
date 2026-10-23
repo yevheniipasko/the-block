@@ -1,3 +1,14 @@
+//
+//  ConditionSectionView.swift
+//  The Block
+//
+//  Detail screen condition card: grade scale, report, damage notes and
+//  title status with branded titles flagged (spec DETAIL-4).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import SwiftUI
 
 /// Condition grade, report, damage notes, and title status (spec DETAIL-4).

@@ -1,3 +1,13 @@
+//
+//  InventoryQuery.swift
+//  The Block
+//
+//  Inventory search, filter, and sort options and how they are applied to vehicles.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 
 /// Status groups a buyer can filter by (spec LIST-3).

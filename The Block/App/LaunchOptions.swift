@@ -1,3 +1,14 @@
+//
+//  LaunchOptions.swift
+//  The Block
+//
+//  Launch-time switches parsed from process arguments (`-market off|fast`),
+//  used by UI tests to control the simulated market.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 
 /// Launch-time switches, mainly for UI tests (spec UX-4, LIVE-2).
