@@ -25,6 +25,7 @@ struct OutbidBannerView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     /// Vertical offset while the banner is being dragged; resets when the drag ends.
     @GestureState private var dragOffset: CGFloat = 0
+    /// Icon circle diameter, scaled with Dynamic Type so the arrow stays inside it.
     @ScaledMetric(relativeTo: .subheadline) private var iconSize = Constants.iconSize
 
     var body: some View {

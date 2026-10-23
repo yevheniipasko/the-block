@@ -54,6 +54,8 @@ struct AuctionStatusBadge: View {
 
 }
 
+/// Layout values for the status badge.
 private enum Constants {
+    /// Diameter of the status colour dot.
     static let dotSize: CGFloat = 6
 }
