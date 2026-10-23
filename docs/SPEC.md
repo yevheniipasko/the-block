@@ -207,7 +207,7 @@ Tasks:
 - [x] Design tokens + formatters in `Shared/` (Spacing, Formatting, status display, `AuctionStatusBadge`, `VehicleImage`, `LoadingStateView` / `ErrorStateView` / `PageStatusRow`)
 - [ ] Accessibility pass
 - [x] XCUITest smoke tests: browse/search, open detail, valid bid, below-minimum, live outbid (see `.claude/rules/ui-testing.md`)
-- [ ] Submission README
+- [x] Submission README
 
 ## Postponed (designed, deliberately not built — see DECISIONS)
 
