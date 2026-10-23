@@ -59,12 +59,17 @@ struct InventoryView: View {
                     countdownPausedAt: countdownPausedAt
                 )
                     .tag(vehicle.id)
+                    .listRowInsets(Constants.cardInsets)
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
                     .accessibilityIdentifier("list.row.\(vehicle.lot)")
                     .onAppear { viewModel.loadNextPageIfNeeded(currentID: vehicle.id) }
             }
             pageStatusRow
         }
         .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .background(Color(uiColor: .systemGroupedBackground))
         .refreshable { await viewModel.refresh() }
         .onScrollPhaseChange { oldPhase, newPhase in
             if oldPhase == .idle, newPhase != .idle {
@@ -151,14 +156,37 @@ private struct InventoryResultsHeader: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.small) {
-            Text(InventoryLabels.resultCount(viewModel.totalCount ?? 0))
+            HStack(alignment: .firstTextBaseline) {
+                Label(Localizable.liveAuction, systemImage: "dot.radiowaves.left.and.right")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(.tint)
+                Spacer(minLength: Spacing.small)
+                Text(InventoryLabels.resultCount(viewModel.totalCount ?? 0))
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .accessibilityIdentifier("list.resultCount")
+            }
+            Text(Localizable.headline)
+                .font(.title2.bold())
+                .accessibilityAddTraits(.isHeader)
+            Text(Localizable.subtitle)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
-                .accessibilityIdentifier("list.resultCount")
             if viewModel.hasActiveFilters {
                 chips
             }
         }
+        .padding(Spacing.large)
+        .background(
+            Color.accentColor.opacity(Constants.headerTintOpacity),
+            in: .rect(cornerRadius: CornerRadius.medium)
+        )
+        .overlay {
+            RoundedRectangle(cornerRadius: CornerRadius.medium)
+                .stroke(Color.accentColor.opacity(Constants.headerBorderOpacity))
+        }
+        .listRowInsets(Constants.headerInsets)
+        .listRowBackground(Color.clear)
         .listRowSeparator(.hidden)
         .selectionDisabled()
     }
@@ -205,10 +233,17 @@ private struct TrailingIconLabelStyle: LabelStyle {
 
 private enum Constants {
     static let chipOpacity = 0.15
+    static let headerTintOpacity = 0.09
+    static let headerBorderOpacity = 0.2
+    static let headerInsets = EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16)
+    static let cardInsets = EdgeInsets(top: 5, leading: 16, bottom: 5, trailing: 16)
 }
 
 private enum Localizable {
-    static let title = "Inventory"
+    static let title = "The Block"
+    static let liveAuction = "LIVE VEHICLE AUCTION"
+    static let headline = "Inventory on the block"
+    static let subtitle = "Follow live bids, watch the clock, and open any lot for full details."
     static let searchPrompt = "Make, model, year, lot, VIN, dealer"
     static let loading = "Loading inventory…"
     static let pageFailed = "We couldn't load the vehicles. Please try again."

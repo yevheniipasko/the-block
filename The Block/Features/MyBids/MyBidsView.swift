@@ -34,7 +34,7 @@ struct MyBidsView: View {
                     }
                 }
             }
-            .listStyle(.plain)
+            .listStyle(.insetGrouped)
             .animation(.default, value: viewModel.groups)
         }
     }
@@ -73,24 +73,27 @@ private struct MyBidsRow: View {
                 .clipShape(RoundedRectangle(cornerRadius: CornerRadius.small))
             details
         }
-        .padding(.vertical, Spacing.xSmall)
+        .padding(.vertical, Spacing.small)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityLabel)
     }
 
     private var details: some View {
         VStack(alignment: .leading, spacing: Spacing.xSmall) {
+            HStack(alignment: .firstTextBaseline, spacing: Spacing.small) {
+                Text(Localizable.lot(vehicle.lot))
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(.secondary)
+                Spacer(minLength: Spacing.small)
+                AuctionStatusBadge(vehicle: vehicle)
+            }
             Text(vehicle.title)
                 .font(.headline)
                 .lineLimit(Constants.titleLineLimit)
-            Text(Localizable.lot(vehicle.lot))
-                .font(.caption)
-                .foregroundStyle(.secondary)
             amountLine(title: Localizable.currentBid, amount: vehicle.currentBid ?? vehicle.startingBid)
             if let yourAmount {
                 amountLine(title: yourAmountTitle, amount: yourAmount)
             }
-            AuctionStatusBadge(vehicle: vehicle)
             Label(position.badgeTitle, systemImage: position.systemImage)
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(position.tint)

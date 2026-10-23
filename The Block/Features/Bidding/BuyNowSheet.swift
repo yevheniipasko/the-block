@@ -67,6 +67,9 @@ struct BuyNowSheet: View {
                     .font(.largeTitle.monospacedDigit().bold())
                     .accessibilityIdentifier("buyNow.price")
                 if let vehicle = viewModel.vehicle {
+                    Text(Localizable.lot(vehicle.lot))
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(.secondary)
                     Text(vehicle.title)
                         .font(.headline)
                 }
@@ -124,5 +127,6 @@ private enum Localizable {
     static let unavailableTitle = "Buy Now unavailable"
     static let successTitle = "Purchased by you"
 
+    static func lot(_ lot: String) -> String { "LOT \(lot)" }
     static func successDetail(_ price: String) -> String { "You bought this vehicle for \(price)." }
 }

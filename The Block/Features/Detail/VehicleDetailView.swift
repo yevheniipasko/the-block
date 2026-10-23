@@ -60,18 +60,29 @@ struct VehicleDetailView: View {
     /// Lot, title, status badge, buyer marker, and price block.
     private func header(_ vehicle: VehicleModel) -> some View {
         VStack(alignment: .leading, spacing: Spacing.small) {
-            Text(Localizable.lot(vehicle.lot))
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+            HStack(alignment: .firstTextBaseline, spacing: Spacing.small) {
+                Text(Localizable.lot(vehicle.lot))
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(.secondary)
+                    .tracking(Constants.lotTracking)
+                Spacer(minLength: Spacing.small)
+                AuctionStatusBadge(vehicle: vehicle)
+            }
             Text(vehicle.title)
                 .font(.title2.bold())
                 .accessibilityAddTraits(.isHeader)
                 .accessibilityIdentifier("detail.title")
-            AuctionStatusBadge(vehicle: vehicle)
             buyerMarker
+            Divider()
             priceBlock(vehicle)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(Spacing.large)
+        .background(Color(uiColor: .secondarySystemGroupedBackground), in: .rect(cornerRadius: CornerRadius.medium))
+        .overlay {
+            RoundedRectangle(cornerRadius: CornerRadius.medium)
+                .stroke(Color.accentColor.opacity(Constants.headerBorderOpacity))
+        }
     }
 
     @ViewBuilder private var buyerMarker: some View {
@@ -156,6 +167,11 @@ struct VehicleDetailView: View {
         .accessibilityElement(children: .combine)
     }
 
+}
+
+private enum Constants {
+    static let lotTracking: CGFloat = 0.8
+    static let headerBorderOpacity = 0.18
 }
 
 private enum Localizable {

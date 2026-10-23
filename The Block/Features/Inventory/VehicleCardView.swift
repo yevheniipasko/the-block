@@ -21,11 +21,27 @@ struct VehicleCardView: View {
             ? AnyLayout(VStackLayout(alignment: .leading, spacing: Spacing.medium))
             : AnyLayout(HStackLayout(alignment: .top, spacing: Spacing.medium))
 
-        layout {
-            photo(isStacked: isStacked)
-            details
+        VStack(alignment: .leading, spacing: Spacing.medium) {
+            HStack(alignment: .firstTextBaseline, spacing: Spacing.small) {
+                Text(Localizable.lot(vehicle.lot))
+                    .font(.caption2.weight(.bold))
+                    .foregroundStyle(.secondary)
+                    .tracking(Constants.lotTracking)
+                Spacer(minLength: Spacing.small)
+                AuctionStatusBadge(vehicle: vehicle, pausedAt: countdownPausedAt)
+            }
+            layout {
+                photo(isStacked: isStacked)
+                details
+            }
         }
-        .padding(.vertical, Spacing.xSmall)
+        .padding(Spacing.medium)
+        .background(.background, in: .rect(cornerRadius: CornerRadius.medium))
+        .overlay {
+            RoundedRectangle(cornerRadius: CornerRadius.medium)
+                .stroke(.quaternary)
+        }
+        .contentShape(.rect(cornerRadius: CornerRadius.medium))
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityLabel)
     }
@@ -50,11 +66,13 @@ struct VehicleCardView: View {
             Text(odometerAndLocation)
                 .font(.caption)
                 .foregroundStyle(.secondary)
-            AuctionStatusBadge(vehicle: vehicle, pausedAt: countdownPausedAt)
             if let buyNowPrice = vehicle.buyNowPrice {
                 Label(Localizable.buyNow(Formatting.currency(buyNowPrice)), systemImage: "bolt.fill")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.tint)
+                    .padding(.horizontal, Spacing.small)
+                    .padding(.vertical, Spacing.xxSmall)
+                    .background(Color.accentColor.opacity(Constants.badgeOpacity), in: Capsule())
             }
             yourPositionMarker
         }
@@ -87,7 +105,7 @@ struct VehicleCardView: View {
 
     private var priceAmountText: some View {
         Text(Formatting.currency(price))
-            .font(.subheadline.weight(.semibold))
+            .font(.title3.weight(.bold))
             .monospacedDigit()
             .fixedSize(horizontal: true, vertical: false)
     }
@@ -135,7 +153,9 @@ struct VehicleCardView: View {
     private var accessibilityLabel: String {
         var parts = [
             vehicle.title,
+            Localizable.lot(vehicle.lot),
             "\(priceTitle) \(Formatting.currency(price)), \(InventoryLabels.bidCount(vehicle.bidCount))",
+            odometerAndLocation,
             vehicle.status(at: now).badgeTitle
         ]
         if let buyNowPrice = vehicle.buyNowPrice {
@@ -158,6 +178,8 @@ private enum Constants {
     static let thumbnailHeight: CGFloat = 84
     static let stackedPhotoHeight: CGFloat = 180
     static let titleLineLimit = 2
+    static let badgeOpacity = 0.12
+    static let lotTracking: CGFloat = 0.8
 }
 
 private enum Localizable {
@@ -165,6 +187,7 @@ private enum Localizable {
     static let startingAt = "Starting at"
     static let highBidder = "You're the high bidder"
     static let outbid = "You've been outbid"
+    static func lot(_ lot: String) -> String { "LOT \(lot)" }
     static func buyNow(_ price: String) -> String { "Buy Now \(price)" }
     static func purchased(_ price: String) -> String { "Purchased by you for \(price)" }
 }

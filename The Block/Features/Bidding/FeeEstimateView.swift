@@ -12,11 +12,12 @@ struct FeeEstimateView: View {
 
     /// Whether the fee breakdown is showing; collapsed by default to keep the sheet short.
     @State private var isExpanded = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.small) {
             Button {
-                withAnimation { isExpanded.toggle() }
+                withAnimation(reduceMotion ? nil : .snappy) { isExpanded.toggle() }
             } label: {
                 totalLine
             }
