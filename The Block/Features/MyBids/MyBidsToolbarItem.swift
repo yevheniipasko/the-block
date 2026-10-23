@@ -17,8 +17,9 @@ struct MyBidsToolbarItem: ToolbarContent {
                     .accessibilityLabel(Localizable.title)
             }
             .accessibilityIdentifier("list.myBidsButton")
-            .accessibilityValue(Localizable.outbidValue(outbidCount))
             .badge(outbidCount)
+            // After `.badge`, which otherwise sets the value to the bare count (UX-3).
+            .accessibilityValue(Localizable.outbidValue(outbidCount))
         }
     }
 
