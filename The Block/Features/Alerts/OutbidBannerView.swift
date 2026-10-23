@@ -10,6 +10,7 @@ struct OutbidBannerView: View {
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @GestureState private var dragOffset: CGFloat = 0
+    @ScaledMetric(relativeTo: .subheadline) private var iconSize = Constants.iconSize
 
     var body: some View {
         contentLayout {
@@ -54,7 +55,7 @@ struct OutbidBannerView: View {
         Image(systemName: "arrow.down")
             .font(.subheadline.weight(.bold))
             .foregroundStyle(.white)
-            .frame(width: Constants.iconSize, height: Constants.iconSize)
+            .frame(width: iconSize, height: iconSize)
             .background(.orange.gradient, in: Circle())
             .accessibilityHidden(true)
     }
