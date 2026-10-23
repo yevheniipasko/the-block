@@ -72,17 +72,8 @@ private struct BidEntryView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.large) {
             if let vehicle = viewModel.vehicle {
-                VStack(alignment: .leading, spacing: Spacing.xSmall) {
-                    HStack(alignment: .firstTextBaseline, spacing: Spacing.small) {
-                        Text(Localizable.lot(vehicle.lot))
-                            .font(.caption.weight(.bold))
-                            .foregroundStyle(.secondary)
-                        Spacer(minLength: Spacing.small)
-                        AuctionStatusBadge(vehicle: vehicle)
-                    }
-                    Text(vehicle.title)
-                        .font(.headline)
-                }
+                Text(vehicle.title)
+                    .font(.headline)
             }
 
             if viewModel.isOutbid {
@@ -140,10 +131,6 @@ private struct BidEntryView: View {
         .font(.title.monospacedDigit().weight(.semibold))
         .padding(Spacing.medium)
         .background(.fill.tertiary, in: RoundedRectangle(cornerRadius: CornerRadius.medium))
-        .overlay {
-            RoundedRectangle(cornerRadius: CornerRadius.medium)
-                .stroke(isAmountFocused ? Color.accentColor : .clear, lineWidth: Constants.focusBorderWidth)
-        }
     }
 
     private var quickAddButtons: some View {
@@ -199,9 +186,6 @@ private struct BidReviewView: View {
                 Text(viewModel.amount.map { Formatting.currency($0) } ?? "")
                     .font(.largeTitle.monospacedDigit().bold())
                 if let vehicle = viewModel.vehicle {
-                    Text(Localizable.lot(vehicle.lot))
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(.secondary)
                     Text(vehicle.title)
                         .font(.headline)
                 }
@@ -277,7 +261,6 @@ private enum Constants {
     static let quickAddSteps = [1, 2, 5]
     static let successDisplayDuration: Duration = .seconds(1.2)
     static let successIconSize: CGFloat = 56
-    static let focusBorderWidth: CGFloat = 2
 }
 
 private enum Localizable {
@@ -297,7 +280,6 @@ private enum Localizable {
     static let successTitle = "You're the high bidder"
     static let outbidNotice = "You've been outbid. Bid again to take the lead."
 
-    static func lot(_ lot: String) -> String { "LOT \(lot)" }
     static func successDetail(_ amount: String) -> String { "Your bid of \(amount) was placed." }
     static func quickAddAccessibility(_ amount: String) -> String { "Add \(amount)" }
 }

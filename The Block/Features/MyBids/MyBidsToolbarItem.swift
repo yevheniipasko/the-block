@@ -11,8 +11,6 @@ struct MyBidsToolbarItem: ToolbarContent {
         ToolbarItem(placement: .topBarLeading) {
             Button(action: action) {
                 Image(systemName: "hammer")
-                    .padding(.top, Constants.badgeInset)
-                    .padding(.trailing, Constants.badgeInset)
                     .overlay(alignment: .topTrailing) { badge }
                     .accessibilityLabel(Localizable.title)
             }
@@ -30,6 +28,7 @@ struct MyBidsToolbarItem: ToolbarContent {
                 .padding(.horizontal, Spacing.xSmall)
                 .frame(minWidth: Constants.badgeSize, minHeight: Constants.badgeSize)
                 .background(.red, in: Capsule())
+                .offset(x: Constants.badgeOffset, y: -Constants.badgeOffset)
                 .accessibilityIdentifier("list.myBidsBadge")
         }
     }
@@ -38,7 +37,7 @@ struct MyBidsToolbarItem: ToolbarContent {
 
 private enum Constants {
     static let badgeSize: CGFloat = 16
-    static let badgeInset: CGFloat = 8
+    static let badgeOffset: CGFloat = 8
 }
 
 private enum Localizable {

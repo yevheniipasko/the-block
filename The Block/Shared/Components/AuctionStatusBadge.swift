@@ -16,7 +16,7 @@ struct AuctionStatusBadge: View {
         let now = pausedAt ?? ticker.now
         let status = vehicle.status(at: now)
         HStack(spacing: Spacing.xSmall) {
-            Label(status.badgeTitle, systemImage: status.systemImage)
+            Text(status.badgeTitle)
                 .font(.caption.weight(.semibold))
                 .padding(.horizontal, Spacing.small)
                 .padding(.vertical, Spacing.xxSmall)
@@ -30,18 +30,6 @@ struct AuctionStatusBadge: View {
         }
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("status.badge")
-    }
-
-}
-
-private extension AuctionStatus {
-
-    var systemImage: String {
-        switch self {
-        case .upcoming: "clock.fill"
-        case .active: "circle.fill"
-        case .ended: "flag.checkered"
-        }
     }
 
 }
