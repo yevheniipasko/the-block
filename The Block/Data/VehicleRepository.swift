@@ -22,7 +22,7 @@ enum LoadState: Equatable, Sendable {
 
 /// Single source of truth for vehicles: a cache of the live feed, fanned out as `AsyncStream`s
 /// (spec LIVE-1). Data can change at any time — screens subscribe instead of reading once.
-protocol VehicleRepositoryProtocol: AnyObject {
+protocol VehicleRepositoryProtocol: AnyObject, Sendable {
     /// Latest load progress (snapshot read; subscribe with `loadStateUpdates()`).
     var loadState: LoadState { get }
     /// Latest known vehicles (snapshot read; subscribe with `inventoryUpdates()`).
@@ -138,8 +138,9 @@ final class VehicleRepository: VehicleRepositoryProtocol {
         if pageLatency > .zero {
             try await Task.sleep(for: pageLatency)
         }
-        let results = query.apply(to: vehicles, now: clock.now)
-        return try Paginator.page(of: results, after: cursor, limit: limit)
+        let now = clock.now
+        let results = query.apply(to: vehicles, now: now)
+        return try Paginator.page(of: results, after: cursor, limit: limit) { query.position(of: $0, now: now) }
     }
 
     /// Applies the server's response right away, so the caller sees its own bid even before the
@@ -157,15 +158,20 @@ final class VehicleRepository: VehicleRepositoryProtocol {
     // MARK: - Private
 
     /// Reads feed events until the feed ends; a feed that ends before its snapshot is a failure.
+    ///
+    /// A connection replaced by `load()` is cancelled and ends quietly: it must not report a
+    /// failure over the new connection's `.loading`.
     private func consume(_ feed: AsyncThrowingStream<VehicleFeedEvent, Error>) async {
         do {
             for try await event in feed {
                 handle(event)
             }
+            guard !Task.isCancelled else { return }
             if loadState == .loading {
                 fail(reason: "feed closed before snapshot")
             }
         } catch {
+            guard !Task.isCancelled else { return }
             fail(reason: String(describing: error))
         }
     }

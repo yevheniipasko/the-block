@@ -32,7 +32,21 @@ final class OutbidAlertCenter {
     /// The alert on screen, or `nil` when the banner is hidden.
     private(set) var current: OutbidAlert?
     /// Lot whose bid sheet is open; its outbids raise no banner because the sheet shows its own notice.
-    var suppressedLotID: VehicleModel.ID?
+    ///
+    /// Setting it also drops that lot's queued alert, and hides its banner if it is on screen (ALERT-3).
+    var suppressedLotID: VehicleModel.ID? {
+        didSet {
+            dropStaleAlerts()
+            if let current, current.lotID == suppressedLotID {
+                dismiss()
+            }
+        }
+    }
+
+    /// Lots with an alert waiting behind the current banner, oldest first.
+    var queuedLotIDs: [VehicleModel.ID] {
+        queue.map(\.lotID)
+    }
 
     /// Alerts waiting for the banner, oldest first; at most one per lot (spec ALERT-2).
     @ObservationIgnored private var queue: [OutbidAlert] = []
@@ -58,8 +72,8 @@ final class OutbidAlertCenter {
     ///
     /// Waits for the first load, then seeds positions from the loaded lots and subscribes in the
     /// same main-actor step, so no update is missed between the two. Seeding from `vehicles`
-    /// rather than the snapshot's burst of updates matters: that burst can overflow a stream's
-    /// buffer. Lots already outbid when observing starts never alert.
+    /// gives the starting positions in one pass, before any update is compared against them.
+    /// Lots already outbid when observing starts never alert.
     func observe() async {
         for await state in repository.loadStateUpdates() where state == .loaded {
             break
@@ -85,10 +99,13 @@ final class OutbidAlertCenter {
     // MARK: - Private
 
     /// Records the lot's new position and queues an alert when the buyer just lost the lead.
+    ///
+    /// A queued alert for a lot the buyer leads again is dropped (ALERT-3).
     private func handle(_ vehicle: VehicleModel) {
         let previous = positions[vehicle.id]
         let position = vehicle.bidPosition(at: repository.now)
         positions[vehicle.id] = position
+        dropStaleAlerts()
         guard previous == .winning, position == .outbid, vehicle.id != suppressedLotID,
               let currentBid = vehicle.currentBid else { return }
         enqueue(OutbidAlert(lotID: vehicle.id, title: vehicle.title, currentBid: currentBid))
@@ -105,8 +122,16 @@ final class OutbidAlertCenter {
         showNextIfIdle()
     }
 
-    /// Shows the oldest queued alert when no banner is on screen and schedules its auto-dismiss.
+    /// Removes queued alerts that no longer apply: the lot's bid sheet is open, or the buyer is no
+    /// longer outbid on it (spec ALERT-3).
+    private func dropStaleAlerts() {
+        queue.removeAll { $0.lotID == suppressedLotID || positions[$0.lotID] != .outbid }
+    }
+
+    /// Shows the oldest still-valid queued alert when no banner is on screen and schedules its
+    /// auto-dismiss.
     private func showNextIfIdle() {
+        dropStaleAlerts()
         guard current == nil, !queue.isEmpty else { return }
         current = queue.removeFirst()
         let duration = displayDuration

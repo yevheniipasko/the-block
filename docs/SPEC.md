@@ -55,7 +55,7 @@ Auth/accounts, backend/networking (except placeholder images), persistence acros
 ### DATA — loading the inventory
 
 - **DATA-1** All 200 vehicles decode from the bundled `vehicles.json` (snake_case, nullable `reserve_price` / `buy_now_price` / `current_bid`).
-- **DATA-2** `auction_start` without timezone decodes; malformed dates fail decoding with a clear error, not a crash.
+- **DATA-2** `auction_start` without timezone decodes; malformed dates fail decoding with a clear error, not a crash. It is read as UTC wall-clock time, so device time zones and DST don't change the spacing (TIME-1).
 - **DATA-3** If loading fails, the app shows an error state with a retry, not an empty list.
 
 Tasks:
@@ -85,11 +85,11 @@ Tasks:
 
 - **LIST-1** Inventory shows every vehicle as a card: first photo, year make model trim, current bid (or "Starting at" + starting bid), bid count, odometer, city/province, status badge + countdown, Buy Now price if present.
 - **LIST-2** Search matches make, model, trim, year, lot, VIN, and dealership — case-insensitive, combinable with filters.
-- **LIST-3** Filters: status (Upcoming / Live / Ended), body style, fuel type, province (multi-select each), "Buy Now available" toggle. Active filters are visible and clearable in one tap.
+- **LIST-3** Filters: status (Upcoming / Live / Ended), body style, fuel type, province (multi-select each), "Buy Now available" toggle. Active filters are visible and clearable in one tap. With a status filter on, results and count refresh from page one when any lot starts or ends.
 - **LIST-4** Sort: Ending soonest (default — active by end time, then upcoming by start, ended last), Price low→high, Price high→low, Newest year, Lowest km.
 - **LIST-5** No results → empty state naming the query/filters with a "Clear" action.
 - **LIST-6** Result count is visible ("142 vehicles").
-- **LIST-7** Inventory loads in pages of 20 through a cursor, imitating a paginated API: next page loads when the list nears its end, with a loading row; changing search/filters/sort restarts from page one; a stale cursor (lot no longer matches) silently restarts; a failed page shows an inline retry. Bids placed after loading are reflected in loaded rows.
+- **LIST-7** Inventory loads in pages of 20 through a cursor, imitating a paginated API: next page loads when the list nears its end, with a loading row; changing search/filters/sort restarts from page one; a stale cursor (lot no longer matches) silently restarts; a failed page shows an inline retry. Bids placed after loading are reflected in loaded rows. The cursor is the last row's sort position when its page was served; the next page continues strictly after it, so re-priced or ended lots don't make pages skip or repeat rows.
 - **LIST-8** *(postponed — see Postponed)* Extra filters, combinable with LIST-3 and search, shown as clearable chips: make (multi-select from makes in the data), max price (current bid, or starting bid when no bids, ≤ the chosen amount), clean title only, no bids yet, under 50,000 km.
 - **LIST-9** *(postponed — see Postponed)* Extra sorts: Best condition (grade high→low), Oldest year.
 
@@ -122,7 +122,7 @@ Tasks:
 - **BID-1** Bid sheet pre-fills the minimum next bid and explains it ("Minimum $24,000 · step $1,000 · Hot lot, 14 bids").
 - **BID-2** Quick-add buttons (+1, +2, +5 steps) adjust the amount; manual entry accepts whole dollars only.
 - **BID-3** Bids below the minimum are rejected with an inline message; the confirm button stays disabled.
-- **BID-4** Bids at/above the Buy Now price are rejected with "Use Buy Now instead".
+- **BID-4** Bids at/above the Buy Now price are rejected with "Use Buy Now instead" (on an upcoming lot, where Buy Now isn't open yet: "Bids must be below the Buy Now price of $X. Buy Now opens when the auction goes live.").
 - **BID-5** Confirmation step shows vehicle, amount, and that the bid is binding; confirm places the bid.
 - **BID-6** After placing: current bid = your amount, bid count + 1, "You're the high bidder" badge, floor state and activity level recomputed — visible on detail **and** in the list without refresh.
 - **BID-7** Bidding on an ended lot is impossible (UI disabled + repository rejects).
@@ -143,7 +143,7 @@ Tasks:
 
 - **LIVE-1** Data arrives as streams, as from a socket: the data source exposes `vehicleFeed()` (`AsyncThrowingStream`: snapshot, then per-lot updates); the repository caches it and fans out `AsyncStream`s (`loadStateUpdates()`, `vehicleUpdates(id:)`, `inventoryUpdates()`). Screens subscribe in `.task` (auto-cancelled) instead of reading once; no screen needs a reload to see a change.
 - **LIVE-2** A simulated market places a competing bid every ~6 s on a random active lot (next minimum bid, below Buy Now), ~40 % of the time on a lot you're winning, so data changes while you watch.
-- **LIVE-3** Outbid state (`isYouOutbid`) shows in the list card, the detail header, and an open bid sheet ("You've been outbid"); an open bid sheet recomputes its minimum live, keeps the typed amount, and re-validates it.
+- **LIVE-3** Outbid state (`isYouOutbid`) shows in the list card, the detail header, and an open bid sheet ("You've been outbid"); an open bid sheet recomputes its minimum live, keeps the typed amount, and re-validates it. The list card and detail header hide the outbid marker once the lot has ended.
 - **LIVE-4** A connection failure shows the load error with retry (reconnects the feed); bids/Buy Now that can't reach the server fail with "Couldn't reach the auction" and change nothing.
 
 Tasks:

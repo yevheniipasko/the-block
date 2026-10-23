@@ -53,7 +53,7 @@ enum BidRejection: Error, Hashable, Sendable {
     case connectionFailed
 }
 
-/// Pure auction rules (spec BID-1, BID-3, BID-4, BID-7, BID-9, BID-11).
+/// Pure auction rules (spec BID-1, BID-3, BID-4, BID-7, BID-9, BID-11, LIVE-2).
 enum BiddingRules {
 
     /// Price-tier step before the activity multiplier (spec BID-9).
@@ -114,6 +114,17 @@ enum BiddingRules {
             return .failure(.atOrAboveBuyNow(buyNowPrice: buyNowPrice))
         }
         return .success(())
+    }
+
+    /// Whether `vehicle` can take another bid at `now` without reaching its Buy Now price (spec LIVE-2).
+    ///
+    /// The lot must be active, and its minimum next bid must stay below any Buy Now price, since a
+    /// bid at that price is rejected (BID-4). Used by the simulated market and the demo seed to pick
+    /// lots that can still move.
+    static func canTakeAnotherBid(_ vehicle: VehicleModel, at now: Date) -> Bool {
+        guard case .active = vehicle.status(at: now) else { return false }
+        guard let buyNowPrice = vehicle.buyNowPrice else { return true }
+        return minimumNextBid(for: vehicle) < buyNowPrice
     }
 
     /// Whether Buy Now is offered for `vehicle` at `now` (spec BID-10, BID-11).

@@ -30,6 +30,14 @@ struct FormattingTests {
     }
 
     @Test(
+        "LIST-1: bid count reads No bids, 1 bid, or N bids everywhere",
+        arguments: [(0, "No bids"), (1, "1 bid"), (14, "14 bids")]
+    )
+    func bidCount(count: Int, expected: String) {
+        #expect(Formatting.bidCount(count) == expected)
+    }
+
+    @Test(
         "TIME-3: countdown switches units at one day and one hour",
         arguments: [
             (TimeInterval(2 * 86_400 + 4 * 3_600 + 59), "2d 4h"),

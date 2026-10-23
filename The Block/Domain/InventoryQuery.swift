@@ -52,15 +52,28 @@ struct InventoryQuery: Hashable, Sendable {
     /// Filters and sorts `vehicles` as seen at `now`. Empty filter sets mean "any".
     ///
     /// Search is case-insensitive over make, model, trim, year, lot, VIN, and dealership.
-    /// Ties keep a stable order by lot so pages never shuffle between requests.
+    /// Ties keep a stable order by lot, then ID, so pages never shuffle between requests.
     func apply(to vehicles: [VehicleModel], now: Date) -> [VehicleModel] {
         vehicles
             .filter { matches($0, now: now) }
-            .sorted { lhs, rhs in
-                let left = sortKey(lhs, now: now)
-                let right = sortKey(rhs, now: now)
-                return left == right ? lhs.lot < rhs.lot : left < right
-            }
+            .sorted { position(of: $0, now: now) < position(of: $1, now: now) }
+    }
+
+    /// Where `vehicle` sits in this query's order at `now`; also the paging boundary (spec LIST-7).
+    func position(of vehicle: VehicleModel, now: Date) -> SortPosition {
+        SortPosition(key: sortKey(vehicle, now: now), lot: vehicle.lot, id: vehicle.id)
+    }
+
+    /// When this query's results next change just because time passes (spec LIST-3, TIME-4).
+    ///
+    /// That is the earliest auction start or end after `now` among `vehicles`. `nil` when no
+    /// status filter is on (results then don't depend on time) or no lot changes status later.
+    func nextStatusChange(in vehicles: [VehicleModel], after now: Date) -> Date? {
+        guard !statuses.isEmpty else { return nil }
+        return vehicles
+            .flatMap { [$0.auctionStart, $0.auctionEnd] }
+            .filter { $0 > now }
+            .min()
     }
 
     /// Whether a vehicle passes every active filter and the search text.

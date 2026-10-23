@@ -66,17 +66,36 @@ struct InventoryRouterTests {
         #expect(factory.detailRequests == [id])
     }
 
-    @Test("UX-1: clearing the selection drops the detail ViewModel")
-    func clearSelection() {
+    @Test("UX-1: clearing the selection keeps the last detail ViewModel while the screen pops")
+    func clearSelectionKeepsDetail() {
         let router = InventoryRouter(factory: factory)
-        router.select(UUID())
+        let id = UUID()
+        router.select(id)
+        let viewModel = router.detailViewModel
 
         router.select(nil)
 
-        #expect(router.detailViewModel == nil)
+        #expect(router.selectedVehicleID == nil)
+        #expect(router.detailViewModel === viewModel)
     }
 
-    @Test("BID-1 / BID-10: presenting a sheet builds its ViewModel; dismissing clears both")
+    @Test("UX-1: re-selecting the last vehicle reuses its detail ViewModel; another builds a new one")
+    func reselectReusesDetail() {
+        let router = InventoryRouter(factory: factory)
+        let first = UUID()
+        let second = UUID()
+
+        router.select(first)
+        router.select(nil)
+        router.select(first)
+        #expect(factory.detailRequests == [first])
+
+        router.select(second)
+        #expect(router.detailViewModel?.vehicleID == second)
+        #expect(factory.detailRequests == [first, second])
+    }
+
+    @Test("BID-1 / BID-10: presenting a sheet builds its ViewModel; it outlives dismissal until the sheet is gone")
     func sheets() {
         let router = InventoryRouter(factory: factory)
         let id = UUID()
@@ -90,7 +109,24 @@ struct InventoryRouterTests {
 
         router.dismissSheet()
         #expect(router.presentedSheet == nil)
+        #expect(router.bidViewModel?.vehicleID == id)
+
+        router.sheetDidDismiss()
         #expect(router.bidViewModel == nil)
+    }
+
+    @Test("BID-1: a sheet presented before the old one finished dismissing keeps its ViewModel")
+    func sheetDidDismissKeepsNewSheet() {
+        let router = InventoryRouter(factory: factory)
+        let id = UUID()
+        router.presentBid(for: UUID())
+        router.dismissSheet()
+
+        router.presentBid(for: id)
+        router.sheetDidDismiss()
+
+        #expect(router.presentedSheet == .bid(id))
+        #expect(router.bidViewModel?.vehicleID == id)
     }
 
     @Test("MYBIDS-1 / MYBIDS-5: My bids opens and closes; its ViewModel is built once with the router")

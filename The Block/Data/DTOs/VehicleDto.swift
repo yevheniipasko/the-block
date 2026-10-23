@@ -133,17 +133,26 @@ extension VehicleDto {
         return components.url
     }
 
-    /// Parses an `auction_start` string, which has no timezone (e.g. `2026-04-05T14:00:00`), as local time.
+    /// Parses `auction_start` text, which has no timezone (e.g. `2026-04-05T14:00:00`).
     ///
-    /// Standard ISO-8601 decoding rejects it, so a fixed POSIX format is used (spec DATA-2).
+    /// The fixed POSIX format reads the wall-clock value as UTC. A fixed zone keeps the spacing
+    /// between auctions equal to the wall-clock difference on every device: a local zone would
+    /// add or drop an hour for lots after a DST change inside the dataset's week (e.g. Sydney on
+    /// 2026-04-05). Only relative spacing matters, since every start is shifted onto launch time
+    /// (spec DATA-2, TIME-1).
+    private static let auctionStartFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone(secondsFromGMT: 0)
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        return formatter
+    }()
+
+    /// Parses an `auction_start` string with `auctionStartFormatter`.
     ///
     /// - Returns: The date, or `nil` when the text does not match the format.
     private static func parseDate(_ text: String) -> Date? {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.timeZone = .current
-        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
-        return formatter.date(from: text)
+        auctionStartFormatter.date(from: text)
     }
 
 }

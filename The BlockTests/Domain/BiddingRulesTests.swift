@@ -89,6 +89,21 @@ struct BiddingRulesTests {
         #expect(!BiddingRules.canBuyNow(unpriced, at: duringAuction))
     }
 
+    @Test("LIVE-2: a lot takes another bid only while active and below its Buy Now price")
+    func canTakeAnotherBid() {
+        let unpriced = VehicleModel.fixture(auctionStart: start, currentBid: 20_000, bidCount: 5)
+        let roomBelowBuyNow = VehicleModel.fixture(auctionStart: start, buyNowPrice: 20_501,
+                                                   currentBid: 20_000, bidCount: 5)
+        let atBuyNow = VehicleModel.fixture(auctionStart: start, buyNowPrice: 20_500,
+                                            currentBid: 20_000, bidCount: 5)
+
+        #expect(BiddingRules.canTakeAnotherBid(unpriced, at: duringAuction))
+        #expect(BiddingRules.canTakeAnotherBid(roomBelowBuyNow, at: duringAuction))
+        #expect(!BiddingRules.canTakeAnotherBid(atBuyNow, at: duringAuction))
+        #expect(!BiddingRules.canTakeAnotherBid(unpriced, at: start.addingTimeInterval(-1)))
+        #expect(!BiddingRules.canTakeAnotherBid(unpriced, at: unpriced.auctionEnd))
+    }
+
 }
 
 /// Test convenience for asserting on a result's error.

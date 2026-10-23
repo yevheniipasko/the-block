@@ -162,6 +162,22 @@ struct BidViewModelTests {
         #expect(!viewModel.canReview)
     }
 
+    @Test("BID-4: on an upcoming lot the Buy Now ceiling message doesn't offer Buy Now")
+    func atBuyNowCeilingBeforeLive() async {
+        let vehicle = VehicleModel.fixture(buyNowPrice: 31_000)
+        let clock = MutableClock(now: TestDates.reference)
+        let repository = await BiddingTestSupport.makeRepository([vehicle], clock: clock)
+        clock.now = TestDates.reference.addingTimeInterval(-TestDates.hours(1))
+        let viewModel = BidViewModel(vehicleID: vehicle.id, repository: repository)
+
+        viewModel.updateAmountText("31000")
+
+        #expect(viewModel.validationRejection == .atOrAboveBuyNow(buyNowPrice: 31_000))
+        #expect(viewModel.validationMessage
+            == "Bids must be below the Buy Now price of $31,000. Buy Now opens when the auction goes live.")
+        #expect(!viewModel.canReview)
+    }
+
     // MARK: - BID-5 / BID-8
 
     @Test("BID-5 / BID-8: review then confirm places the bid and succeeds")

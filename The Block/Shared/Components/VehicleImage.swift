@@ -3,7 +3,7 @@
 //  The Block
 //
 //  Network-loaded vehicle photo with a progress placeholder and a
-//  fallback icon when loading fails.
+//  fallback icon when there is no photo or loading fails.
 //
 //  Created by Yevhenii Pasko on 2026-10-22.
 //  Copyright © 2026 Yevhenii Pasko. All rights reserved.
@@ -17,29 +17,37 @@ struct VehicleImage: View {
     let url: URL?
 
     var body: some View {
-        AsyncImage(url: url) { phase in
-            switch phase {
-            case .success(let image):
-                image.resizable().scaledToFill()
-            case .failure:
-                placeholder(systemImage: "car.side", label: "Photo unavailable")
-            case .empty:
-                ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
-            @unknown default:
-                placeholder(systemImage: "car.side", label: "Photo unavailable")
+        Group {
+            if let url {
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image.resizable().scaledToFill()
+                    case .failure:
+                        unavailablePlaceholder
+                    case .empty:
+                        ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
+                    @unknown default:
+                        unavailablePlaceholder
+                    }
+                }
+            } else {
+                // AsyncImage never leaves `.empty` without a URL, so skip the spinner.
+                unavailablePlaceholder
             }
         }
         .background(Color(uiColor: .secondarySystemBackground))
         .clipped()
     }
 
-    /// Centred SF Symbol with a VoiceOver label, filling the frame when the photo is unavailable.
-    private func placeholder(systemImage: String, label: String) -> some View {
-        Image(systemName: systemImage)
+    /// Centred car symbol labelled "Photo unavailable", filling the frame when there is no photo
+    /// or it failed to load.
+    private var unavailablePlaceholder: some View {
+        Image(systemName: "car.side")
             .font(.largeTitle)
             .foregroundStyle(.tertiary)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .accessibilityLabel(label)
+            .accessibilityLabel("Photo unavailable")
     }
 
 }

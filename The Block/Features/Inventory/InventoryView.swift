@@ -39,6 +39,7 @@ struct InventoryView: View {
             }
             .task { await viewModel.observeLoadState() }
             .task { await viewModel.observeInventoryChanges() }
+            .task { await viewModel.observeStatusChanges() }
     }
 
     /// Full-screen loading or error, the empty state, or the results list, per `viewModel.content`.

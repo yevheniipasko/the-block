@@ -157,6 +157,65 @@ struct OutbidAlertCenterTests {
         #expect(center.current == nil)
     }
 
+    @Test("ALERT-3: a queued alert is dropped once the buyer leads that lot again")
+    func queuedAlertDroppedAfterLeadRegained() async throws {
+        let harness = await makeCenter([lot(yourBid: 20_000), lot(yourBid: 20_000)])
+        let server = harness.server
+        let repository = harness.repository
+        let center = harness.center
+        let task = harness.task
+        defer { task.cancel() }
+
+        let first = try #require(server.simulateCompetingBid())
+        let second = try #require(server.simulateCompetingBid())
+        try await waitUntil { center.current?.lotID == first.id && center.queuedLotIDs == [second.id] }
+        #expect(center.queuedLotIDs == [second.id])
+
+        _ = try await repository.placeBid(BiddingRules.minimumNextBid(for: second), on: second.id).get()
+        try await waitUntil { center.queuedLotIDs.isEmpty }
+        #expect(center.queuedLotIDs.isEmpty)
+
+        center.dismiss()
+        #expect(center.current == nil)
+    }
+
+    @Test("ALERT-3: a queued alert is dropped when its lot's bid sheet opens")
+    func queuedAlertDroppedWhenSuppressed() async throws {
+        let harness = await makeCenter([lot(yourBid: 20_000), lot(yourBid: 20_000)])
+        let server = harness.server
+        let center = harness.center
+        let task = harness.task
+        defer { task.cancel() }
+
+        let first = try #require(server.simulateCompetingBid())
+        let second = try #require(server.simulateCompetingBid())
+        try await waitUntil { center.current?.lotID == first.id && center.queuedLotIDs == [second.id] }
+        #expect(center.queuedLotIDs == [second.id])
+
+        center.suppressedLotID = second.id
+        #expect(center.queuedLotIDs.isEmpty)
+
+        center.dismiss()
+        #expect(center.current == nil)
+    }
+
+    @Test("ALERT-3: opening the bid sheet for the lot on the banner hides the banner")
+    func currentAlertHiddenWhenSuppressed() async throws {
+        let id = UUID()
+        let harness = await makeCenter([lot(id: id, yourBid: 20_000)])
+        let server = harness.server
+        let center = harness.center
+        let task = harness.task
+        defer { task.cancel() }
+
+        server.simulateCompetingBid()
+        try await waitUntil { center.current != nil }
+        #expect(center.current?.lotID == id)
+
+        center.suppressedLotID = id
+        #expect(center.current == nil)
+    }
+
     @Test("ALERT-1: lots already outbid when observing starts never alert")
     func alreadyOutbidLotsDoNotAlert() async throws {
         let outbidID = UUID()

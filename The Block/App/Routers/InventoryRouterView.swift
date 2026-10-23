@@ -17,6 +17,8 @@ struct InventoryRouterView: View {
     let router: InventoryRouterProtocol
     let alertCenter: OutbidAlertCenter
 
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
     var body: some View {
         NavigationSplitView {
             InventoryView(viewModel: router.inventoryViewModel, selection: selection)
@@ -31,7 +33,7 @@ struct InventoryRouterView: View {
                     )
                 }
         } detail: {
-            if let detailViewModel = router.detailViewModel {
+            if let detailViewModel = router.detailViewModel, !showsEmptyDetail {
                 VehicleDetailView(
                     viewModel: detailViewModel,
                     onPlaceBid: { router.presentBid(for: detailViewModel.vehicleID) },
@@ -43,17 +45,25 @@ struct InventoryRouterView: View {
             }
         }
         .task { await router.myBidsViewModel.observe() }
-        .sheet(item: presentedSheet) { sheet in
+        .sheet(item: presentedSheet, onDismiss: router.sheetDidDismiss) { sheet in
             if let bidViewModel = router.bidViewModel {
-                switch sheet {
-                case .bid:
-                    BidSheet(viewModel: bidViewModel, onFinish: router.dismissSheet)
-                case .buyNow:
-                    BuyNowSheet(viewModel: bidViewModel, onFinish: router.dismissSheet)
+                Group {
+                    switch sheet {
+                    case .bid:
+                        BidSheet(viewModel: bidViewModel, onFinish: router.dismissSheet)
+                    case .buyNow:
+                        BuyNowSheet(viewModel: bidViewModel, onFinish: router.dismissSheet)
+                    }
                 }
+                .overlay(alignment: .top) {
+                    if router.presentedSheet != nil { outbidBanner }
+                }
+                .animation(.snappy, value: alertCenter.current)
             }
         }
-        .overlay(alignment: .top) { outbidBanner }
+        .overlay(alignment: .top) {
+            if router.presentedSheet == nil { outbidBanner }
+        }
         .animation(.snappy, value: alertCenter.current)
         .task { await alertCenter.observe() }
         .onChange(of: suppressedLotID, initial: true) { _, lotID in
@@ -61,8 +71,11 @@ struct InventoryRouterView: View {
         }
     }
 
-    /// Outbid banner over every screen (spec ALERT-1). It doesn't cover an open sheet, which is
-    /// accepted: the sheet's own lot is suppressed and its outbid notice shows inside the sheet (ALERT-3).
+    /// Outbid banner over every screen (spec ALERT-1).
+    ///
+    /// A root overlay can't cover a sheet, so the same banner is also overlaid on the sheet's
+    /// content; exactly one of the two shows it, the sheet's while one is presented. The sheet's
+    /// own lot raises no banner there (ALERT-3): its outbid notice shows inside the sheet.
     @ViewBuilder
     private var outbidBanner: some View {
         if let alert = alertCenter.current {
@@ -80,13 +93,21 @@ struct InventoryRouterView: View {
     }
 
     /// Lot whose open sheet shows its own outbid notice (spec ALERT-3). The success screen shows
-    /// none, so an outbid landing there still raises the banner, visible once the sheet closes.
+    /// none, so an outbid landing there still raises the banner, shown over the sheet.
     private var suppressedLotID: VehicleModel.ID? {
         guard let sheet = router.presentedSheet, router.bidViewModel?.phase != .succeeded else { return nil }
         switch sheet {
         case .bid(let id), .buyNow(let id):
             return id
         }
+    }
+
+    /// Whether the detail column shows the "Select a vehicle" placeholder.
+    ///
+    /// In regular width (iPad) it does whenever nothing is selected. In compact width (iPhone) the
+    /// last detail stays in place instead, so the screen being popped doesn't flash the placeholder.
+    private var showsEmptyDetail: Bool {
+        router.selectedVehicleID == nil && horizontalSizeClass != .compact
     }
 
     /// Selected vehicle, routed through `router.select(_:)` so the detail ViewModel is rebuilt.
@@ -99,7 +120,8 @@ struct InventoryRouterView: View {
         Binding(get: { router.isShowingMyBids }, set: { if !$0 { router.hideMyBids() } })
     }
 
-    /// Presented sheet; a swipe-down dismissal tells the router to clear it.
+    /// Presented sheet; a swipe-down dismissal tells the router to close it (its ViewModel is
+    /// dropped later, in `onDismiss`).
     private var presentedSheet: Binding<BiddingSheet?> {
         Binding(get: { router.presentedSheet }, set: { if $0 == nil { router.dismissSheet() } })
     }

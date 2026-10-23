@@ -3,7 +3,7 @@
 //  The Block
 //
 //  Buyer-facing labels for inventory sort orders, filter chips,
-//  result counts, and bid counts.
+//  and result counts.
 //
 //  Created by Yevhenii Pasko on 2026-10-22.
 //  Copyright © 2026 Yevhenii Pasko. All rights reserved.
@@ -63,15 +63,6 @@ enum InventoryLabels {
         count == 1 ? Localizable.oneVehicle : String(format: Localizable.vehiclesFormat, count)
     }
 
-    /// Bid count, e.g. `No bids`, `1 bid`, `14 bids`.
-    static func bidCount(_ count: Int) -> String {
-        switch count {
-        case 0: Localizable.noBids
-        case 1: Localizable.oneBid
-        default: String(format: Localizable.bidsFormat, count)
-        }
-    }
-
 }
 
 /// User-facing strings behind the inventory labels.
@@ -87,7 +78,4 @@ private enum Localizable {
     static let buyNow = "Buy Now available"
     static let oneVehicle = "1 vehicle"
     static let vehiclesFormat = "%d vehicles"
-    static let noBids = "No bids"
-    static let oneBid = "1 bid"
-    static let bidsFormat = "%d bids"
 }

@@ -112,6 +112,22 @@ struct DemoSeedTests {
         #expect(seeded.allSatisfy { $0.yourBid == nil })
     }
 
+    @Test("MYBIDS-7: a lot whose current bid equals its starting bid is never seeded as outbid")
+    func skipsOutbidWithoutRoomBelowCurrentBid() {
+        let live = now.addingTimeInterval(-TestDates.hours(1))
+        let leading = VehicleModel.fixture(auctionStart: live, currentBid: 20_000, bidCount: 5).with(lot: "A-0001")
+        let noRoom = VehicleModel.fixture(auctionStart: live, startingBid: 15_000,
+                                          currentBid: 15_000, bidCount: 1).with(lot: "A-0002")
+        let outbid = VehicleModel.fixture(auctionStart: live, currentBid: 15_000, bidCount: 2).with(lot: "A-0003")
+
+        let seeded = DemoSeed.apply(to: [leading, noRoom, outbid], now: now)
+        let byLot = Dictionary(uniqueKeysWithValues: seeded.map { ($0.lot, $0) })
+
+        #expect(byLot["A-0001"]?.bidPosition(at: now) == .winning)
+        #expect(byLot["A-0002"]?.yourBid == nil)
+        #expect(byLot["A-0003"]?.bidPosition(at: now) == .outbid)
+    }
+
 }
 
 private extension VehicleModel {
