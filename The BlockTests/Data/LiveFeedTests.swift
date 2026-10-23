@@ -167,6 +167,28 @@ struct LiveFeedTests {
         #expect(repository.vehicles.count == 1)
     }
 
+    @Test("DATA-3 / LIVE-1: reconnecting a live feed never reports the replaced connection as failed")
+    func reloadWhileLiveNeverFails() async {
+        let (_, repository) = await makeStack([activeLot()])
+        var states: [LoadState] = []
+        let recorder = Task {
+            for await state in repository.loadStateUpdates() {
+                states.append(state)
+            }
+        }
+        await Task.yield()
+
+        await repository.load()
+        await repository.load()
+        for _ in 0..<20 {
+            await Task.yield()
+        }
+        recorder.cancel()
+
+        #expect(repository.loadState == .loaded)
+        #expect(!states.contains { if case .failed = $0 { true } else { false } })
+    }
+
     @Test("LIVE-1: a cancelled subscriber is removed from the broadcaster")
     func cancelledSubscriberIsRemoved() async {
         let broadcaster = StreamBroadcaster<Int>()

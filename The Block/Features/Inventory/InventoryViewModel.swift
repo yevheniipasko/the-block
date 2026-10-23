@@ -15,9 +15,10 @@ import OSLog
 
 /// Inventory screen state: search, filters, sort, and cursor-paged results (spec LIST-*).
 ///
-/// Owns the loaded rows in page order. The view's `.task` runs `observeLoadState()` and
-/// `observeInventoryChanges()`, so the first page starts when the feed connects and a loaded row
-/// is replaced in place whenever its lot changes (spec LIVE-1, LIST-7, BID-6).
+/// Owns the loaded rows in page order. The view's `.task` runs `observeLoadState()`,
+/// `observeInventoryChanges()`, and `observeStatusChanges()`, so the first page starts when the
+/// feed connects, a loaded row is replaced in place whenever its lot changes, and a status filter
+/// is re-applied when a lot starts or ends (spec LIVE-1, LIST-3, LIST-7, BID-6, TIME-4).
 @Observable
 final class InventoryViewModel {
 
@@ -87,11 +88,19 @@ final class InventoryViewModel {
     @ObservationIgnored private var searchTask: Task<Void, Never>?
     /// Cursor from the latest page; `nil` before page one and after the last page.
     @ObservationIgnored private var nextCursor: PageCursor?
+    /// When page one's status-filtered results go out of date because a lot starts or ends;
+    /// `nil` without a status filter (spec LIST-3, TIME-4).
+    @ObservationIgnored private var statusChangeAt: Date?
+    /// How often `observeStatusChanges()` checks the clock.
+    @ObservationIgnored private let clockTick: Duration
     @ObservationIgnored private let logger = Logger(subsystem: "TheBlock", category: "InventoryViewModel")
 
-    /// - Parameter repository: Shared repository; rows and pages are always read from it.
-    init(repository: VehicleRepositoryProtocol) {
+    /// - Parameters:
+    ///   - repository: Shared repository; rows, pages, and "now" are always read from it.
+    ///   - clockTick: How often a status filter is re-checked against the clock; shorter in tests.
+    init(repository: VehicleRepositoryProtocol, clockTick: Duration = .seconds(1)) {
         self.repository = repository
+        self.clockTick = clockTick
     }
 
     // MARK: - Derived state
@@ -173,6 +182,19 @@ final class InventoryViewModel {
         }
     }
 
+    /// Restarts page one whenever a lot starts or ends while a status filter is on, until cancelled
+    /// (spec LIST-3, TIME-4).
+    ///
+    /// Status filters depend on the time, so their results and count change without any feed
+    /// event. Checks the repository's clock every `clockTick` against the moment page one went
+    /// out of date. Loaded rows stay visible during the restart. Run from the view's `.task`.
+    func observeStatusChanges() async {
+        while (try? await Task.sleep(for: clockTick)) != nil {
+            guard let statusChangeAt, repository.now >= statusChangeAt else { continue }
+            restart()
+        }
+    }
+
     // MARK: - Paging
 
     /// Cancels any in-flight request and loads page one for the current query.
@@ -181,6 +203,8 @@ final class InventoryViewModel {
     /// changes and pull-to-refresh don't flash an empty list.
     func restart() {
         nextCursor = nil
+        // Set again when page one arrives, so a failed page one isn't retried on every tick.
+        statusChangeAt = nil
         startLoading(after: nil)
     }
 
@@ -311,6 +335,7 @@ final class InventoryViewModel {
     private func apply(_ page: InventoryPage, isFirstPage: Bool) {
         if isFirstPage {
             vehicles = page.vehicles
+            statusChangeAt = query.nextStatusChange(in: repository.vehicles, after: repository.now)
         } else {
             let known = Set(loadedIDs)
             vehicles += page.vehicles.filter { !known.contains($0.id) }
