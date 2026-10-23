@@ -1,3 +1,14 @@
+//
+//  InventoryTestSupport.swift
+//  The Block
+//
+//  Shared inventory test helpers: a 45-lot fleet, stream observers, repository stacks, and
+//  bounded waits used by the LIST-* and LIVE-* inventory tests.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 @testable import The_Block
 
@@ -13,11 +24,13 @@ final class InventoryObservers {
 
     private var tasks: [Task<Void, Never>] = []
 
+    /// Starts the load-state and inventory-change subscriptions of `viewModel`.
     func start(_ viewModel: InventoryViewModel) {
         tasks.append(Task { await viewModel.observeLoadState() })
         tasks.append(Task { await viewModel.observeInventoryChanges() })
     }
 
+    /// Cancels every subscription this instance started.
     deinit {
         tasks.forEach { $0.cancel() }
     }

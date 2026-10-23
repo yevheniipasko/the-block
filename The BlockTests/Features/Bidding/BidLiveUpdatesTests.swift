@@ -1,3 +1,14 @@
+//
+//  BidLiveUpdatesTests.swift
+//  The Block
+//
+//  Tests for an open bid / Buy Now sheet following the live feed: competing bids, lot ending,
+//  Buy Now turning unavailable, connection failures (LIVE-3, LIVE-4, BID-7, BID-11).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 import Testing
 @testable import The_Block
@@ -6,6 +17,7 @@ import Testing
 @MainActor
 struct BidLiveUpdatesTests {
 
+    /// Stub server plus a repository on it that has already loaded `vehicles`.
     private func makeStack(
         _ vehicles: [VehicleModel],
         clock: AuctionClockProtocol = FixedClock(now: TestDates.reference)
@@ -197,22 +209,26 @@ private struct UnreachableDataSource: VehicleDataSourceProtocol {
 
     let vehicles: [VehicleModel]
 
+    /// Yields one snapshot of `vehicles` and stays open.
     func vehicleFeed() -> AsyncThrowingStream<VehicleFeedEvent, Error> {
         let (stream, continuation) = AsyncThrowingStream<VehicleFeedEvent, Error>.makeStream()
         continuation.yield(.snapshot(vehicles))
         return stream
     }
 
+    /// Always fails as if the device were offline.
     func placeBid(_ amount: Int, on id: VehicleModel.ID) async throws -> VehicleModel {
         throw URLError(.notConnectedToInternet)
     }
 
+    /// Always fails as if the device were offline.
     func buyNow(_ id: VehicleModel.ID) async throws -> VehicleModel {
         throw URLError(.notConnectedToInternet)
     }
 
 }
 
+/// Wait budgets, the fast clock tick, and the expected connection-failure message.
 private enum Constants {
     static let maxYields = 200
     static let clockTick: Duration = .milliseconds(10)

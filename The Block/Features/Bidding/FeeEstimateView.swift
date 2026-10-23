@@ -1,3 +1,14 @@
+//
+//  FeeEstimateView.swift
+//  The Block
+//
+//  "Est. total" row with an expandable buyer/documentation fee breakdown,
+//  shared by the bid and Buy Now sheets (spec FEES-1, FEES-2).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import SwiftUI
 
 /// "Est. total $X" row with a tap-to-expand fee breakdown and the estimate caption (spec FEES-1, FEES-2).
@@ -6,6 +17,7 @@ import SwiftUI
 /// mid-number: each line falls back to a stacked layout when it doesn't fit (spec UX-2).
 struct FeeEstimateView: View {
 
+    /// Amount, fees and total to show.
     let estimate: FeeEstimate
     /// Accessibility id prefix, e.g. `bid` → `bid.estimateRow`, `bid.estimateBreakdown`.
     let identifierPrefix: String
@@ -62,6 +74,7 @@ struct FeeEstimateView: View {
         .contentShape(Rectangle())
     }
 
+    /// "Est. total" label; never truncated.
     private var totalTitle: some View {
         Text(Localizable.totalTitle)
             .font(.subheadline)
@@ -69,6 +82,7 @@ struct FeeEstimateView: View {
             .fixedSize(horizontal: true, vertical: false)
     }
 
+    /// Total in CAD; never wraps mid-number (spec UX-2).
     private var totalAmount: some View {
         Text(Formatting.currency(estimate.total))
             .font(.headline.monospacedDigit())

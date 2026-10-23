@@ -1,3 +1,14 @@
+//
+//  BidPosition+Display.swift
+//  The Block
+//
+//  Display wording, SF Symbols, tints, and test identifiers for each
+//  BidPosition on the "My bids" screen.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import SwiftUI
 
 /// Buyer-facing wording, icon, and colour for each position on the "My bids" screen (spec MYBIDS-2, MYBIDS-3).
@@ -59,6 +70,7 @@ extension BidPosition {
 
 }
 
+/// User-facing strings for bid positions.
 private enum Localizable {
     static let winning = "Winning"
     static let outbid = "Outbid"

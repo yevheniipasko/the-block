@@ -1,7 +1,20 @@
+//
+//  LiveFeedTests.swift
+//  The Block
+//
+//  Tests for the simulated live feed and repository streams: snapshot, competing bids,
+//  per-lot and inventory updates, reconnect, broadcaster cleanup (LIVE-1, LIVE-2, DATA-3).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 import Testing
 @testable import The_Block
 
+/// Simulated server feed and the repository streams built on it: snapshot, competing bids,
+/// per-lot and inventory updates, reconnect, and subscriber cleanup.
 @MainActor
 struct LiveFeedTests {
 
@@ -14,6 +27,7 @@ struct LiveFeedTests {
                  currentBid: currentBid, bidCount: bidCount)
     }
 
+    /// Stub server plus a repository on it that has already loaded `vehicles`.
     private func makeStack(_ vehicles: [VehicleModel]) async -> (SimulatedAuctionDataSource, VehicleRepository) {
         let server = SimulatedAuctionDataSource.stub(result: .success(vehicles), clock: clock)
         let repository = VehicleRepository(dataSource: server, clock: clock)
@@ -173,6 +187,7 @@ struct LiveFeedTests {
 
 }
 
+/// Counts snapshot load attempts so the first one can fail and the retry succeed.
 @MainActor
 private final class AttemptCounter {
     var count = 0

@@ -1,3 +1,13 @@
+//
+//  AuctionClock.swift
+//  The Block
+//
+//  Injectable source of the current time and its system-clock implementation.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 
 /// Source of "now", injectable so tests can pin time.

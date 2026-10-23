@@ -1,3 +1,14 @@
+//
+//  BuyNowSheet.swift
+//  The Block
+//
+//  Buy Now confirmation sheet: price, fee estimate, binding notice, or the reason
+//  Buy Now is unavailable (spec BID-10, BID-11).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import SwiftUI
 
 /// Buy Now confirmation sheet (spec BID-10, BID-11, FEES-1, UX-5).
@@ -6,7 +17,9 @@ import SwiftUI
 /// no confirm button. On success it shows "Purchased by you" briefly, then calls `onFinish`.
 struct BuyNowSheet: View {
 
+    /// Bid / Buy Now state for the lot.
     let viewModel: BidViewModel
+    /// Closes the sheet: on Cancel, or shortly after a successful purchase.
     let onFinish: () -> Void
 
     var body: some View {
@@ -37,6 +50,7 @@ struct BuyNowSheet: View {
         }
     }
 
+    /// Success, the reason Buy Now is unavailable, or the confirmation (spec BID-11).
     @ViewBuilder
     private var content: some View {
         if viewModel.phase == .succeeded {
@@ -57,6 +71,7 @@ struct BuyNowSheet: View {
         }
     }
 
+    /// Price, title, fee estimate, ends-the-auction notice, any rejection, and the confirm button (spec BID-10).
     private var confirmation: some View {
         VStack(alignment: .leading, spacing: Spacing.large) {
             VStack(alignment: .leading, spacing: Spacing.xSmall) {

@@ -1,3 +1,14 @@
+//
+//  MyBidsView.swift
+//  The Block
+//
+//  "My bids" screen: lots you bid on or bought, grouped by position,
+//  plus its empty state and row layout.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import SwiftUI
 
 /// Every lot you bid on or bought, grouped by your position (spec MYBIDS-1 … MYBIDS-5).
@@ -7,6 +18,7 @@ import SwiftUI
 struct MyBidsView: View {
 
     let viewModel: MyBidsViewModel
+    /// Selected lot; the router turns a new value into the detail screen.
     @Binding var selection: VehicleModel.ID?
     /// Leaves "My bids" and returns to the inventory list (empty-state action).
     let onBrowseInventory: () -> Void
@@ -16,6 +28,7 @@ struct MyBidsView: View {
             .navigationTitle(Localizable.title)
     }
 
+    /// The empty state, or one section per position group with an animated regroup (spec MYBIDS-4).
     @ViewBuilder private var content: some View {
         if viewModel.isEmpty {
             emptyState
@@ -39,6 +52,7 @@ struct MyBidsView: View {
         }
     }
 
+    /// Empty state with a "Browse inventory" action back to the list (spec MYBIDS-5).
     private var emptyState: some View {
         ContentUnavailableView {
             Label(Localizable.emptyTitle, systemImage: "hand.raised")
@@ -58,6 +72,7 @@ struct MyBidsView: View {
 private struct MyBidsRow: View {
 
     let vehicle: VehicleModel
+    /// The group the row sits in; drives the position badge.
     let position: BidPosition
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -78,6 +93,7 @@ private struct MyBidsRow: View {
         .accessibilityLabel(accessibilityLabel)
     }
 
+    /// Title, lot, current bid, your bid or purchase price, status badge, and position badge.
     private var details: some View {
         VStack(alignment: .leading, spacing: Spacing.xSmall) {
             Text(vehicle.title)
@@ -115,6 +131,7 @@ private struct MyBidsRow: View {
         vehicle.yourPurchasePrice ?? vehicle.yourBid
     }
 
+    /// `You paid` for Buy Now lots, otherwise `Your bid`, matching `yourAmount`.
     private var yourAmountTitle: String {
         vehicle.yourPurchasePrice == nil ? Localizable.yourBid : Localizable.paid
     }
@@ -135,12 +152,14 @@ private struct MyBidsRow: View {
 
 }
 
+/// Layout constants for the "My bids" rows.
 private enum Constants {
     static let thumbnailWidth: CGFloat = 96
     static let thumbnailHeight: CGFloat = 72
     static let titleLineLimit = 2
 }
 
+/// User-facing strings for the "My bids" screen.
 private enum Localizable {
     static let title = "My bids"
     static let emptyTitle = "You haven't bid on anything yet"

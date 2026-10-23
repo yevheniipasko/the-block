@@ -1,3 +1,14 @@
+//
+//  VehicleDetailView.swift
+//  The Block
+//
+//  Vehicle detail screen: gallery, header with price and buyer marker, specs,
+//  condition, seller, and the pinned action bar (spec DETAIL-*).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import SwiftUI
 
 /// Vehicle detail: gallery, header, specs, condition, seller, and a pinned action bar (spec DETAIL-*).
@@ -5,10 +16,14 @@ import SwiftUI
 /// The bottom action bar calls `onPlaceBid` / `onBuyNow`; the router presents the sheets.
 struct VehicleDetailView: View {
 
+    /// Detail state for the lot being shown.
     let viewModel: VehicleDetailViewModel
+    /// Asks the router to present the bid sheet.
     let onPlaceBid: () -> Void
+    /// Asks the router to present the Buy Now sheet.
     let onBuyNow: () -> Void
 
+    /// Shared clock, so the buyer marker updates when the lot ends while on screen.
     @Environment(AuctionTicker.self) private var ticker
 
     var body: some View {
@@ -17,6 +32,7 @@ struct VehicleDetailView: View {
             .task { await viewModel.observeVehicle() }
     }
 
+    /// The scrolling detail with its pinned action bar, or a not-found state when the lot is missing.
     @ViewBuilder
     private var content: some View {
         if let vehicle = viewModel.vehicle {
@@ -74,6 +90,7 @@ struct VehicleDetailView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
+    /// The buyer's position label, if any (spec BID-6, BID-10, LIVE-3).
     @ViewBuilder private var buyerMarker: some View {
         switch viewModel.buyerMarker(at: ticker.now) {
         case .highBidder:
@@ -98,6 +115,7 @@ struct VehicleDetailView: View {
             .accessibilityIdentifier(identifier)
     }
 
+    /// "Current bid", "Starting at" or "Purchased for" caption.
     private var priceLabelText: some View {
         Text(viewModel.priceLabel)
             .font(.subheadline)
@@ -105,6 +123,7 @@ struct VehicleDetailView: View {
             .fixedSize(horizontal: true, vertical: false)
     }
 
+    /// The headline price; never wraps mid-number (spec UX-2).
     private var priceAmountText: some View {
         Text(viewModel.priceAmount)
             .font(.title.bold().monospacedDigit())

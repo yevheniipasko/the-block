@@ -1,3 +1,13 @@
+//
+//  VehicleDto.swift
+//  The Block
+//
+//  Decodable mirror of one `vehicles.json` entry and its mapping to `VehicleModel`.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 
 /// Mirrors one entry of `vehicles.json` exactly. Never leaves `Data/`.

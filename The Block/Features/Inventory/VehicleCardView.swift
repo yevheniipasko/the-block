@@ -1,3 +1,14 @@
+//
+//  VehicleCardView.swift
+//  The Block
+//
+//  Inventory row card: photo, title, price, bids, odometer, location,
+//  auction status, Buy Now, and your bid position.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import SwiftUI
 
 /// One inventory row: photo, title, price, bids, odometer, location, status, Buy Now, and
@@ -41,6 +52,7 @@ struct VehicleCardView: View {
             .clipShape(RoundedRectangle(cornerRadius: CornerRadius.small))
     }
 
+    /// Title, price line, odometer and location, status badge, Buy Now price, and your position.
     private var details: some View {
         VStack(alignment: .leading, spacing: Spacing.xSmall) {
             Text(vehicle.title)
@@ -119,14 +131,17 @@ struct VehicleCardView: View {
         }
     }
 
+    /// Current bid, or the starting bid while there are no bids.
     private var price: Int {
         vehicle.currentBid ?? vehicle.startingBid
     }
 
+    /// `Current bid` or `Starting at`, matching `price`.
     private var priceTitle: String {
         vehicle.currentBid == nil ? Localizable.startingAt : Localizable.currentBid
     }
 
+    /// Odometer and location, e.g. `47,731 km · Mississauga, Ontario`.
     private var odometerAndLocation: String {
         "\(Formatting.kilometres(vehicle.odometerKm)) · \(vehicle.city), \(vehicle.province)"
     }
@@ -153,6 +168,7 @@ struct VehicleCardView: View {
 
 }
 
+/// Layout constants for the inventory card.
 private enum Constants {
     static let thumbnailWidth: CGFloat = 112
     static let thumbnailHeight: CGFloat = 84
@@ -160,6 +176,7 @@ private enum Constants {
     static let titleLineLimit = 2
 }
 
+/// User-facing strings for the inventory card.
 private enum Localizable {
     static let currentBid = "Current bid"
     static let startingAt = "Starting at"

@@ -1,3 +1,14 @@
+//
+//  InventoryRouterView.swift
+//  The Block
+//
+//  Root navigation view: hosts inventory, detail, My bids, the bid / Buy Now
+//  sheets, and the outbid banner.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import SwiftUI
 
 /// Root navigation: split view on iPad, collapsing to a stack on iPhone (spec UX-1).
@@ -78,14 +89,17 @@ struct InventoryRouterView: View {
         }
     }
 
+    /// Selected vehicle, routed through `router.select(_:)` so the detail ViewModel is rebuilt.
     private var selection: Binding<VehicleModel.ID?> {
         Binding(get: { router.selectedVehicleID }, set: { router.select($0) })
     }
 
+    /// Whether My bids is pushed; a back navigation sets it to `false` and closes the screen.
     private var isShowingMyBids: Binding<Bool> {
         Binding(get: { router.isShowingMyBids }, set: { if !$0 { router.hideMyBids() } })
     }
 
+    /// Presented sheet; a swipe-down dismissal tells the router to clear it.
     private var presentedSheet: Binding<BiddingSheet?> {
         Binding(get: { router.presentedSheet }, set: { if $0 == nil { router.dismissSheet() } })
     }

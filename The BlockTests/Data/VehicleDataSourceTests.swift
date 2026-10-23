@@ -1,7 +1,19 @@
+//
+//  VehicleDataSourceTests.swift
+//  The Block
+//
+//  Tests for decoding and mapping vehicles.json: nullable fields, timezone-less dates,
+//  enum and image mapping, missing resource (DATA-1…DATA-3, DETAIL-1).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 import Testing
 @testable import The_Block
 
+/// Decoding the bundled dataset and mapping DTOs to models, including mapping errors.
 @MainActor
 struct VehicleDataSourceTests {
 
@@ -60,6 +72,7 @@ struct VehicleDataSourceTests {
         }
     }
 
+    /// One-vehicle JSON payload in the bundled file's shape, with a configurable `auction_start`.
     private static func json(auctionStart: String) -> Data {
         Data("""
         [{

@@ -1,3 +1,13 @@
+//
+//  AuctionSchedule.swift
+//  The Block
+//
+//  Shifts the dataset's auction start times onto real time around app launch.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 
 /// Maps the dataset's synthetic `auction_start` values onto real time (spec TIME-1).

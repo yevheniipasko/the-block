@@ -1,3 +1,14 @@
+//
+//  SimulatedAuctionDataSource.swift
+//  The Block
+//
+//  In-process fake auction server: live vehicle feed, bid / Buy Now endpoints,
+//  and a simulated market placing competing bids.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 import OSLog
 
@@ -25,8 +36,11 @@ final class SimulatedAuctionDataSource: VehicleDataSourceProtocol {
     private var generator: any RandomNumberGenerator
     private let logger = Logger(subsystem: "TheBlock", category: "SimulatedAuctionDataSource")
 
+    /// Authoritative lot state; `nil` until the first snapshot loads.
     private var vehicles: [VehicleModel]?
+    /// Open feed connections, keyed so each can be removed when it terminates.
     private var subscribers: [UUID: AsyncThrowingStream<VehicleFeedEvent, Error>.Continuation] = [:]
+    /// Running market loop; only alive while at least one subscriber listens.
     private var marketTask: Task<Void, Never>?
 
     /// - Parameters:
@@ -133,6 +147,9 @@ final class SimulatedAuctionDataSource: VehicleDataSourceProtocol {
         return snapshot
     }
 
+    /// Looks up the server's copy of a lot.
+    ///
+    /// - Throws: `BidRejection.vehicleNotFound` when the lot is unknown or the snapshot never loaded.
     private func currentVehicle(_ id: VehicleModel.ID) throws -> VehicleModel {
         guard let vehicle = vehicles?.first(where: { $0.id == id }) else {
             throw BidRejection.vehicleNotFound
@@ -149,6 +166,7 @@ final class SimulatedAuctionDataSource: VehicleDataSourceProtocol {
         }
     }
 
+    /// Drops a closed connection and stops the market once nobody listens.
     private func unsubscribe(_ id: UUID) {
         subscribers[id] = nil
         if subscribers.isEmpty {
@@ -157,6 +175,7 @@ final class SimulatedAuctionDataSource: VehicleDataSourceProtocol {
         }
     }
 
+    /// Starts the competing-bid loop on the first connection, if a market is configured (spec LIVE-2).
     private func startMarketIfNeeded() {
         guard let market, marketTask == nil else { return }
         marketTask = Task { [weak self] in
@@ -168,11 +187,13 @@ final class SimulatedAuctionDataSource: VehicleDataSourceProtocol {
         }
     }
 
+    /// Waits for the configured latency to imitate a network request.
     private func simulateRoundTrip() async {
         guard latency > .zero else { return }
         try? await Task.sleep(for: latency)
     }
 
+    /// Whether the market may bid on a lot: active, and its next minimum stays below any Buy Now price.
     private static func canTakeCompetingBid(_ vehicle: VehicleModel, now: Date) -> Bool {
         guard case .active = vehicle.status(at: now) else { return false }
         guard let buyNowPrice = vehicle.buyNowPrice else { return true }

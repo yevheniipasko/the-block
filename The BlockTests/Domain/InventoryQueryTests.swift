@@ -1,7 +1,19 @@
+//
+//  InventoryQueryTests.swift
+//  The Block
+//
+//  Tests for InventoryQuery search, filters, and sorting, and for cursor-based Paginator
+//  paging (LIST-2…LIST-4, LIST-7).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 import Testing
 @testable import The_Block
 
+/// Search, filters, and sort orders applied by `InventoryQuery`.
 @MainActor
 struct InventoryQueryTests {
 
@@ -63,6 +75,7 @@ struct InventoryQueryTests {
 
 }
 
+/// Cursor-based paging over a result list.
 @MainActor
 struct PaginatorTests {
 

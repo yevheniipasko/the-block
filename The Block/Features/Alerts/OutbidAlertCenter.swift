@@ -1,11 +1,26 @@
+//
+//  OutbidAlertCenter.swift
+//  The Block
+//
+//  App-wide outbid alert queue: watches every lot and raises a banner when
+//  the buyer goes from winning to outbid (spec ALERT-1 … ALERT-3).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 import Observation
 
 /// One "you've been outbid" notice shown in the banner (spec ALERT-1).
 struct OutbidAlert: Identifiable, Equatable, Sendable {
+    /// Fresh per alert, so SwiftUI treats each banner as a new view.
     let id = UUID()
+    /// Lot the buyer was outbid on; "Bid again" opens its bid sheet.
     let lotID: VehicleModel.ID
+    /// Vehicle title shown in the banner, e.g. "2021 Ford F-150".
     let title: String
+    /// The bid that passed the buyer's, in whole CAD dollars.
     let currentBid: Int
 }
 
@@ -19,12 +34,17 @@ final class OutbidAlertCenter {
     /// Lot whose bid sheet is open; its outbids raise no banner because the sheet shows its own notice.
     var suppressedLotID: VehicleModel.ID?
 
+    /// Alerts waiting for the banner, oldest first; at most one per lot (spec ALERT-2).
     @ObservationIgnored private var queue: [OutbidAlert] = []
+    /// Last known buyer position per lot, used to spot winning → outbid transitions.
     @ObservationIgnored private var positions: [VehicleModel.ID: BidPosition] = [:]
+    /// Pending auto-dismiss of the current banner; cancelled when it is dismissed early.
     @ObservationIgnored private var dismissTask: Task<Void, Never>?
     @ObservationIgnored private let repository: VehicleRepositoryProtocol
     @ObservationIgnored private let displayDuration: Duration
 
+    /// Creates an idle center; call `observe()` to start watching lots.
+    ///
     /// - Parameters:
     ///   - repository: Source of the lots and their live updates.
     ///   - displayDuration: How long each banner stays before it dismisses itself (spec ALERT-2).

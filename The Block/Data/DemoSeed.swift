@@ -1,3 +1,13 @@
+//
+//  DemoSeed.swift
+//  The Block
+//
+//  Seeds one leading and one outbid demo position into the launch snapshot.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 
 /// Gives the buyer two positions at launch so "My bids" and the outbid state are visible
@@ -30,6 +40,7 @@ enum DemoSeed {
         }
     }
 
+    /// Whether a lot can carry a seeded position: active, has bids, and still biddable below Buy Now.
     private static func isEligible(_ vehicle: VehicleModel, now: Date) -> Bool {
         guard case .active = vehicle.status(at: now), vehicle.bidCount > 0, vehicle.currentBid != nil else {
             return false

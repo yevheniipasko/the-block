@@ -1,3 +1,14 @@
+//
+//  AuctionStatus+Display.swift
+//  The Block
+//
+//  Display wording and colours for AuctionStatus, EndedOutcome, and
+//  FloorState, shared by list and detail screens.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import SwiftUI
 
 /// Buyer-facing wording and colours for auction states, shared by list and detail.
@@ -41,6 +52,7 @@ extension AuctionStatus {
 
 }
 
+/// Buyer-facing wording and colours for how an auction ended.
 extension EndedOutcome {
 
     /// OPENLANE-style result wording.
@@ -53,6 +65,7 @@ extension EndedOutcome {
         }
     }
 
+    /// Badge colour: accent when you bought it, orange while pending below floor, secondary otherwise.
     var tint: Color {
         switch self {
         case .purchasedByYou: .accentColor
@@ -63,6 +76,7 @@ extension EndedOutcome {
 
 }
 
+/// Buyer-facing wording for whether a lot's floor (reserve) has been met.
 extension FloorState {
 
     /// Buyer-facing floor wording; the floor amount itself is never shown.

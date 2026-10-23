@@ -1,7 +1,19 @@
+//
+//  VehicleDetailViewModelTests.swift
+//  The Block
+//
+//  Tests for VehicleDetailViewModel: action bar, live bid / Buy Now state, header, specs,
+//  condition, location (DETAIL-2…DETAIL-6, TIME-4, BID-6, BID-10, LIVE-1, LIVE-3).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 import Testing
 @testable import The_Block
 
+/// Detail ViewModel: action bar, live bid and Buy Now state, header, and spec / condition sections.
 @MainActor
 struct VehicleDetailViewModelTests {
 
@@ -9,6 +21,7 @@ struct VehicleDetailViewModelTests {
     private let launch = TestDates.reference
     private let datasetAnchor = Date(timeIntervalSince1970: 1_000_000)
 
+    /// Detail ViewModel for `vehicle` plus its loaded repository.
     private func makeViewModel(_ vehicle: VehicleModel) async -> (VehicleDetailViewModel, VehicleRepository) {
         let stack = await makeStack(vehicle)
         return (stack.viewModel, stack.repository)

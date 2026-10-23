@@ -56,6 +56,7 @@ Running log — see `.claude/rules/decisions-log.md`. One line per entry, newest
 - 2026-10-22 — Stretch (My bids, outbid banner, fee estimate; parallel agents) + integration + README: ~70 min
 - 2026-10-22 — App icon: 10 min
 - 2026-10-22 — Maestro flows recovered, verified, committed: 10 min
+- 2026-10-22 — Copyright headers + doc comments for all Swift files: 15 min
 
 ## AI usage
 
@@ -74,3 +75,4 @@ Running log — see `.claude/rules/decisions-log.md`. One line per entry, newest
 - 2026-10-22 — Claude Code looked at SwiftUI toast/banner libraries for reference, argued against native notifications, rewrote `OutbidBannerView`, and verified it from simulator screenshots taken during the outbid UI test.
 - 2026-10-22 — Claude Code reproduced the stale-detail report with XCUITest probes and screen recordings on a dedicated simulator (Maestro was routing to the wrong device), found bids already updated within ~1 s while Buy Now left the price block stale, and fixed it.
 - 2026-10-22 — Claude Code traced the clipped toolbar badge to the offset overlay inside the glass button, switched to the native toolbar badge, and verified it with a Maestro push/pop flow on a cloned simulator.
+- 2026-10-22 — Claude Code added a copyright/summary header to all 75 Swift files and filled missing `///` docs, using 4 parallel agents (one worktree each, split App/Data/Domain · Alerts/Bidding/Detail · Inventory/MyBids/Shared · tests); fixed two stale comments (`AuctionActionBar` TimelineView, `AttemptCounter`); verified diff is comments-only and all 164 tests pass.
