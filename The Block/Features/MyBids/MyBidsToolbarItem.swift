@@ -29,9 +29,9 @@ struct MyBidsToolbarItem: ToolbarContent {
                 Image(systemName: "hammer")
                     .accessibilityLabel(Localizable.title)
             }
+            .badge(outbidCount)
             .accessibilityIdentifier("list.myBidsButton")
             .accessibilityValue(Localizable.outbidValue(outbidCount))
-            .badge(outbidCount)
         }
     }
 
