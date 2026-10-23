@@ -39,6 +39,7 @@ Running log — see `.claude/rules/decisions-log.md`. One line per entry, newest
 - 2026-10-22 — Stretch: My bids (container-scoped ViewModel so the toolbar's outbid badge stays live while the screen is closed; regroups from the repository on every feed signal and on a 1 s tick for auction ends), outbid banner (queued, auto-dismiss 4 s; suppressed only while that lot's bid sheet is on screen and not on its success step — otherwise a fast outbid right after bidding would never be shown), fee estimate (shown even for an invalid amount so the buyer sees the cost while typing).
 - 2026-10-22 — Stream buffers are unbounded. Two agents independently found that the 64-value buffer dropped early lots from the ~200-lot snapshot burst (the seeded My bids lots vanished). Values are small structs, so unbounded is safe; regression test added.
 - 2026-10-22 — Live UI tests retry the review step: with the fast market a competing bid can land during review and correctly send the sheet back to editing (LIVE-3), which made one test fail ~1 in 15 runs. Verified with three consecutive full green runs.
+- 2026-10-22 - Inventory countdowns use one shared clock instead of one timer per visible row, and pause visual countdown updates while the list is moving. Live bid updates continue during scrolling. Pagination now prefetches five rows before each page boundary. Why: timer-driven layout work and late page loading caused visible scroll hitches.
 
 ## Time
 

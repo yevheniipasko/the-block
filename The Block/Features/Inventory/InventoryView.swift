@@ -9,6 +9,7 @@ struct InventoryView: View {
     @Binding var selection: VehicleModel.ID?
 
     @State private var isFilterSheetPresented = false
+    @State private var countdownPausedAt: Date?
 
     var body: some View {
         content
@@ -52,7 +53,11 @@ struct InventoryView: View {
         List(selection: $selection) {
             InventoryResultsHeader(viewModel: viewModel)
             ForEach(viewModel.vehicles) { vehicle in
-                VehicleCardView(vehicle: vehicle, now: viewModel.now)
+                VehicleCardView(
+                    vehicle: vehicle,
+                    now: viewModel.now,
+                    countdownPausedAt: countdownPausedAt
+                )
                     .tag(vehicle.id)
                     .accessibilityIdentifier("list.row.\(vehicle.lot)")
                     .onAppear { viewModel.loadNextPageIfNeeded(currentID: vehicle.id) }
@@ -61,6 +66,13 @@ struct InventoryView: View {
         }
         .listStyle(.plain)
         .refreshable { await viewModel.refresh() }
+        .onScrollPhaseChange { oldPhase, newPhase in
+            if oldPhase == .idle, newPhase != .idle {
+                countdownPausedAt = .now
+            } else if newPhase == .idle {
+                countdownPausedAt = nil
+            }
+        }
     }
 
     @ViewBuilder private var pageStatusRow: some View {

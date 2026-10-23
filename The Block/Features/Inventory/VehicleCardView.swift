@@ -10,6 +10,8 @@ struct VehicleCardView: View {
     let vehicle: VehicleModel
     /// Moment used for the VoiceOver status; the visible badge keeps its own live clock.
     let now: Date
+    /// When set, the countdown stays at this moment until scrolling ends.
+    var countdownPausedAt: Date?
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
@@ -48,7 +50,7 @@ struct VehicleCardView: View {
             Text(odometerAndLocation)
                 .font(.caption)
                 .foregroundStyle(.secondary)
-            AuctionStatusBadge(vehicle: vehicle)
+            AuctionStatusBadge(vehicle: vehicle, pausedAt: countdownPausedAt)
             if let buyNowPrice = vehicle.buyNowPrice {
                 Label(Localizable.buyNow(Formatting.currency(buyNowPrice)), systemImage: "bolt.fill")
                     .font(.caption.weight(.semibold))

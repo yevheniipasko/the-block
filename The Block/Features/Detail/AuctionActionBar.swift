@@ -10,15 +10,15 @@ struct AuctionActionBar: View {
     let onPlaceBid: () -> Void
     let onBuyNow: () -> Void
 
+    @Environment(AuctionTicker.self) private var ticker
+
     var body: some View {
-        TimelineView(.periodic(from: .now, by: 1)) { context in
-            if let state = viewModel.actionBar(at: context.date) {
-                content(for: state)
-                    .padding(.horizontal, Spacing.large)
-                    .padding(.vertical, Spacing.medium)
-                    .frame(maxWidth: .infinity)
-                    .background(.bar)
-            }
+        if let state = viewModel.actionBar(at: ticker.now) {
+            content(for: state)
+                .padding(.horizontal, Spacing.large)
+                .padding(.vertical, Spacing.medium)
+                .frame(maxWidth: .infinity)
+                .background(.bar)
         }
     }
 

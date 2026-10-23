@@ -161,9 +161,12 @@ final class InventoryViewModel {
         startLoading(after: nil)
     }
 
-    /// Loads the next page when `id` is the last loaded row (spec LIST-7).
+    /// Loads the next page when `id` is within the final few rows (spec LIST-7).
     func loadNextPageIfNeeded(currentID id: VehicleModel.ID) {
-        guard id == vehicles.last?.id, let nextCursor, pageStatus == .idle else { return }
+        guard let index = vehicles.firstIndex(where: { $0.id == id }),
+              index >= max(vehicles.count - Constants.prefetchDistance, 0),
+              let nextCursor,
+              pageStatus == .idle else { return }
         startLoading(after: nextCursor)
     }
 
@@ -311,5 +314,6 @@ private extension Set {
 
 private enum Constants {
     static let pageSize = 20
+    static let prefetchDistance = 5
     static let searchDebounce: Duration = .milliseconds(300)
 }

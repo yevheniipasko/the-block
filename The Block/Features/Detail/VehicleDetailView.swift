@@ -9,6 +9,8 @@ struct VehicleDetailView: View {
     let onPlaceBid: () -> Void
     let onBuyNow: () -> Void
 
+    @Environment(AuctionTicker.self) private var ticker
+
     var body: some View {
         // Live updates for as long as the screen is shown; `.task` cancels them on disappear (LIVE-1).
         content
@@ -72,21 +74,19 @@ struct VehicleDetailView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    private var buyerMarker: some View {
-        TimelineView(.periodic(from: .now, by: 1)) { context in
-            switch viewModel.buyerMarker(at: context.date) {
-            case .highBidder:
-                markerLabel(Localizable.highBidder, systemImage: "hand.thumbsup.fill", tint: .green,
-                            identifier: "detail.buyerMarker")
-            case .outbid:
-                markerLabel(Localizable.outbid, systemImage: "exclamationmark.triangle.fill", tint: .orange,
-                            identifier: "detail.outbidMarker")
-            case .purchased:
-                markerLabel(Localizable.purchased, systemImage: "checkmark.seal.fill", tint: .accentColor,
-                            identifier: "detail.buyerMarker")
-            case nil:
-                EmptyView()
-            }
+    @ViewBuilder private var buyerMarker: some View {
+        switch viewModel.buyerMarker(at: ticker.now) {
+        case .highBidder:
+            markerLabel(Localizable.highBidder, systemImage: "hand.thumbsup.fill", tint: .green,
+                        identifier: "detail.buyerMarker")
+        case .outbid:
+            markerLabel(Localizable.outbid, systemImage: "exclamationmark.triangle.fill", tint: .orange,
+                        identifier: "detail.outbidMarker")
+        case .purchased:
+            markerLabel(Localizable.purchased, systemImage: "checkmark.seal.fill", tint: .accentColor,
+                        identifier: "detail.buyerMarker")
+        case nil:
+            EmptyView()
         }
     }
 

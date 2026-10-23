@@ -84,8 +84,8 @@ struct InventoryViewModelTests {
         #expect(viewModel.loadedIDs.count == 45)
     }
 
-    @Test("LIST-7: only the last loaded row triggers the next page")
-    func nextPageOnlyFromLastRow() async throws {
+    @Test("LIST-7: a row far from the page boundary does not trigger the next page")
+    func nextPageNotTriggeredEarly() async throws {
         let repository = await makeRepository(fleet)
         let viewModel = await makeStartedViewModel(repository: repository)
 
@@ -93,6 +93,17 @@ struct InventoryViewModelTests {
         await settle(viewModel)
 
         #expect(viewModel.loadedIDs.count == 20)
+    }
+
+    @Test("LIST-7: nearing the page boundary prefetches the next page")
+    func nextPagePrefetchesNearBoundary() async {
+        let repository = await makeRepository(fleet)
+        let viewModel = await makeStartedViewModel(repository: repository)
+
+        viewModel.loadNextPageIfNeeded(currentID: viewModel.loadedIDs[15])
+        await settle(viewModel)
+
+        #expect(viewModel.loadedIDs.count == 40)
     }
 
     @Test("LIST-4 / LIST-7: changing the query restarts from page one")
