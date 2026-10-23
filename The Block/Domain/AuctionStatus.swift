@@ -39,10 +39,12 @@ extension VehicleModel {
 
     /// Whether the current bid meets the floor (`reservePrice`); `.noFloor` when the lot has none.
     ///
-    /// A lot with a floor but no bids is `.notMet`. Shown in the header (spec DETAIL-2) and
-    /// recomputed after the buyer bids (spec BID-6).
+    /// A lot with a floor but no bids is `.notMet`; a Buy Now purchase meets it, since the lot is
+    /// sold. Shown in the header (spec DETAIL-2) and recomputed after the buyer bids or buys
+    /// (spec BID-6, BID-10).
     var floorState: FloorState {
         guard let reservePrice else { return .noFloor }
+        guard !isPurchasedByYou else { return .met }
         guard let currentBid, currentBid >= reservePrice else { return .notMet }
         return .met
     }

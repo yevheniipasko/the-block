@@ -41,6 +41,7 @@ Running log — see `.claude/rules/decisions-log.md`. One line per entry, newest
 - 2026-10-22 — Live UI tests retry the review step: with the fast market a competing bid can land during review and correctly send the sheet back to editing (LIVE-3), which made one test fail ~1 in 15 runs. Verified with three consecutive full green runs.
 - 2026-10-22 - Inventory countdowns use one shared clock instead of one timer per visible row, and pause visual countdown updates while the list is moving. Live bid updates continue during scrolling. Pagination now prefetches five rows before each page boundary. Why: timer-driven layout work and late page loading caused visible scroll hitches.
 - 2026-10-22 — Outbid banner redesigned as a compact Liquid Glass card (icon, "Outbid", one-line title, "Now $X", capsule "Bid again"); the ✕ button was dropped because the banner auto-dismisses and still dismisses on swipe or via the VoiceOver action. Why: the old card was heavy and covered the photo. Alt: native local notifications (rejected: permission prompt, only useful when the app is backgrounded, which the simulated market isn't; flaky SpringBoard UI tests).
+- 2026-10-22 — After Buy Now the detail header shows "Purchased for $X" and the floor counts as met (DETAIL-2 updated). Why: Buy Now only set `yourPurchasePrice`, so the header kept "Starting at … · Floor not met" and looked stale. Alt: have the data source also set `currentBid` to the Buy Now price (rejected: a purchase isn't a bid and would inflate bid counts and min-bid math).
 
 ## Time
 
@@ -70,3 +71,4 @@ Running log — see `.claude/rules/decisions-log.md`. One line per entry, newest
 - 2026-10-22 — Claude Code wrote the icon generator script and tuned the composition after previewing the render.
 - 2026-10-22 — Claude Code found the Maestro flows it had written in an earlier session's scratchpad, added `-market` launch args, made the high-bidder check optional after the fast market outbid before it ran, and verified both flows pass.
 - 2026-10-22 — Claude Code looked at SwiftUI toast/banner libraries for reference, argued against native notifications, rewrote `OutbidBannerView`, and verified it from simulator screenshots taken during the outbid UI test.
+- 2026-10-22 — Claude Code reproduced the stale-detail report with XCUITest probes and screen recordings on a dedicated simulator (Maestro was routing to the wrong device), found bids already updated within ~1 s while Buy Now left the price block stale, and fixed it.
