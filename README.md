@@ -66,6 +66,7 @@ The Block/
 - **Floor price** = `reserve_price`; only "met / not met / no floor" is shown. **Buy Now** only while live; bids must stay below it.
 - **One buyer, no accounts.** Bids and purchases are in memory. No checkout, payments, seller tools, or transport.
 - **Simulated pieces are labelled as such:** the market, fees, latency, and the two seeded "My bids" positions.
+- **Platform: native iOS, no desktop version.** The brief allows "a web or mobile application" on "the platform you choose"; the Minimum Bar's "desktop and mobile" reads as the responsive-web case, so I took it as "works on small and large screens": iPhone uses a navigation stack, iPad a split view. Xcode also lists a "My Mac (Designed for iPad)" run destination (on by default for iOS apps), which would run the iPad layout on an Apple Silicon Mac; I haven't tested or tuned it, and it isn't meant as a desktop app.
 
 ## Notable Decisions
 
@@ -81,13 +82,19 @@ The Block/
 
 - **Unit (Swift Testing, `The BlockTests`):** domain rules (step tiers at every boundary, minimum bid, validation, Buy Now eligibility, auction timing and outcomes, fees), DTO mapping and decoding the real JSON, the simulated server and market, repository streams (snapshot, updates, reconnect), cursor paging, and every ViewModel (inventory paging/filters/live rows, detail, bidding including live minimum and outbid, My bids grouping, outbid alerts).
 - **UI (XCUITest, `The BlockUITests`):** 7 flows: browse & search, open detail, place a valid bid, reject a bid below the minimum, get outbid live, open My bids and a lot from it, outbid banner → "Bid again".
-- **Totals:** 162 tests (155 unit + 7 UI; 192 cases counting parameterized arguments), all passing. No compiler warnings; SwiftLint clean.
+- **Totals:** 164 tests (157 unit + 7 UI), all passing. No compiler warnings; SwiftLint clean.
 - **Manual / visual:** iPhone and iPad simulators, dark mode, largest accessibility text size (fixed a price line that wrapped mid-number in the narrow iPad sidebar).
 - Tests run with a per-test time limit so a stuck async test fails fast instead of hanging the suite.
 
 ## Time Spent
 
-Roughly 5-6 hours of active work across one long session (setup and spec ~45 min, data/domain ~45 min, app shell + pagination ~40 min, three screens ~45 min, live streams ~75 min, UI tests and visual checks ~35 min, stretch features + README ~1 h). That's over the suggested 3-4 h. The live-data rework (the data should be able to change at any time) and the stretch features were deliberate additions on top of a complete core. The detailed log is in `docs/DECISIONS.md`.
+About **7 hours** in one session (commits run 15:33–22:33), of which the core took about **3 hours**:
+
+- **Core, ~3 h (15:33–18:39):** setup, spec, data/domain, app shell and pagination, the three screens, live streams, and the XCUITest smoke suite. At this point every core requirement was done and tested.
+- **Stretch, ~1 h 45 (18:39–20:22):** outbid alerts, My bids, the total-cost estimate, app icon, README. Chosen because they make bidding clearer and more trustworthy.
+- **Polish, ~2 h (20:22–22:33):** scroll performance, a design pass (one attempt reverted), the outbid banner restyle, two bug fixes (stale price after Buy Now, clipped toolbar badge), an accessibility pass, and doc comments.
+
+That's past the suggested 3-4 h, on purpose: the core was complete inside the timebox, and I spent the rest on depth rather than more features. If I'd had to stop at 4 h, I'd have shipped the core plus the outbid banner. The per-phase log is in `docs/DECISIONS.md`.
 
 ## How I Used AI
 
