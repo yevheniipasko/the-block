@@ -1,3 +1,14 @@
+//
+//  VehicleDetailViewModel.swift
+//  The Block
+//
+//  Detail screen state and display shaping: live lot copy, action bar state,
+//  buyer marker, price text and spec rows (spec DETAIL-*, BID-6).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 import Observation
 
@@ -11,15 +22,21 @@ enum DetailActionBarState: Hashable, Sendable {
 
 /// The buyer's own position on a lot, shown in the header (spec BID-6, BID-10).
 enum BuyerMarker: Hashable, Sendable {
+    /// The buyer holds the current high bid.
     case highBidder
+    /// The buyer bid but someone else now leads; shown on live lots only.
     case outbid
+    /// The lot ended as "Purchased by you".
     case purchased
 }
 
 /// One label/value pair in the specs grid (spec DETAIL-3).
 struct SpecRow: Identifiable, Hashable, Sendable {
+    /// Caption above the value, e.g. `Engine`; also the row's identity.
     let label: String
+    /// Display value, e.g. `Automatic`.
     let value: String
+    /// SF Symbol shown beside the cell.
     let systemImage: String
     var id: String { label }
 }
@@ -148,6 +165,7 @@ final class VehicleDetailViewModel {
         return vehicle.titleStatus != .clean
     }
 
+    /// Title status for display, e.g. `Rebuilt` (spec DETAIL-4).
     var titleStatusText: String { vehicle?.titleStatus.rawValue.capitalized ?? "" }
 
     /// Seller location as `City, Province` (spec DETAIL-5).
@@ -159,6 +177,7 @@ final class VehicleDetailViewModel {
 }
 
 private extension Transmission {
+    /// Readable transmission name, e.g. `CVT`, `Single-speed`.
     var displayName: String {
         switch self {
         case .automatic: "Automatic"
@@ -170,6 +189,7 @@ private extension Transmission {
 }
 
 private extension BodyStyle {
+    /// Body style for display: `SUV` in capitals, the rest capitalised.
     var displayName: String {
         switch self {
         case .suv: "SUV"

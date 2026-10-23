@@ -1,3 +1,14 @@
+//
+//  MyBidsUITests.swift
+//  The Block
+//
+//  XCUITest journey for My bids with the market off: open it from the toolbar, see the
+//  seeded groups, open a lot (MYBIDS-1…MYBIDS-3, MYBIDS-6, MYBIDS-7).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import XCTest
 
 /// "My bids" journey on the real app with the market off, so the two demo positions seeded at
@@ -33,12 +44,14 @@ final class MyBidsUITests: XCTestCase {
 
     // MARK: - Helpers
 
+    /// First element of any type with `identifier`.
     private func element(_ app: XCUIApplication, _ identifier: String) -> XCUIElement {
         app.descendants(matching: .any).matching(identifier: identifier).firstMatch
     }
 
 }
 
+/// Timeouts and expected values for the My bids journey.
 private enum Constants {
     static let loadTimeout: TimeInterval = 20
     static let stepTimeout: TimeInterval = 10

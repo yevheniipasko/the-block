@@ -1,14 +1,26 @@
+//
+//  InventoryPage.swift
+//  The Block
+//
+//  Cursor-based paging types and the paginator that cuts query results into pages.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 
 /// Opaque position in a query's results: "continue after this vehicle" (keyset pagination).
 ///
 /// Callers only pass back what a page returned; they never build one.
 struct PageCursor: Hashable, Sendable {
+    /// Last vehicle of the previous page.
     let afterID: VehicleModel.ID
 }
 
 /// One page of inventory results (spec LIST-7).
 struct InventoryPage: Sendable {
+    /// Vehicles on this page, in query order.
     let vehicles: [VehicleModel]
     /// Cursor for the next page, `nil` when this was the last one.
     let nextCursor: PageCursor?
@@ -16,6 +28,7 @@ struct InventoryPage: Sendable {
     let totalCount: Int
 }
 
+/// Why a page request could not be served.
 enum PagingError: Error, Equatable {
     /// The cursor's vehicle no longer matches the query (e.g. its auction ended); restart from page one.
     case staleCursor

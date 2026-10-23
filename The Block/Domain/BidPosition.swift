@@ -1,3 +1,14 @@
+//
+//  BidPosition.swift
+//  The Block
+//
+//  The buyer's position on a lot (winning, outbid, won, bought, lost) and how
+//  it is derived from the vehicle's state.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 
 /// The buyer's standing on a lot they bid on or bought (spec MYBIDS-2, ALERT-1).

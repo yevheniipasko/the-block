@@ -43,10 +43,10 @@ Running log — see `.claude/rules/decisions-log.md`. One line per entry, newest
 - 2026-10-22 — Outbid banner redesigned as a compact Liquid Glass card (icon, "Outbid", one-line title, "Now $X", capsule "Bid again"); the ✕ button was dropped because the banner auto-dismisses and still dismisses on swipe or via the VoiceOver action. Why: the old card was heavy and covered the photo. Alt: native local notifications (rejected: permission prompt, only useful when the app is backgrounded, which the simulated market isn't; flaky SpringBoard UI tests).
 - 2026-10-22 — After Buy Now the detail header shows "Purchased for $X" and the floor counts as met (DETAIL-2 updated). Why: Buy Now only set `yourPurchasePrice`, so the header kept "Starting at … · Floor not met" and looked stale. Alt: have the data source also set `currentBid` to the Buy Now price (rejected: a purchase isn't a bid and would inflate bid counts and min-bid math).
 - 2026-10-22 — My bids outbid badge uses the system toolbar `.badge(_:)` instead of an offset overlay. Why: the Liquid Glass toolbar button clipped the overlay after navigating back. Alt: padding the label to fit the overlay (cut: still fights the glass shape).
+- 2026-10-22 — Toolbar `.badge()` is applied before the accessibility modifiers. Why: placed last it overrode the VoiceOver value with the bare count ("1" instead of "Outbid on 1"), failing MyBidsUITests. Alt: change the test to expect "1" (rejected, worse for VoiceOver).
 
 - 2026-10-22 — Accessibility pass (UX-2, UX-3): ran Xcode's `performAccessibilityAudit` once as a diagnostic, fixed what it found, then dropped the audit test. Fixes: status badge text is primary on a tinted pill with a coloured dot (green/orange caption text failed contrast, and colour is no longer the only cue); spec-row and outbid-banner icons scale with Dynamic Type (`@ScaledMetric`), they overlapped labels at accessibility sizes. Accepted: "nearly passed" contrast on Apple's semantic `.secondary` text, system Cancel button, and contrast flags on content scrolled under glass bars. Why no committed audit test: it needed three filters to avoid false positives and its failing element changed run to run with the live countdown. Alt: keep it as a gate (rejected, flaky and hard to explain). Verification is `.maestro/accessibility.yaml` screenshots in dark mode at accessibility XXXL and light at default size.
 - 2026-10-22 — `OutbidAlertUITests` review retries raised from 3 to 5: it failed once in a full-suite run (fast market repriced the lot on every review under load), passed 3/3 alone.
-- 2026-10-22 — My bids toolbar button: `.accessibilityValue` moved after `.badge`. The native badge (from `fix/toolbar-badge`) replaced the VoiceOver value "Outbid on 1" with a bare "1"; caught by `MyBidsUITests` after merging main.
 
 ## Time
 
@@ -60,6 +60,7 @@ Running log — see `.claude/rules/decisions-log.md`. One line per entry, newest
 - 2026-10-22 — Stretch (My bids, outbid banner, fee estimate; parallel agents) + integration + README: ~70 min
 - 2026-10-22 — App icon: 10 min
 - 2026-10-22 — Maestro flows recovered, verified, committed: 10 min
+- 2026-10-22 — Copyright headers + doc comments for all Swift files: 15 min
 - 2026-10-22 — Accessibility pass (audit, fixes, Maestro visual check): ~45 min
 
 ## AI usage
@@ -79,4 +80,6 @@ Running log — see `.claude/rules/decisions-log.md`. One line per entry, newest
 - 2026-10-22 — Claude Code looked at SwiftUI toast/banner libraries for reference, argued against native notifications, rewrote `OutbidBannerView`, and verified it from simulator screenshots taken during the outbid UI test.
 - 2026-10-22 — Claude Code reproduced the stale-detail report with XCUITest probes and screen recordings on a dedicated simulator (Maestro was routing to the wrong device), found bids already updated within ~1 s while Buy Now left the price block stale, and fixed it.
 - 2026-10-22 — Claude Code traced the clipped toolbar badge to the offset overlay inside the glass button, switched to the native toolbar badge, and verified it with a Maestro push/pop flow on a cloned simulator.
+- 2026-10-22 — Claude Code added a copyright/summary header to all 75 Swift files and filled missing `///` docs, using 4 parallel agents (one worktree each, split App/Data/Domain · Alerts/Bidding/Detail · Inventory/MyBids/Shared · tests); fixed two stale comments (`AuctionActionBar` TimelineView, `AttemptCounter`); verified diff is comments-only and all 164 tests pass.
+- 2026-10-22 — Claude Code caught the toolbar-badge a11y regression in the post-merge full test run, fixed it by reordering modifiers, and verified with the full suite (164/164) and a simulator screenshot.
 - 2026-10-22 — Claude Code ran the Xcode accessibility audit, separated real issues from false positives (glass-bar occlusion, system controls), fixed badge contrast and icon scaling, and checked the result with Maestro screenshots on a cloned simulator. I asked to drop the committed XCUITest audit in favour of Maestro; Claude's first version of that test needed three filters and was flaky.

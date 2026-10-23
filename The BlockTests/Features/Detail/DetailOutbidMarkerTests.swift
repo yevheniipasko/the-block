@@ -1,7 +1,18 @@
+//
+//  DetailOutbidMarkerTests.swift
+//  The Block
+//
+//  Tests that the detail screen's outbid marker hides once the lot has ended (LIVE-3).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 import Testing
 @testable import The_Block
 
+/// Detail buyer marker for a lot the buyer was outbid on after it ended.
 @MainActor
 struct DetailOutbidMarkerTests {
 

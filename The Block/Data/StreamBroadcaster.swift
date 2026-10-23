@@ -1,3 +1,13 @@
+//
+//  StreamBroadcaster.swift
+//  The Block
+//
+//  Generic helper that fans values out to any number of `AsyncStream` subscribers.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 
 /// Fans values out to any number of `AsyncStream` subscribers (spec LIVE-1).

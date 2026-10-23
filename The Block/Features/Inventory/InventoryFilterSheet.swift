@@ -1,3 +1,14 @@
+//
+//  InventoryFilterSheet.swift
+//  The Block
+//
+//  Filter sheet for the inventory list: status, body style, fuel type,
+//  province, and Buy Now toggles bound to InventoryViewModel.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import SwiftUI
 
 /// Filter sheet: status, body style, fuel type, province, and Buy Now (spec LIST-3).
@@ -5,6 +16,7 @@ import SwiftUI
 /// Changes apply immediately, so the list behind the sheet updates as you toggle.
 struct InventoryFilterSheet: View {
 
+    /// The list's own ViewModel, so each toggle changes its query directly.
     let viewModel: InventoryViewModel
 
     @Environment(\.dismiss) private var dismiss
@@ -67,6 +79,7 @@ struct InventoryFilterSheet: View {
 
 }
 
+/// User-facing strings for the filter sheet.
 private enum Localizable {
     static let title = "Filters"
     static let status = "Auction status"

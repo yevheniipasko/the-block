@@ -1,7 +1,19 @@
+//
+//  BiddingRulesTests.swift
+//  The Block
+//
+//  Tests for BiddingRules: adaptive step, minimum next bid, bid validation, and Buy Now
+//  availability (BID-1, BID-3, BID-4, BID-7, BID-9, BID-11).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 import Testing
 @testable import The_Block
 
+/// Pure bidding rules: adaptive step, minimum next bid, validation, and Buy Now availability.
 @MainActor
 struct BiddingRulesTests {
 
@@ -79,7 +91,9 @@ struct BiddingRulesTests {
 
 }
 
+/// Test convenience for asserting on a result's error.
 extension Result {
+    /// The error of a `.failure`, or `nil` on success.
     var failure: Failure? {
         if case .failure(let error) = self { return error }
         return nil

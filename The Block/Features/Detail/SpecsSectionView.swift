@@ -1,13 +1,28 @@
+//
+//  SpecsSectionView.swift
+//  The Block
+//
+//  Detail screen specs card: adaptive grid of vehicle specs plus a copyable VIN
+//  (spec DETAIL-3).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import SwiftUI
 import UIKit
 
 /// Specs grid plus a copyable VIN (spec DETAIL-3).
 struct SpecsSectionView: View {
 
+    /// Spec cells in display order.
     let rows: [SpecRow]
+    /// VIN, shown in monospace with a copy button.
     let vin: String
 
+    /// Whether the copy button currently shows its "Copied" state.
     @State private var didCopyVIN = false
+    /// Minimum grid column width, scaled with Dynamic Type so cells reflow into fewer columns.
     @ScaledMetric(relativeTo: .body) private var columnMinWidth = Constants.columnMinWidth
     @ScaledMetric(relativeTo: .title3) private var iconWidth = Constants.iconWidth
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -48,6 +63,7 @@ struct SpecsSectionView: View {
         .accessibilityElement(children: .combine)
     }
 
+    /// VIN and copy button side by side, or stacked when they don't fit.
     private var vinRow: some View {
         ViewThatFits(in: .horizontal) {
             HStack(alignment: .center) {
@@ -62,6 +78,7 @@ struct SpecsSectionView: View {
         }
     }
 
+    /// VIN caption and selectable value.
     private var vinText: some View {
         HStack(alignment: .top, spacing: Spacing.small) {
             Image(systemName: "number")
@@ -81,6 +98,7 @@ struct SpecsSectionView: View {
         .accessibilityElement(children: .combine)
     }
 
+    /// Copy / Copied button with a success haptic.
     private var copyButton: some View {
         Button(action: copyVIN) {
             Label(

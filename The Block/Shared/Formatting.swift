@@ -1,3 +1,14 @@
+//
+//  Formatting.swift
+//  The Block
+//
+//  Shared display formatters: whole-dollar CAD currency, kilometres,
+//  and compact countdowns.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 
 /// Display formatting shared by every screen. Money is whole CAD, distances in km.

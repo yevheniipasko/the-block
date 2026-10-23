@@ -1,3 +1,14 @@
+//
+//  InventoryViewModelTests.swift
+//  The Block
+//
+//  Tests for InventoryViewModel paging, query restarts, page failures and retry, filter chips,
+//  and search debounce (LIST-2…LIST-7, BID-6, UX-5).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 import Testing
 @testable import The_Block
@@ -7,8 +18,10 @@ import Testing
 private final class FlakyPageRepository: VehicleRepositoryProtocol {
 
     let base: VehicleRepository
+    /// When `true`, `fetchPage` throws instead of reaching the base repository.
     var failPages = false
 
+    /// Wraps `base`, forwarding everything to it.
     init(base: VehicleRepository) {
         self.base = base
     }
@@ -27,6 +40,7 @@ private final class FlakyPageRepository: VehicleRepositoryProtocol {
 
     func inventoryUpdates() -> AsyncStream<VehicleModel> { base.inventoryUpdates() }
 
+    /// Throws `StubError` while `failPages` is set; otherwise forwards to the base repository.
     func fetchPage(_ query: InventoryQuery, after cursor: PageCursor?, limit: Int) async throws -> InventoryPage {
         if failPages { throw StubError() }
         return try await base.fetchPage(query, after: cursor, limit: limit)
@@ -42,16 +56,19 @@ private final class FlakyPageRepository: VehicleRepositoryProtocol {
 
 }
 
+/// Inventory ViewModel paging, query restarts, page failures, filter chips, and search.
 @MainActor
 struct InventoryViewModelTests {
 
     private let fleet = inventoryFleet
     private let observers = InventoryObservers()
 
+    /// Loaded repository on a stub server with a fixed clock.
     private func makeRepository(_ vehicles: [VehicleModel]) async -> VehicleRepository {
         await makeInventoryStack(vehicles, clock: FixedClock(now: TestDates.reference)).repository
     }
 
+    /// Subscribed ViewModel with page one loaded, sorted by price.
     private func makeStartedViewModel(repository: VehicleRepositoryProtocol) async -> InventoryViewModel {
         await makeStartedInventory(repository: repository, observers: observers)
     }

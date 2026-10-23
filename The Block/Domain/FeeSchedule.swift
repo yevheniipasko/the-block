@@ -1,11 +1,26 @@
+//
+//  FeeSchedule.swift
+//  The Block
+//
+//  Simulated buyer-fee tiers and the total-cost estimate shown in the bid and
+//  Buy Now sheets.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 
 /// What the buyer would pay on top of the hammer price (spec FEES-1).
 struct FeeEstimate: Hashable, Sendable {
+    /// The bid or Buy Now price the estimate is for.
     let amount: Int
+    /// Tiered buyer fee for `amount`.
     let buyerFee: Int
+    /// Flat documentation fee.
     let documentationFee: Int
 
+    /// Amount plus all fees, before taxes and transport (spec FEES-2).
     var total: Int { amount + buyerFee + documentationFee }
 }
 

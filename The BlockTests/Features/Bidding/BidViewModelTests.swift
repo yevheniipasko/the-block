@@ -1,3 +1,14 @@
+//
+//  BidViewModelTests.swift
+//  The Block
+//
+//  Tests for BidViewModel entry, validation, review / confirm, and rejections (BID-1…BID-5,
+//  BID-7, BID-8, UX-5); also provides MutableClock and BiddingTestSupport.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 import Testing
 @testable import The_Block
@@ -6,6 +17,7 @@ import Testing
 @MainActor
 final class MutableClock: AuctionClockProtocol {
     var now: Date
+    /// Starts the clock at `now`.
     init(now: Date) { self.now = now }
 }
 
@@ -13,6 +25,7 @@ final class MutableClock: AuctionClockProtocol {
 @MainActor
 enum BiddingTestSupport {
 
+    /// Stub-server repository that has already loaded `vehicles` on `clock`.
     static func makeRepository(
         _ vehicles: [VehicleModel],
         clock: AuctionClockProtocol = FixedClock(now: TestDates.reference),
@@ -39,9 +52,11 @@ enum BiddingTestSupport {
 
 }
 
+/// Bid sheet ViewModel: pre-fill, quick-add, validation, review / confirm, and rejections.
 @MainActor
 struct BidViewModelTests {
 
+    /// Bid ViewModel for `vehicle` on a loaded repository, which is returned for assertions.
     private func makeViewModel(
         _ vehicle: VehicleModel,
         actionLatency: Duration = .zero

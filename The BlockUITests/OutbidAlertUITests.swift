@@ -1,3 +1,14 @@
+//
+//  OutbidAlertUITests.swift
+//  The Block
+//
+//  XCUITest journey for the outbid banner with a fast market: bid, get outbid, tap
+//  Bid again (ALERT-1, ALERT-3).
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import XCTest
 
 /// Outbid banner on the real app with a fast market (spec ALERT-1, ALERT-3).
@@ -25,6 +36,7 @@ final class OutbidAlertUITests: XCTestCase {
 
     // MARK: - Helpers
 
+    /// Launches the app with `-market <market>`, stopping the test at the first failure.
     private func launch(market: String) -> XCUIApplication {
         continueAfterFailure = false
         let app = XCUIApplication()
@@ -33,10 +45,12 @@ final class OutbidAlertUITests: XCTestCase {
         return app
     }
 
+    /// First element of any type with `identifier`.
     private func element(_ app: XCUIApplication, _ identifier: String) -> XCUIElement {
         app.descendants(matching: .any).matching(identifier: identifier).firstMatch
     }
 
+    /// Searches for the test lot and opens its detail screen.
     private func openLot(_ app: XCUIApplication) {
         let field = app.searchFields.firstMatch
         XCTAssertTrue(field.waitForExistence(timeout: Constants.loadTimeout))
@@ -62,6 +76,7 @@ final class OutbidAlertUITests: XCTestCase {
         XCTFail("Could not reach the confirm step")
     }
 
+    /// Waits for the element with `identifier`, then taps it.
     private func tapWhenReady(_ app: XCUIApplication, _ identifier: String) {
         let target = element(app, identifier)
         XCTAssertTrue(target.waitForExistence(timeout: Constants.stepTimeout), "\(identifier) not found")
@@ -70,6 +85,7 @@ final class OutbidAlertUITests: XCTestCase {
 
 }
 
+/// Test lot and timeouts for the outbid alert journey.
 private enum Constants {
     static let lot = "D-0010"
     static let loadTimeout: TimeInterval = 20

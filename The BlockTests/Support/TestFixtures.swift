@@ -1,3 +1,14 @@
+//
+//  TestFixtures.swift
+//  The Block
+//
+//  Shared test fixtures: fixed clock, stub data source and repository, seeded RNG,
+//  reference dates, and the VehicleModel fixture.
+//
+//  Created by Yevhenii Pasko on 2026-10-22.
+//  Copyright © 2026 Yevhenii Pasko. All rights reserved.
+//
+
 import Foundation
 @testable import The_Block
 
@@ -44,10 +55,12 @@ extension VehicleRepository {
 struct SeededGenerator: RandomNumberGenerator {
     private var state: UInt64
 
+    /// Starts the sequence from `seed`; the same seed always yields the same values.
     init(seed: UInt64) {
         state = seed
     }
 
+    /// Next value of the SplitMix64 sequence.
     mutating func next() -> UInt64 {
         state &+= 0x9E37_79B9_7F4A_7C15
         var value = state
@@ -57,18 +70,22 @@ struct SeededGenerator: RandomNumberGenerator {
     }
 }
 
+/// Placeholder error for stubs that need to fail.
 struct StubError: Error {}
 
+/// Fixed dates and time helpers shared by the tests.
 enum TestDates {
     /// 2026-04-03 12:00:00 UTC — an arbitrary, fixed reference point.
     static let reference = Date(timeIntervalSince1970: 1_775_217_600)
 
+    /// `value` hours as a `TimeInterval`.
     static func hours(_ value: Double) -> TimeInterval { value * 60 * 60 }
 }
 
 @MainActor
 extension VehicleModel {
 
+    /// Valid 2023 Ford Bronco lot (A-0043, Ontario) with the auction and bid fields overridable.
     static func fixture(
         id: UUID = UUID(),
         auctionStart: Date = TestDates.reference,
