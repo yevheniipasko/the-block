@@ -9,6 +9,7 @@ struct SpecsSectionView: View {
 
     @State private var didCopyVIN = false
     @ScaledMetric(relativeTo: .body) private var columnMinWidth = Constants.columnMinWidth
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         DetailSectionCard(title: Localizable.title) {
@@ -18,7 +19,7 @@ struct SpecsSectionView: View {
                 spacing: Spacing.medium
             ) {
                 ForEach(rows) { row in
-                    specCell(label: row.label, value: row.value)
+                    specCell(row)
                 }
             }
             Divider()
@@ -26,14 +27,21 @@ struct SpecsSectionView: View {
         }
     }
 
-    /// One label-over-value cell in the specs grid.
-    private func specCell(label: String, value: String) -> some View {
-        VStack(alignment: .leading, spacing: Spacing.xxSmall) {
-            Text(label)
-                .font(.caption)
+    /// One icon plus label/value cell in the specs grid.
+    private func specCell(_ row: SpecRow) -> some View {
+        HStack(alignment: .top, spacing: Spacing.small) {
+            Image(systemName: row.systemImage)
+                .font(.title3)
                 .foregroundStyle(.secondary)
-            Text(value)
-                .font(.subheadline)
+                .frame(width: Constants.iconWidth)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: Spacing.xxSmall) {
+                Text(row.label)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text(row.value)
+                    .font(.subheadline)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
@@ -41,7 +49,7 @@ struct SpecsSectionView: View {
 
     private var vinRow: some View {
         ViewThatFits(in: .horizontal) {
-            HStack(alignment: .firstTextBaseline) {
+            HStack(alignment: .center) {
                 vinText
                 Spacer(minLength: Spacing.small)
                 copyButton
@@ -54,13 +62,20 @@ struct SpecsSectionView: View {
     }
 
     private var vinText: some View {
-        VStack(alignment: .leading, spacing: Spacing.xxSmall) {
-            Text(Localizable.vin)
-                .font(.caption)
+        HStack(alignment: .top, spacing: Spacing.small) {
+            Image(systemName: "number")
+                .font(.title3)
                 .foregroundStyle(.secondary)
-            Text(vin)
-                .font(.subheadline.monospaced())
-                .textSelection(.enabled)
+                .frame(width: Constants.iconWidth)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: Spacing.xxSmall) {
+                Text(Localizable.vin)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text(vin)
+                    .font(.subheadline.monospaced())
+                    .textSelection(.enabled)
+            }
         }
         .accessibilityElement(children: .combine)
     }
@@ -82,10 +97,10 @@ struct SpecsSectionView: View {
     /// Puts the VIN on the pasteboard and shows "Copied" briefly.
     private func copyVIN() {
         UIPasteboard.general.string = vin
-        withAnimation { didCopyVIN = true }
+        withAnimation(reduceMotion ? nil : .default) { didCopyVIN = true }
         Task {
             try? await Task.sleep(for: Constants.copiedFeedbackDuration)
-            withAnimation { didCopyVIN = false }
+            withAnimation(reduceMotion ? nil : .default) { didCopyVIN = false }
         }
     }
 
@@ -93,6 +108,7 @@ struct SpecsSectionView: View {
 
 private enum Constants {
     static let columnMinWidth: CGFloat = 140
+    static let iconWidth: CGFloat = 24
     static let copiedFeedbackDuration: Duration = .seconds(1.5)
 }
 

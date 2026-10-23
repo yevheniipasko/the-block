@@ -11,25 +11,57 @@ struct OutbidBannerView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
-        layout {
-            VStack(alignment: .leading, spacing: Spacing.xxSmall) {
-                Text(Localizable.outbidOn(alert.title))
-                    .font(.subheadline.weight(.semibold))
-                Text(Localizable.now(Formatting.currency(alert.currentBid)))
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .accessibilityElement(children: .combine)
-            .accessibilityLabel(message)
+        HStack(alignment: .top, spacing: Spacing.medium) {
+            Image(systemName: "exclamationmark")
+                .font(.headline.bold())
+                .foregroundStyle(.orange)
+                .frame(width: Constants.iconSize, height: Constants.iconSize)
+                .background(.orange.opacity(Constants.iconBackgroundOpacity), in: Circle())
+                .accessibilityHidden(true)
 
-            Button(Localizable.bidAgain, action: onBidAgain)
-                .buttonStyle(.borderedProminent)
-                .controlSize(.small)
-                .accessibilityIdentifier("alert.bidAgainButton")
+            VStack(alignment: .leading, spacing: Spacing.small) {
+                HStack(alignment: .top, spacing: Spacing.small) {
+                    VStack(alignment: .leading, spacing: Spacing.xxSmall) {
+                        Text(Localizable.title)
+                            .font(.headline)
+                        Text(alert.title)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(Constants.vehicleTitleLineLimit)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                    Button(Localizable.dismiss, systemImage: "xmark", action: onDismiss)
+                        .labelStyle(.iconOnly)
+                        .buttonStyle(.plain)
+                        .foregroundStyle(.secondary)
+                        .padding(Spacing.small)
+                        .background(.fill.tertiary, in: Circle())
+                        .frame(minWidth: Constants.minimumTapSize, minHeight: Constants.minimumTapSize)
+                        .contentShape(Rectangle())
+                        .accessibilityIdentifier("alert.dismissButton")
+                }
+
+                actionLayout {
+                    HStack(alignment: .firstTextBaseline, spacing: Spacing.xSmall) {
+                        Text(Localizable.currentBid)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        Text(Formatting.currency(alert.currentBid))
+                            .font(.headline.monospacedDigit())
+                            .fixedSize(horizontal: true, vertical: false)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                    Button(Localizable.bidAgain, systemImage: "arrow.up", action: onBidAgain)
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.regular)
+                        .accessibilityIdentifier("alert.bidAgainButton")
+                }
+            }
         }
         .padding(Spacing.medium)
-        .background(.thickMaterial, in: RoundedRectangle(cornerRadius: CornerRadius.medium))
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: CornerRadius.medium))
         .overlay {
             RoundedRectangle(cornerRadius: CornerRadius.medium)
                 .strokeBorder(.orange.opacity(Constants.borderOpacity))
@@ -49,11 +81,11 @@ struct OutbidBannerView: View {
         Localizable.message(title: alert.title, amount: Formatting.currency(alert.currentBid))
     }
 
-    /// Side by side normally; stacked at accessibility text sizes so nothing truncates (spec UX-2).
-    private var layout: AnyLayout {
+    /// Price and action stay side by side normally, then stack at accessibility text sizes.
+    private var actionLayout: AnyLayout {
         dynamicTypeSize.isAccessibilitySize
             ? AnyLayout(VStackLayout(alignment: .leading, spacing: Spacing.small))
-            : AnyLayout(HStackLayout(spacing: Spacing.medium))
+            : AnyLayout(HStackLayout(alignment: .center, spacing: Spacing.medium))
     }
 
     private var swipeUpToDismiss: some Gesture {
@@ -68,17 +100,23 @@ struct OutbidBannerView: View {
 }
 
 private enum Localizable {
+    static let title = "You've been outbid"
     static let bidAgain = "Bid again"
     static let dismiss = "Dismiss"
-    static func outbidOn(_ title: String) -> String { "Outbid on \(title)" }
-    static func now(_ amount: String) -> String { "now \(amount)" }
-    static func message(title: String, amount: String) -> String { "Outbid on \(title) · now \(amount)" }
+    static let currentBid = "Current bid"
+    static func message(title: String, amount: String) -> String {
+        "You've been outbid on \(title). Current bid \(amount)."
+    }
 }
 
 private enum Constants {
-    static let borderOpacity = 0.4
-    static let shadowRadius: CGFloat = 8
-    static let shadowOffset: CGFloat = 2
+    static let borderOpacity = 0.3
+    static let iconBackgroundOpacity = 0.14
+    static let iconSize: CGFloat = 36
+    static let minimumTapSize: CGFloat = 44
+    static let shadowRadius: CGFloat = 10
+    static let shadowOffset: CGFloat = 4
+    static let vehicleTitleLineLimit = 2
     static let dragMinimumDistance: CGFloat = 10
     static let dismissDragDistance: CGFloat = 20
 }

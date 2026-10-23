@@ -20,6 +20,7 @@ enum BuyerMarker: Hashable, Sendable {
 struct SpecRow: Identifiable, Hashable, Sendable {
     let label: String
     let value: String
+    let systemImage: String
     var id: String { label }
 }
 
@@ -105,14 +106,22 @@ final class VehicleDetailViewModel {
     var specRows: [SpecRow] {
         guard let vehicle else { return [] }
         return [
-            SpecRow(label: Localizable.engine, value: vehicle.engine),
-            SpecRow(label: Localizable.transmission, value: vehicle.transmission.displayName),
-            SpecRow(label: Localizable.drivetrain, value: vehicle.drivetrain.rawValue),
-            SpecRow(label: Localizable.fuel, value: vehicle.fuelType.rawValue.capitalized),
-            SpecRow(label: Localizable.odometer, value: Formatting.kilometres(vehicle.odometerKm)),
-            SpecRow(label: Localizable.bodyStyle, value: vehicle.bodyStyle.displayName),
-            SpecRow(label: Localizable.exterior, value: vehicle.exteriorColor),
-            SpecRow(label: Localizable.interior, value: vehicle.interiorColor)
+            SpecRow(label: Localizable.engine, value: vehicle.engine, systemImage: "engine.combustion"),
+            SpecRow(label: Localizable.transmission, value: vehicle.transmission.displayName, systemImage: "gearshape"),
+            SpecRow(
+                label: Localizable.drivetrain,
+                value: vehicle.drivetrain.rawValue,
+                systemImage: "car.rear.road.lane"
+            ),
+            SpecRow(label: Localizable.fuel, value: vehicle.fuelType.rawValue.capitalized, systemImage: "fuelpump"),
+            SpecRow(
+                label: Localizable.odometer,
+                value: Formatting.kilometres(vehicle.odometerKm),
+                systemImage: "gauge.with.dots.needle.50percent"
+            ),
+            SpecRow(label: Localizable.bodyStyle, value: vehicle.bodyStyle.displayName, systemImage: "car.side"),
+            SpecRow(label: Localizable.exterior, value: vehicle.exteriorColor, systemImage: "paintpalette"),
+            SpecRow(label: Localizable.interior, value: vehicle.interiorColor, systemImage: "steeringwheel")
         ]
     }
 
