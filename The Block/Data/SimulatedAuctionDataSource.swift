@@ -117,7 +117,7 @@ final class SimulatedAuctionDataSource: VehicleDataSourceProtocol {
     func simulateCompetingBid() -> VehicleModel? {
         guard let vehicles else { return nil }
         let now = clock.now
-        let candidates = vehicles.filter { Self.canTakeCompetingBid($0, now: now) }
+        let candidates = vehicles.filter { BiddingRules.canTakeAnotherBid($0, at: now) }
         let yours = candidates.filter(\.isYouHighBidder)
         let probability = market?.targetsYourLotsProbability ?? 0
         let pool = !yours.isEmpty && Double.random(in: 0..<1, using: &generator) < probability ? yours : candidates
@@ -176,13 +176,15 @@ final class SimulatedAuctionDataSource: VehicleDataSourceProtocol {
     }
 
     /// Starts the competing-bid loop on the first connection, if a market is configured (spec LIVE-2).
+    ///
+    /// The loop holds the data source weakly and ends once it is cancelled or the data source is gone.
     private func startMarketIfNeeded() {
         guard let market, marketTask == nil else { return }
         marketTask = Task { [weak self] in
             while !Task.isCancelled {
                 try? await Task.sleep(for: market.interval)
-                guard !Task.isCancelled else { return }
-                self?.simulateCompetingBid()
+                guard !Task.isCancelled, let self else { return }
+                self.simulateCompetingBid()
             }
         }
     }
@@ -191,13 +193,6 @@ final class SimulatedAuctionDataSource: VehicleDataSourceProtocol {
     private func simulateRoundTrip() async {
         guard latency > .zero else { return }
         try? await Task.sleep(for: latency)
-    }
-
-    /// Whether the market may bid on a lot: active, and its next minimum stays below any Buy Now price.
-    private static func canTakeCompetingBid(_ vehicle: VehicleModel, now: Date) -> Bool {
-        guard case .active = vehicle.status(at: now) else { return false }
-        guard let buyNowPrice = vehicle.buyNowPrice else { return true }
-        return BiddingRules.minimumNextBid(for: vehicle) < buyNowPrice
     }
 
 }

@@ -28,15 +28,25 @@ struct VehicleDataSourceTests {
         #expect(vehicles.allSatisfy { $0.yourBid == nil && $0.yourPurchasePrice == nil })
     }
 
-    @Test("DATA-2: auction_start without timezone decodes as local time")
+    @Test("DATA-2: auction_start without timezone decodes as the same wall-clock time in UTC")
     func decodesTimezoneLessDate() throws {
         let vehicles = try VehicleDecoder.decode(Self.json(auctionStart: "2026-04-05T14:00:00"))
+        var utc = Calendar(identifier: .gregorian)
+        utc.timeZone = try #require(TimeZone(secondsFromGMT: 0))
 
-        let components = Calendar.current.dateComponents(
+        let components = utc.dateComponents(
             [.year, .month, .day, .hour, .minute],
             from: try #require(vehicles.first).auctionStart
         )
         #expect(components == DateComponents(year: 2026, month: 4, day: 5, hour: 14, minute: 0))
+    }
+
+    @Test("TIME-1: spacing across a DST change (Sydney, 2026-04-05 03:00) equals the wall-clock difference")
+    func spacingIgnoresDeviceTimeZone() throws {
+        let before = try #require(try VehicleDecoder.decode(Self.json(auctionStart: "2026-04-05T01:00:00")).first)
+        let after = try #require(try VehicleDecoder.decode(Self.json(auctionStart: "2026-04-05T05:00:00")).first)
+
+        #expect(after.auctionStart.timeIntervalSince(before.auctionStart) == TestDates.hours(4))
     }
 
     @Test("DETAIL-1: placeholder image URLs are rewritten to PNG so AsyncImage can render them")

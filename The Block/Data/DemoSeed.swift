@@ -16,37 +16,43 @@ enum DemoSeed {
 
     /// Marks the buyer as leading on the first eligible lot and outbid on the second.
     ///
-    /// Eligible: active at `now`, already has bids, and its next minimum stays below any Buy Now
-    /// price (so the market can keep bidding on it). Lots are taken in lot-number order, so the
-    /// choice is stable across launches. Lots without bids are never touched.
+    /// Eligible: already has bids and can take another one (`BiddingRules.canTakeAnotherBid`), so
+    /// the market can keep bidding on it. The outbid lot must also leave room for a bid strictly
+    /// below the current bid but at or above the starting bid. Lots are taken in lot-number order,
+    /// so the choice is stable across launches. Lots without bids are never touched.
     static func apply(to vehicles: [VehicleModel], now: Date) -> [VehicleModel] {
         let eligible = vehicles
             .filter { isEligible($0, now: now) }
             .sorted { $0.lot < $1.lot }
-            .prefix(2)
-            .map(\.id)
-        guard let leadingID = eligible.first else { return vehicles }
-        let outbidID = eligible.dropFirst().first
+        guard let leading = eligible.first else { return vehicles }
+        let outbid = eligible.dropFirst().first { outbidAmount(for: $0) != nil }
 
         return vehicles.map { vehicle in
             var copy = vehicle
-            if vehicle.id == leadingID {
+            if vehicle.id == leading.id {
                 copy.yourBid = vehicle.currentBid
-            } else if vehicle.id == outbidID, let currentBid = vehicle.currentBid {
-                let step = BiddingRules.step(currentBid: currentBid, bidCount: vehicle.bidCount)
-                copy.yourBid = max(vehicle.startingBid, currentBid - step)
+            } else if vehicle.id == outbid?.id {
+                copy.yourBid = outbidAmount(for: vehicle)
             }
             return copy
         }
     }
 
-    /// Whether a lot can carry a seeded position: active, has bids, and still biddable below Buy Now.
+    /// Whether a lot can carry a seeded position: has bids and can still take another one.
     private static func isEligible(_ vehicle: VehicleModel, now: Date) -> Bool {
-        guard case .active = vehicle.status(at: now), vehicle.bidCount > 0, vehicle.currentBid != nil else {
-            return false
-        }
-        guard let buyNowPrice = vehicle.buyNowPrice else { return true }
-        return BiddingRules.minimumNextBid(for: vehicle) < buyNowPrice
+        guard vehicle.bidCount > 0, vehicle.currentBid != nil else { return false }
+        return BiddingRules.canTakeAnotherBid(vehicle, at: now)
+    }
+
+    /// The seeded "outbid" amount: one step below the current bid, floored at the starting bid.
+    ///
+    /// - Returns: `nil` when no amount strictly below the current bid reaches the starting bid
+    ///   (e.g. current bid equals the starting bid), since that bid would be winning, not outbid.
+    private static func outbidAmount(for vehicle: VehicleModel) -> Int? {
+        guard let currentBid = vehicle.currentBid else { return nil }
+        let step = BiddingRules.step(currentBid: currentBid, bidCount: vehicle.bidCount)
+        let amount = max(vehicle.startingBid, currentBid - step)
+        return amount < currentBid ? amount : nil
     }
 
 }
