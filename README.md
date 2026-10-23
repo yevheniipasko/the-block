@@ -81,8 +81,8 @@ The Block/
 ## Testing
 
 - **Unit (Swift Testing, `The BlockTests`):** domain rules (step tiers at every boundary, minimum bid, validation, Buy Now eligibility, auction timing and outcomes, fees), DTO mapping and decoding the real JSON, the simulated server and market, repository streams (snapshot, updates, reconnect), cursor paging, and every ViewModel (inventory paging/filters/live rows, detail, bidding including live minimum and outbid, My bids grouping, outbid alerts).
-- **UI (XCUITest, `The BlockUITests`):** 7 flows: browse & search, open detail, place a valid bid, reject a bid below the minimum, get outbid live, open My bids and a lot from it, outbid banner → "Bid again".
-- **Totals:** 185 tests (178 unit in 27 suites + 7 UI), all passing. No compiler warnings.
+- **UI (XCUITest, `The BlockUITests`):** 8 flows: browse & search, open detail, place a valid bid, reject a bid below the minimum, get outbid live, open My bids and a lot from it, the same on iPad with My bids and the detail side by side (iPad only), outbid banner → "Bid again".
+- **Totals:** 186 tests (178 unit in 27 suites + 8 UI; the iPad flow is skipped on iPhone), all passing. No compiler warnings.
 - **Manual / visual:** iPhone and iPad simulators, dark mode, largest accessibility text size (fixed a price line that wrapped mid-number in the narrow iPad sidebar).
 - **Accessibility:** ran Xcode's accessibility audit on inventory, detail, and the bid sheet and fixed what it found (status badge contrast, icons that didn't scale with Dynamic Type). `.maestro/accessibility.yaml` screenshots the same screens for a visual check in dark mode at the largest text size.
 - Tests run with a per-test time limit so a stuck async test fails fast instead of hanging the suite.

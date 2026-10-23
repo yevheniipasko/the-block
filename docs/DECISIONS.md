@@ -63,6 +63,7 @@ Running log — see `.claude/rules/decisions-log.md`. One line per entry, newest
 - 2026-10-22 — Earlier commits that break `commits.md` (`design:` / `perf:` types, merge commits with conflict bodies) left as is. Why: they are on `main`; rewriting history isn't worth it for a prototype. Rule applies from here on.
 - 2026-10-22 — Detail action bar buttons share one two-line label ("Place bid / Min $X", "Buy Now / $X") and stay equal height; the filled vs. tinted style alone marks the primary action. Why: side by side, the longer "Place bid · Min $X" label wrapped in its half of the bar and made that button taller than Buy Now, which looked broken. Alt: one-line labels with a stacked fallback (cut: unequal widths, stacks more often), moving the minimum to a caption (cut: hides the minimum right before tapping), always stacked (cut: more vertical space).
 - 2026-10-22 — After a successful bid or Buy Now, the sheet's toolbar shows "Done" (confirmation placement) instead of "Cancel". Why: "Cancel" read as undoing the bid. Alt: hide the button during the 1.2 s success state (cut: no way to close early).
+- 2026-10-23 — iPad: My bids is pushed inside the list column's own `NavigationStack` (MYBIDS-1). Why: a `navigationDestination` in a split view's sidebar pushes into the detail column, so My bids covered the vehicle detail and selecting a row looked like nothing happened. Found by manual iPad testing; covered by an iPad-only XCUITest.
 
 ## Time
 

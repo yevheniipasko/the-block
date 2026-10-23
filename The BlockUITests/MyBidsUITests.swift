@@ -42,6 +42,29 @@ final class MyBidsUITests: XCTestCase {
         XCTAssertTrue(element(app, "detail.title").waitForExistence(timeout: Constants.stepTimeout))
     }
 
+    /// MYBIDS-1, UX-1 (iPad): My bids opens in the list column, so tapping one of its rows
+    /// shows that lot's detail beside it instead of behind it. Skipped on iPhone.
+    func testMyBidsKeepsDetailVisibleOnIPad() throws {
+        try XCTSkipUnless(UIDevice.current.userInterfaceIdiom == .pad, "iPad split view only")
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchArguments = ["-market", "off"]
+        app.launch()
+
+        let myBidsButton = element(app, "list.myBidsButton")
+        XCTAssertTrue(myBidsButton.waitForExistence(timeout: Constants.loadTimeout))
+        myBidsButton.tap()
+
+        let row = element(app, "mybids.row.\(Constants.seededWinningLot)")
+        XCTAssertTrue(row.waitForExistence(timeout: Constants.stepTimeout))
+        row.tap()
+
+        let detailTitle = element(app, "detail.title")
+        XCTAssertTrue(detailTitle.waitForExistence(timeout: Constants.stepTimeout))
+        XCTAssertTrue(detailTitle.isHittable)
+        XCTAssertTrue(row.isHittable)
+    }
+
     // MARK: - Helpers
 
     /// First element of any type with `identifier`.
@@ -57,4 +80,6 @@ private enum Constants {
     static let stepTimeout: TimeInterval = 10
     /// The demo seed leaves you outbid on exactly one lot.
     static let seededOutbidValue = "Outbid on 1"
+    /// The demo seed's lot you lead on (spec MYBIDS-7).
+    static let seededWinningLot = "A-0003"
 }

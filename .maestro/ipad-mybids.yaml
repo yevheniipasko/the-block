@@ -1,0 +1,38 @@
+# iPad only (spec MYBIDS-1, UX-1): My bids opens in the list column, and tapping its rows shows
+# each lot's detail beside it. On iPhone a tapped row covers My bids, so this flow fails there.
+appId: com.softie.dev.The-Block
+name: iPad - My bids beside the detail
+tags:
+  - ipad
+---
+- launchApp:
+    stopApp: true
+    arguments:
+      market: "off"
+- extendedWaitUntil:
+    visible:
+      id: "list.row.*"
+    timeout: 30000
+- tapOn:
+    id: "list.myBidsButton"
+- extendedWaitUntil:
+    visible:
+      id: "mybids.row.A-0003"
+    timeout: 10000
+- takeScreenshot: 1-mybids-open
+- tapOn:
+    id: "mybids.row.A-0003"
+- extendedWaitUntil:
+    visible:
+      id: "detail.title"
+    timeout: 10000
+- assertVisible:
+    id: "mybids.row.A-0005"
+- takeScreenshot: 2-row-selected
+- tapOn:
+    id: "mybids.row.A-0005"
+- extendedWaitUntil:
+    visible:
+      text: ".*A-0005.*"
+    timeout: 10000
+- takeScreenshot: 3-second-row

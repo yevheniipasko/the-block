@@ -1,0 +1,36 @@
+# Outbid banner over an open sheet (spec ALERT-1): bid on D-0010 with a fast market; the
+# market outbids you within seconds and the banner must show over the bid sheet.
+appId: com.softie.dev.The-Block
+name: Alerts - outbid banner over the bid sheet
+tags:
+  - live
+  - alerts
+---
+- launchApp:
+    stopApp: true
+    arguments:
+      market: "fast"
+- extendedWaitUntil:
+    visible:
+      id: "list.row.*"
+    timeout: 30000
+- tapOn: "Make, model, year, lot, VIN, dealer"
+- inputText: "D-0010"
+- extendedWaitUntil:
+    visible:
+      id: "list.row.*"
+    timeout: 10000
+- tapOn:
+    id: "list.row.*"
+    index: 0
+- tapOn:
+    id: "detail.placeBidButton"
+- tapOn:
+    id: "bid.reviewButton"
+- tapOn:
+    id: "bid.confirmButton"
+- extendedWaitUntil:
+    visible:
+      id: "alert.banner"
+    timeout: 20000
+- takeScreenshot: banner-over-sheet
