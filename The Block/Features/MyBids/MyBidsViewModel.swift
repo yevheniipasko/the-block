@@ -63,8 +63,8 @@ final class MyBidsViewModel {
     /// Keeps the groups live until the calling task is cancelled (spec MYBIDS-4).
     ///
     /// Each update is used as a "something changed" signal and the groups are rebuilt from the
-    /// repository's current state: the update stream keeps only the newest values for a slow
-    /// subscriber, so the 200-lot snapshot burst can drop individual lots. Subscribes before the
+    /// repository's current state, so the groups always match what the repository holds and the
+    /// 200-lot snapshot burst needs no per-lot bookkeeping here. Subscribes before the
     /// first rebuild, so no change between the two is lost. A child task also rebuilds every
     /// `tickInterval`, because an auction ending moves a lot from Winning to Won (or Outbid to Lost)
     /// without any feed event.

@@ -23,7 +23,7 @@ enum BiddingSheet: Identifiable, Hashable {
 }
 
 /// Builds screen ViewModels. Implemented by `AppModule`, so the router never sees the container.
-protocol ViewModelFactoryProtocol: AnyObject {
+protocol ViewModelFactoryProtocol: AnyObject, Sendable {
     /// The app-wide inventory list ViewModel.
     func makeInventoryViewModel() -> InventoryViewModel
     /// A fresh detail ViewModel for one vehicle.
@@ -35,16 +35,22 @@ protocol ViewModelFactoryProtocol: AnyObject {
 }
 
 /// Navigation state for the whole app: selected vehicle (list → detail) and presented sheet.
-protocol InventoryRouterProtocol: AnyObject {
+protocol InventoryRouterProtocol: AnyObject, Sendable {
     /// The inventory list ViewModel, kept for the router's lifetime.
     var inventoryViewModel: InventoryViewModel { get }
     /// Vehicle whose detail is shown, or `nil` when none is selected.
     var selectedVehicleID: VehicleModel.ID? { get }
-    /// ViewModel for the selected vehicle's detail; rebuilt when the selection changes.
+    /// ViewModel for the last selected vehicle's detail; rebuilt when another vehicle is selected.
+    ///
+    /// Kept when the selection clears, so the outgoing detail screen stays filled while it
+    /// animates away; `nil` only until the first selection.
     var detailViewModel: VehicleDetailViewModel? { get }
     /// The bid or Buy Now sheet currently presented, if any.
     var presentedSheet: BiddingSheet? { get }
-    /// ViewModel backing the presented sheet; `nil` when no sheet is open.
+    /// ViewModel backing the presented sheet.
+    ///
+    /// Outlives `dismissSheet()` so the sheet stays filled while it slides away; cleared by
+    /// `sheetDidDismiss()` once it is gone, or replaced by the next presentation.
     var bidViewModel: BidViewModel? { get }
     /// Lives as long as the router, so the toolbar's outbid badge stays current (spec MYBIDS-6).
     var myBidsViewModel: MyBidsViewModel { get }
@@ -57,8 +63,11 @@ protocol InventoryRouterProtocol: AnyObject {
     func presentBid(for vehicleID: VehicleModel.ID)
     /// Presents the Buy Now confirmation for a vehicle (spec BID-10).
     func presentBuyNow(for vehicleID: VehicleModel.ID)
-    /// Closes any presented sheet.
+    /// Closes any presented sheet; its ViewModel stays until `sheetDidDismiss()`.
     func dismissSheet()
+    /// Called once the sheet has finished animating away; drops its ViewModel unless a new
+    /// sheet was presented meanwhile.
+    func sheetDidDismiss()
     /// Opens "My bids" (spec MYBIDS-1).
     func showMyBids()
     /// Closes "My bids" and returns to the inventory list (spec MYBIDS-5).
@@ -90,10 +99,14 @@ final class InventoryRouter: InventoryRouterProtocol {
     }
 
     /// ViewModels are built here, on navigation, never inside a view's `body`.
+    ///
+    /// Clearing the selection keeps the last detail ViewModel (see `detailViewModel`), and
+    /// re-selecting that same vehicle reuses it instead of building another.
     func select(_ vehicleID: VehicleModel.ID?) {
         guard vehicleID != selectedVehicleID else { return }
         selectedVehicleID = vehicleID
-        detailViewModel = vehicleID.map { factory.makeVehicleDetailViewModel(vehicleID: $0) }
+        guard let vehicleID, detailViewModel?.vehicleID != vehicleID else { return }
+        detailViewModel = factory.makeVehicleDetailViewModel(vehicleID: vehicleID)
     }
 
     func presentBid(for vehicleID: VehicleModel.ID) {
@@ -108,6 +121,10 @@ final class InventoryRouter: InventoryRouterProtocol {
 
     func dismissSheet() {
         presentedSheet = nil
+    }
+
+    func sheetDidDismiss() {
+        guard presentedSheet == nil else { return }
         bidViewModel = nil
     }
 
