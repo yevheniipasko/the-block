@@ -56,12 +56,14 @@ struct AuctionActionBar: View {
         }
     }
 
-    /// "Place bid · Min $X" plus "Buy Now $X" when offered; laid out by the caller.
+    /// "Place bid / Min $X" plus "Buy Now / $X" when offered; laid out by the caller.
+    ///
+    /// Both buttons use the same two-line label (action, then price) so they stay the same
+    /// height side by side; the filled style alone marks Place bid as the primary action.
     @ViewBuilder
     private func buttons(minimumBid: Int, buyNowPrice: Int?) -> some View {
         Button(action: onPlaceBid) {
-            Text(Localizable.placeBid(Formatting.currency(minimumBid)))
-                .frame(maxWidth: .infinity)
+            label(title: Localizable.placeBid, price: Localizable.minimum(Formatting.currency(minimumBid)))
         }
         .buttonStyle(.borderedProminent)
         .controlSize(.large)
@@ -70,20 +72,39 @@ struct AuctionActionBar: View {
 
         if let buyNowPrice {
             Button(action: onBuyNow) {
-                Text(Localizable.buyNow(Formatting.currency(buyNowPrice)))
-                    .frame(maxWidth: .infinity)
+                label(title: Localizable.buyNow, price: Formatting.currency(buyNowPrice))
             }
             .buttonStyle(.bordered)
             .controlSize(.large)
+            .accessibilityLabel(Localizable.buyNowAccessibility(Formatting.currency(buyNowPrice)))
             .accessibilityIdentifier("detail.buyNowButton")
         }
+    }
+
+    /// Two-line button label: action on top, price below, each kept on one line.
+    ///
+    /// The fixed horizontal size makes `ViewThatFits` stack the buttons instead of
+    /// truncating or wrapping a label when they don't fit side by side.
+    private func label(title: String, price: String) -> some View {
+        VStack(spacing: 0) {
+            Text(title)
+                .font(.headline)
+            Text(price)
+                .font(.subheadline)
+                .monospacedDigit()
+        }
+        .lineLimit(1)
+        .fixedSize(horizontal: true, vertical: false)
+        .frame(maxWidth: .infinity)
     }
 
 }
 
 private enum Localizable {
-    static func placeBid(_ minimum: String) -> String { "Place bid · Min \(minimum)" }
+    static let placeBid = "Place bid"
+    static let buyNow = "Buy Now"
+    static func minimum(_ amount: String) -> String { "Min \(amount)" }
     static func placeBidAccessibility(_ minimum: String) -> String { "Place bid, minimum \(minimum)" }
-    static func buyNow(_ price: String) -> String { "Buy Now \(price)" }
+    static func buyNowAccessibility(_ price: String) -> String { "Buy Now for \(price)" }
     static func outcomeAccessibility(_ title: String) -> String { "Auction ended: \(title)" }
 }
