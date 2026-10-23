@@ -1,0 +1,42 @@
+# Visual accessibility check (spec UX-2): walks inventory → detail → bid sheet and screenshots
+# each screen. Set the simulator first, then review the screenshots for clipped text and contrast:
+#   xcrun simctl ui <UDID> appearance dark
+#   xcrun simctl ui <UDID> content_size accessibility-extra-extra-extra-large
+appId: com.softie.dev.The-Block
+name: Accessibility - screens at current appearance and text size
+tags:
+  - accessibility
+---
+- launchApp:
+    stopApp: true
+    arguments:
+      market: "off"
+- extendedWaitUntil:
+    visible:
+      id: "list.row.*"
+    timeout: 20000
+- takeScreenshot: a11y-1-inventory
+- tapOn:
+    id: "list.row.*"
+    index: 0
+- extendedWaitUntil:
+    visible:
+      id: "detail.title"
+    timeout: 10000
+- takeScreenshot: a11y-2-detail-top
+- scroll
+- takeScreenshot: a11y-3-detail-specs
+- scroll
+- takeScreenshot: a11y-4-detail-condition
+- tapOn:
+    id: "detail.placeBidButton"
+- extendedWaitUntil:
+    visible:
+      id: "bid.amountField"
+    timeout: 10000
+- takeScreenshot: a11y-5-bid-sheet
+# At accessibility text sizes the review button sits below the fold.
+- scrollUntilVisible:
+    element:
+      id: "bid.reviewButton"
+- takeScreenshot: a11y-6-bid-sheet-review

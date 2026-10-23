@@ -29,20 +29,33 @@ struct AuctionStatusBadge: View {
         let now = pausedAt ?? ticker.now
         let status = vehicle.status(at: now)
         HStack(spacing: Spacing.xSmall) {
-            Text(status.badgeTitle)
-                .font(.caption.weight(.semibold))
-                .padding(.horizontal, Spacing.small)
-                .padding(.vertical, Spacing.xxSmall)
-                .background(status.tint(now: now).opacity(0.15), in: Capsule())
-                .foregroundStyle(status.tint(now: now))
+            // Primary text on a tinted pill with a status dot: tinted caption text fails contrast (UX-3).
+            HStack(spacing: Spacing.xxSmall) {
+                Circle()
+                    .fill(status.tint(now: now))
+                    .frame(width: Constants.dotSize, height: Constants.dotSize)
+                    .accessibilityHidden(true)
+                Text(status.badgeTitle)
+            }
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(.primary)
+            .padding(.horizontal, Spacing.small)
+            .padding(.vertical, Spacing.xxSmall)
+            .background(status.tint(now: now).opacity(0.15), in: Capsule())
             if let countdown = status.countdownText(now: now) {
                 Text(countdown)
-                    .font(.caption.monospacedDigit())
-                    .foregroundStyle(status.isEndingSoon(now: now) ? .orange : .secondary)
+                    .font(.caption.monospacedDigit().weight(status.isEndingSoon(now: now) ? .semibold : .regular))
+                    .foregroundStyle(.primary)
             }
         }
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("status.badge")
     }
 
+}
+
+/// Layout values for the status badge.
+private enum Constants {
+    /// Diameter of the status colour dot.
+    static let dotSize: CGFloat = 6
 }

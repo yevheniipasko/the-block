@@ -25,6 +25,8 @@ struct OutbidBannerView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     /// Vertical offset while the banner is being dragged; resets when the drag ends.
     @GestureState private var dragOffset: CGFloat = 0
+    /// Icon circle diameter, scaled with Dynamic Type so the arrow stays inside it.
+    @ScaledMetric(relativeTo: .subheadline) private var iconSize = Constants.iconSize
 
     var body: some View {
         contentLayout {
@@ -53,7 +55,11 @@ struct OutbidBannerView: View {
         .padding(.vertical, Spacing.medium)
         .padding(.horizontal, Spacing.large)
         .glassEffect(.regular, in: .rect(cornerRadius: Constants.cornerRadius))
-        .shadow(color: .black.opacity(Constants.shadowOpacity), radius: Constants.shadowRadius, y: Constants.shadowOffset)
+        .shadow(
+            color: .black.opacity(Constants.shadowOpacity),
+            radius: Constants.shadowRadius,
+            y: Constants.shadowOffset
+        )
         .padding(.horizontal, Spacing.medium)
         .offset(y: dragOffset)
         .gesture(swipeUpToDismiss)
@@ -70,7 +76,7 @@ struct OutbidBannerView: View {
         Image(systemName: "arrow.down")
             .font(.subheadline.weight(.bold))
             .foregroundStyle(.white)
-            .frame(width: Constants.iconSize, height: Constants.iconSize)
+            .frame(width: iconSize, height: iconSize)
             .background(.orange.gradient, in: Circle())
             .accessibilityHidden(true)
     }

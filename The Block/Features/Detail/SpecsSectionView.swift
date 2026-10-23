@@ -24,6 +24,8 @@ struct SpecsSectionView: View {
     @State private var didCopyVIN = false
     /// Minimum grid column width, scaled with Dynamic Type so cells reflow into fewer columns.
     @ScaledMetric(relativeTo: .body) private var columnMinWidth = Constants.columnMinWidth
+    /// Icon column width, scaled with Dynamic Type so large icons don't overlap their labels.
+    @ScaledMetric(relativeTo: .title3) private var iconWidth = Constants.iconWidth
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
@@ -48,7 +50,7 @@ struct SpecsSectionView: View {
             Image(systemName: row.systemImage)
                 .font(.title3)
                 .foregroundStyle(.secondary)
-                .frame(width: Constants.iconWidth)
+                .frame(width: iconWidth)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: Spacing.xxSmall) {
                 Text(row.label)
@@ -83,7 +85,7 @@ struct SpecsSectionView: View {
             Image(systemName: "number")
                 .font(.title3)
                 .foregroundStyle(.secondary)
-                .frame(width: Constants.iconWidth)
+                .frame(width: iconWidth)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: Spacing.xxSmall) {
                 Text(Localizable.vin)

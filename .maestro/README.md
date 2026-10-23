@@ -6,6 +6,7 @@ Quick exploratory checks with [Maestro](https://maestro.dev). The real UI suite 
 |---|---|---|
 | `smoke.yaml` | `-market off` | App launches, inventory list loads |
 | `live.yaml` | `-market fast` | Bid on the first lot, then the simulated market outbids you |
+| `accessibility.yaml` | `-market off` | Screenshots inventory, detail, and bid sheet for a visual UX-2 check; set dark mode and the text size on the simulator first (see the file header) |
 
 Run (app installed on a booted simulator, bundle id `com.softie.dev.The-Block`):
 
