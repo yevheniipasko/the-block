@@ -21,17 +21,21 @@ struct InventoryRouterView: View {
 
     var body: some View {
         NavigationSplitView {
-            InventoryView(viewModel: router.inventoryViewModel, selection: selection)
-                .toolbar {
-                    MyBidsToolbarItem(outbidCount: router.myBidsViewModel.outbidCount, action: router.showMyBids)
-                }
-                .navigationDestination(isPresented: isShowingMyBids) {
-                    MyBidsView(
-                        viewModel: router.myBidsViewModel,
-                        selection: selection,
-                        onBrowseInventory: router.hideMyBids
-                    )
-                }
+            // Own stack so "My bids" is pushed inside the list column on iPad instead of
+            // covering the detail column (spec MYBIDS-1).
+            NavigationStack {
+                InventoryView(viewModel: router.inventoryViewModel, selection: selection)
+                    .toolbar {
+                        MyBidsToolbarItem(outbidCount: router.myBidsViewModel.outbidCount, action: router.showMyBids)
+                    }
+                    .navigationDestination(isPresented: isShowingMyBids) {
+                        MyBidsView(
+                            viewModel: router.myBidsViewModel,
+                            selection: selection,
+                            onBrowseInventory: router.hideMyBids
+                        )
+                    }
+            }
         } detail: {
             if let detailViewModel = router.detailViewModel, !showsEmptyDetail {
                 VehicleDetailView(
