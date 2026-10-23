@@ -85,6 +85,12 @@ struct AuctionStatusTests {
         #expect(VehicleModel.fixture(reservePrice: 20_000, currentBid: 20_000, bidCount: 1).floorState == .met)
     }
 
+    @Test("BID-10: a Buy Now purchase meets the floor even without bids")
+    func purchaseMeetsFloor() {
+        let bought = VehicleModel.fixture(reservePrice: 20_000, buyNowPrice: 25_000, yourPurchasePrice: 25_000)
+        #expect(bought.floorState == .met)
+    }
+
 }
 
 struct OutcomeCase: Sendable, CustomTestStringConvertible {

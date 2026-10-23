@@ -210,6 +210,22 @@ struct VehicleDetailViewModelTests {
         #expect(viewModel.buyerMarker(at: launch) == nil)
     }
 
+    @Test("DETAIL-2, BID-10: after Buy Now the header shows the price paid")
+    func purchasedPrice() async {
+        let (viewModel, repository) = await makeViewModel(
+            .fixture(startingBid: 8_000, reservePrice: 14_000, buyNowPrice: 18_000)
+        )
+        let task = await startObserving(viewModel)
+        defer { task.cancel() }
+
+        await repository.buyNow(viewModel.vehicleID)
+        await settle { viewModel.vehicle?.isPurchasedByYou == true }
+
+        #expect(viewModel.priceLabel == "Purchased for")
+        #expect(viewModel.priceAmount == "$18,000")
+        #expect(viewModel.vehicle?.floorState == .met)
+    }
+
     // MARK: - DETAIL-3 / DETAIL-4 / DETAIL-5 sections
 
     @Test("DETAIL-3: spec rows list the vehicle's specs in display form")

@@ -104,7 +104,7 @@ Tasks:
 ### DETAIL — vehicle detail
 
 - **DETAIL-1** Swipeable photo gallery with page indicator; loading placeholder and failure fallback per image.
-- **DETAIL-2** Header: year make model trim, lot, status/countdown, current or starting bid, bid count, floor state, Buy Now price if present.
+- **DETAIL-2** Header: year make model trim, lot, status/countdown, current or starting bid, bid count, floor state, Buy Now price if present. After Buy Now it shows "Purchased for" the price paid, and the floor counts as met.
 - **DETAIL-3** Specs: engine, transmission, drivetrain, fuel, odometer, body style, exterior/interior color, VIN (copyable).
 - **DETAIL-4** Condition: grade (x.x / 5 with visual scale), condition report, damage notes list or "No damage reported", title status — rebuilt/salvage visually flagged.
 - **DETAIL-5** Seller: selling dealership, city, province.
