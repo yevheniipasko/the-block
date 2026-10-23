@@ -14,9 +14,9 @@ final class StreamBroadcaster<Element: Sendable> {
     /// Returns a new stream that first yields `initial` (if any) and then every broadcast value.
     func stream(startingWith initial: Element? = nil) -> AsyncStream<Element> {
         let id = UUID()
-        let (stream, continuation) = AsyncStream<Element>.makeStream(
-            bufferingPolicy: .bufferingNewest(Constants.buffer)
-        )
+        // Unbounded: a (re)connection announces every lot at once (~200 values); dropping any of them
+        // would lose state for subscribers that track lots one by one. Values are small value types.
+        let (stream, continuation) = AsyncStream<Element>.makeStream(bufferingPolicy: .unbounded)
         if let initial {
             continuation.yield(initial)
         }
@@ -34,9 +34,4 @@ final class StreamBroadcaster<Element: Sendable> {
         }
     }
 
-}
-
-private enum Constants {
-    /// Slow subscribers keep only the newest updates; older ones are superseded anyway.
-    static let buffer = 64
 }
