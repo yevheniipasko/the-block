@@ -12,9 +12,11 @@ import Foundation
 import Testing
 @testable import The_Block
 
+/// Fee estimates the bid sheet shows for the typed bid and the Buy Now price.
 @MainActor
 struct FeeEstimateViewModelTests {
 
+    /// Bid ViewModel for `vehicle` on a loaded repository.
     private func makeViewModel(_ vehicle: VehicleModel) async -> BidViewModel {
         let repository = await BiddingTestSupport.makeRepository([vehicle])
         return BidViewModel(vehicleID: vehicle.id, repository: repository)

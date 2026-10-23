@@ -13,6 +13,7 @@ import Foundation
 import Testing
 @testable import The_Block
 
+/// Buy Now through the bid sheet ViewModel: success, unavailable reasons, and late rejection.
 @MainActor
 struct BuyNowViewModelTests {
 

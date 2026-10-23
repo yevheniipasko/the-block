@@ -33,6 +33,7 @@ struct VehicleImage: View {
         .clipped()
     }
 
+    /// Centred SF Symbol with a VoiceOver label, filling the frame when the photo is unavailable.
     private func placeholder(systemImage: String, label: String) -> some View {
         Image(systemName: systemImage)
             .font(.largeTitle)

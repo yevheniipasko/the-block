@@ -39,10 +39,15 @@ enum ActivityLevel: Hashable, Sendable {
 
 /// Why a bid or Buy Now was refused; the repository leaves the lot unchanged in every case (spec BID-8).
 enum BidRejection: Error, Hashable, Sendable {
+    /// The lot's auction has ended (spec BID-7).
     case auctionEnded
+    /// The amount is below the minimum next bid (spec BID-3).
     case belowMinimum(minimum: Int)
+    /// The amount reaches the Buy Now price; the buyer should use Buy Now (spec BID-4).
     case atOrAboveBuyNow(buyNowPrice: Int)
+    /// Buy Now is not offered on this lot right now (spec BID-11).
     case buyNowUnavailable
+    /// The lot is not in the inventory.
     case vehicleNotFound
     /// The request never reached the server (network / feed error).
     case connectionFailed

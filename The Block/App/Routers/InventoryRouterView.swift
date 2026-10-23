@@ -89,14 +89,17 @@ struct InventoryRouterView: View {
         }
     }
 
+    /// Selected vehicle, routed through `router.select(_:)` so the detail ViewModel is rebuilt.
     private var selection: Binding<VehicleModel.ID?> {
         Binding(get: { router.selectedVehicleID }, set: { router.select($0) })
     }
 
+    /// Whether My bids is pushed; a back navigation sets it to `false` and closes the screen.
     private var isShowingMyBids: Binding<Bool> {
         Binding(get: { router.isShowingMyBids }, set: { if !$0 { router.hideMyBids() } })
     }
 
+    /// Presented sheet; a swipe-down dismissal tells the router to clear it.
     private var presentedSheet: Binding<BiddingSheet?> {
         Binding(get: { router.presentedSheet }, set: { if $0 == nil { router.dismissSheet() } })
     }

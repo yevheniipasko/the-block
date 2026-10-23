@@ -12,6 +12,7 @@
 import Testing
 @testable import The_Block
 
+/// Smoke test for the composition root: AppModule builds the real stack and shares one repository.
 @MainActor
 struct AppModuleTests {
 

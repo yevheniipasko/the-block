@@ -52,6 +52,7 @@ extension AuctionStatus {
 
 }
 
+/// Buyer-facing wording and colours for how an auction ended.
 extension EndedOutcome {
 
     /// OPENLANE-style result wording.
@@ -64,6 +65,7 @@ extension EndedOutcome {
         }
     }
 
+    /// Badge colour: accent when you bought it, orange while pending below floor, secondary otherwise.
     var tint: Color {
         switch self {
         case .purchasedByYou: .accentColor
@@ -74,6 +76,7 @@ extension EndedOutcome {
 
 }
 
+/// Buyer-facing wording for whether a lot's floor (reserve) has been met.
 extension FloorState {
 
     /// Buyer-facing floor wording; the floor amount itself is never shown.

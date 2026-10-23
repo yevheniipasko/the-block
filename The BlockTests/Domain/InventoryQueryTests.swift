@@ -13,6 +13,7 @@ import Foundation
 import Testing
 @testable import The_Block
 
+/// Search, filters, and sort orders applied by `InventoryQuery`.
 @MainActor
 struct InventoryQueryTests {
 
@@ -74,6 +75,7 @@ struct InventoryQueryTests {
 
 }
 
+/// Cursor-based paging over a result list.
 @MainActor
 struct PaginatorTests {
 

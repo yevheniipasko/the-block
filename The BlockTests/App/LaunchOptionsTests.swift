@@ -12,6 +12,7 @@
 import Testing
 @testable import The_Block
 
+/// Parsing of the `-market` launch argument and the market settings each mode produces.
 @MainActor
 struct LaunchOptionsTests {
 

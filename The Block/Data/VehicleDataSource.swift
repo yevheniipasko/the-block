@@ -43,7 +43,9 @@ protocol VehicleDataSourceProtocol: Sendable {
 
 }
 
+/// Failures reading the bundled inventory.
 enum VehicleDataSourceError: Error, Equatable {
+    /// The named JSON file is missing from the bundle.
     case resourceNotFound(name: String)
 }
 

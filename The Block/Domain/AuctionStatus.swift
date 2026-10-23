@@ -13,8 +13,11 @@ import Foundation
 /// Where a vehicle's auction is at a given moment (spec TIME-2).
 enum AuctionStatus: Hashable, Sendable {
 
+    /// Not started yet; bids are accepted, Buy Now is not.
     case upcoming(startsAt: Date)
+    /// Running until `endsAt`.
     case active(endsAt: Date)
+    /// Closed, with how it finished.
     case ended(EndedOutcome)
 
     /// Whether the auction has ended, whatever the outcome.
@@ -40,8 +43,11 @@ enum EndedOutcome: Hashable, Sendable {
 /// Whether the current bid reaches the seller's floor (reserve) price.
 /// The floor amount itself is never shown to the buyer.
 enum FloorState: Hashable, Sendable {
+    /// The seller set no floor price.
     case noFloor
+    /// The current bid reaches the floor (or the lot was bought outright).
     case met
+    /// The current bid, if any, is still below the floor.
     case notMet
 }
 

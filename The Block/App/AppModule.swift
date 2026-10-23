@@ -65,6 +65,7 @@ final class AppModule: ViewModelFactoryProtocol {
 
     // MARK: - Registrations
 
+    /// Registers the shared clock, data source, and repository (`.container` scope).
     private func registerData() {
         container.register(AuctionClockProtocol.self) { _ in
             SystemAuctionClock()
@@ -94,6 +95,8 @@ final class AppModule: ViewModelFactoryProtocol {
         .inObjectScope(.container)
     }
 
+    /// Registers screen ViewModels: detail and bid are per screen (`.transient`);
+    /// inventory, My bids, and the outbid alert center are shared (`.container`).
     private func registerViewModels() {
         container.register(InventoryViewModel.self) { [unowned self] _ in
             InventoryViewModel(repository: repository)
@@ -122,6 +125,7 @@ final class AppModule: ViewModelFactoryProtocol {
         .inObjectScope(.container)
     }
 
+    /// Registers the app-wide router, which builds ViewModels through this module as its factory.
     private func registerRouters() {
         container.register(InventoryRouterProtocol.self) { [unowned self] _ in
             InventoryRouter(factory: self)
@@ -139,6 +143,7 @@ final class AppModule: ViewModelFactoryProtocol {
         return service
     }
 
+    /// Resolves a registration that takes a runtime argument (a vehicle ID); a missing one is a programming error.
     private func resolve<Service, Argument>(_ type: Service.Type, argument: Argument) -> Service {
         guard let service = container.resolve(type, argument: argument) else {
             preconditionFailure("AppModule: no registration for \(type) with \(Argument.self)")
@@ -148,6 +153,7 @@ final class AppModule: ViewModelFactoryProtocol {
 
 }
 
+/// Simulated network delays used when wiring the data layer.
 private enum Constants {
     /// Simulated network delay for each inventory page.
     static let pageLatency: Duration = .milliseconds(350)

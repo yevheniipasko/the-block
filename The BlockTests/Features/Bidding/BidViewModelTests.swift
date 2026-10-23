@@ -17,6 +17,7 @@ import Testing
 @MainActor
 final class MutableClock: AuctionClockProtocol {
     var now: Date
+    /// Starts the clock at `now`.
     init(now: Date) { self.now = now }
 }
 
@@ -24,6 +25,7 @@ final class MutableClock: AuctionClockProtocol {
 @MainActor
 enum BiddingTestSupport {
 
+    /// Stub-server repository that has already loaded `vehicles` on `clock`.
     static func makeRepository(
         _ vehicles: [VehicleModel],
         clock: AuctionClockProtocol = FixedClock(now: TestDates.reference),
@@ -50,9 +52,11 @@ enum BiddingTestSupport {
 
 }
 
+/// Bid sheet ViewModel: pre-fill, quick-add, validation, review / confirm, and rejections.
 @MainActor
 struct BidViewModelTests {
 
+    /// Bid ViewModel for `vehicle` on a loaded repository, which is returned for assertions.
     private func makeViewModel(
         _ vehicle: VehicleModel,
         actionLatency: Duration = .zero

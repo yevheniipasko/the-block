@@ -13,6 +13,7 @@ import Foundation
 import Testing
 @testable import The_Block
 
+/// Pure bidding rules: adaptive step, minimum next bid, validation, and Buy Now availability.
 @MainActor
 struct BiddingRulesTests {
 
@@ -90,7 +91,9 @@ struct BiddingRulesTests {
 
 }
 
+/// Test convenience for asserting on a result's error.
 extension Result {
+    /// The error of a `.failure`, or `nil` on success.
     var failure: Failure? {
         if case .failure(let error) = self { return error }
         return nil

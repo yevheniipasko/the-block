@@ -74,6 +74,7 @@ enum InventoryLabels {
 
 }
 
+/// User-facing strings behind the inventory labels.
 private enum Localizable {
     static let endingSoonest = "Ending soonest"
     static let priceLowToHigh = "Price: low to high"

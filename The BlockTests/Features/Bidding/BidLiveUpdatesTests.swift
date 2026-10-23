@@ -17,6 +17,7 @@ import Testing
 @MainActor
 struct BidLiveUpdatesTests {
 
+    /// Stub server plus a repository on it that has already loaded `vehicles`.
     private func makeStack(
         _ vehicles: [VehicleModel],
         clock: AuctionClockProtocol = FixedClock(now: TestDates.reference)
@@ -208,22 +209,26 @@ private struct UnreachableDataSource: VehicleDataSourceProtocol {
 
     let vehicles: [VehicleModel]
 
+    /// Yields one snapshot of `vehicles` and stays open.
     func vehicleFeed() -> AsyncThrowingStream<VehicleFeedEvent, Error> {
         let (stream, continuation) = AsyncThrowingStream<VehicleFeedEvent, Error>.makeStream()
         continuation.yield(.snapshot(vehicles))
         return stream
     }
 
+    /// Always fails as if the device were offline.
     func placeBid(_ amount: Int, on id: VehicleModel.ID) async throws -> VehicleModel {
         throw URLError(.notConnectedToInternet)
     }
 
+    /// Always fails as if the device were offline.
     func buyNow(_ id: VehicleModel.ID) async throws -> VehicleModel {
         throw URLError(.notConnectedToInternet)
     }
 
 }
 
+/// Wait budgets, the fast clock tick, and the expected connection-failure message.
 private enum Constants {
     static let maxYields = 200
     static let clockTick: Duration = .milliseconds(10)

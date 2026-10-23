@@ -17,9 +17,11 @@ import SwiftUI
 struct InventoryView: View {
 
     @Bindable var viewModel: InventoryViewModel
+    /// Selected lot; the router turns a new value into navigation to its detail screen.
     @Binding var selection: VehicleModel.ID?
 
     @State private var isFilterSheetPresented = false
+    /// Moment countdowns freeze at while the list scrolls; `nil` when scrolling is idle.
     @State private var countdownPausedAt: Date?
 
     var body: some View {
@@ -39,6 +41,7 @@ struct InventoryView: View {
             .task { await viewModel.observeInventoryChanges() }
     }
 
+    /// Full-screen loading or error, the empty state, or the results list, per `viewModel.content`.
     @ViewBuilder private var content: some View {
         switch viewModel.content {
         case .loading:
@@ -60,6 +63,10 @@ struct InventoryView: View {
 
     // MARK: - Results
 
+    /// Results header, vehicle rows, and the paging row (spec LIST-1, LIST-7).
+    ///
+    /// Each row asks for the next page as it appears. Countdowns pause while the list scrolls so
+    /// ticking text doesn't fight the scroll; live vehicle updates keep arriving meanwhile.
     private var resultsList: some View {
         List(selection: $selection) {
             InventoryResultsHeader(viewModel: viewModel)
@@ -86,6 +93,7 @@ struct InventoryView: View {
         }
     }
 
+    /// Trailing row: a spinner while the next page loads, an inline retry if it failed (spec LIST-7).
     @ViewBuilder private var pageStatusRow: some View {
         switch viewModel.pageStatus {
         case .loading:
@@ -97,6 +105,7 @@ struct InventoryView: View {
         }
     }
 
+    /// No-results state with one action that clears search and filters (spec LIST-5).
     private var emptyState: some View {
         ContentUnavailableView {
             Label(Localizable.emptyTitle, systemImage: "magnifyingglass")
@@ -124,6 +133,7 @@ struct InventoryView: View {
 
     // MARK: - Toolbar
 
+    /// Sort picker bound to `query.sort`; VoiceOver reads the current order as its value (spec LIST-4).
     private var sortMenu: some View {
         Menu {
             Picker(Localizable.sortBy, selection: $viewModel.query.sort) {
@@ -138,6 +148,7 @@ struct InventoryView: View {
         .accessibilityValue(InventoryLabels.title(for: viewModel.query.sort))
     }
 
+    /// Opens the filter sheet; the icon fills and the VoiceOver value counts filters while any are active.
     private var filterButton: some View {
         Button {
             isFilterSheetPresented = true
@@ -174,6 +185,7 @@ private struct InventoryResultsHeader: View {
         .selectionDisabled()
     }
 
+    /// Horizontally scrolling chips, one per active filter (tap to remove), followed by Clear all.
     private var chips: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: Spacing.small) {
@@ -214,10 +226,12 @@ private struct TrailingIconLabelStyle: LabelStyle {
 
 }
 
+/// Layout constants for the inventory screen.
 private enum Constants {
     static let chipOpacity = 0.15
 }
 
+/// User-facing strings for the inventory screen.
 private enum Localizable {
     static let title = "Inventory"
     static let searchPrompt = "Make, model, year, lot, VIN, dealer"

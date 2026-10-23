@@ -37,11 +37,15 @@ enum InventorySort: String, Sendable, CaseIterable {
 /// Search + filters + sort for the inventory, applied "server-side" before paging (spec LIST-2 … LIST-4).
 struct InventoryQuery: Hashable, Sendable {
 
+    /// Free text; every space-separated term must match (spec LIST-2).
     var searchText = ""
     var bodyStyles: Set<BodyStyle> = []
     var fuelTypes: Set<FuelType> = []
+    /// Province names as stored in the data.
     var provinces: Set<String> = []
+    /// Status groups evaluated at the `now` passed to `apply(to:now:)`.
     var statuses: Set<StatusFilter> = []
+    /// Keeps only lots that have a Buy Now price.
     var buyNowOnly = false
     var sort: InventorySort = .endingSoonest
 
@@ -59,6 +63,7 @@ struct InventoryQuery: Hashable, Sendable {
             }
     }
 
+    /// Whether a vehicle passes every active filter and the search text.
     private func matches(_ vehicle: VehicleModel, now: Date) -> Bool {
         if !bodyStyles.isEmpty, !bodyStyles.contains(vehicle.bodyStyle) { return false }
         if !fuelTypes.isEmpty, !fuelTypes.contains(vehicle.fuelType) { return false }
@@ -71,6 +76,7 @@ struct InventoryQuery: Hashable, Sendable {
         return matchesSearch(vehicle)
     }
 
+    /// Whether every search term appears in the vehicle's searchable fields; empty search matches all.
     private func matchesSearch(_ vehicle: VehicleModel) -> Bool {
         let terms = searchText.split(separator: " ").map(String.init)
         guard !terms.isEmpty else { return true }

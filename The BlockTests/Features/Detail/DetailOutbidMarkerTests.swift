@@ -12,6 +12,7 @@ import Foundation
 import Testing
 @testable import The_Block
 
+/// Detail buyer marker for a lot the buyer was outbid on after it ended.
 @MainActor
 struct DetailOutbidMarkerTests {
 

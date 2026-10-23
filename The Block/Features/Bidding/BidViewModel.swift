@@ -41,6 +41,7 @@ final class BidViewModel {
     private(set) var now: Date
     /// Digits-only bid entry, pre-filled with the minimum next bid (spec BID-1, BID-2).
     private(set) var amountText: String
+    /// Current step of the flow; the sheets pick what to show from it.
     private(set) var phase: Phase = .editing
     /// Why the last submission was refused; cleared as soon as the amount changes (spec BID-8).
     private(set) var rejectionMessage: String?

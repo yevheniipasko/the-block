@@ -11,10 +11,13 @@
 
 import SwiftUI
 
+/// App entry point: owns the composition root and the shared countdown ticker.
 @main
 struct TheBlockApp: App {
 
+    /// Composition root, created once per launch with the process's `-market` argument.
     @State private var appModule = AppModule(launchOptions: LaunchOptions(arguments: ProcessInfo.processInfo.arguments))
+    /// Once-per-second clock shared through the environment so countdowns stay live (spec TIME-3).
     @State private var auctionTicker = AuctionTicker()
 
     var body: some Scene {

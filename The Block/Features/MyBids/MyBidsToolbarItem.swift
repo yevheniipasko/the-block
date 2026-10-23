@@ -18,7 +18,9 @@ import SwiftUI
 /// label to the glass shape, which cut off an offset overlay after navigating back.
 struct MyBidsToolbarItem: ToolbarContent {
 
+    /// Lots you're outbid on; shown as the badge and the VoiceOver value.
     let outbidCount: Int
+    /// Opens the "My bids" screen.
     let action: () -> Void
 
     var body: some ToolbarContent {
@@ -35,6 +37,7 @@ struct MyBidsToolbarItem: ToolbarContent {
 
 }
 
+/// User-facing strings for the toolbar entry.
 private enum Localizable {
     static let title = "My bids"
     static func outbidValue(_ count: Int) -> String {

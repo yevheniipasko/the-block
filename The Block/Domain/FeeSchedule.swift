@@ -13,10 +13,14 @@ import Foundation
 
 /// What the buyer would pay on top of the hammer price (spec FEES-1).
 struct FeeEstimate: Hashable, Sendable {
+    /// The bid or Buy Now price the estimate is for.
     let amount: Int
+    /// Tiered buyer fee for `amount`.
     let buyerFee: Int
+    /// Flat documentation fee.
     let documentationFee: Int
 
+    /// Amount plus all fees, before taxes and transport (spec FEES-2).
     var total: Int { amount + buyerFee + documentationFee }
 }
 

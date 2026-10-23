@@ -24,11 +24,13 @@ final class InventoryObservers {
 
     private var tasks: [Task<Void, Never>] = []
 
+    /// Starts the load-state and inventory-change subscriptions of `viewModel`.
     func start(_ viewModel: InventoryViewModel) {
         tasks.append(Task { await viewModel.observeLoadState() })
         tasks.append(Task { await viewModel.observeInventoryChanges() })
     }
 
+    /// Cancels every subscription this instance started.
     deinit {
         tasks.forEach { $0.cancel() }
     }

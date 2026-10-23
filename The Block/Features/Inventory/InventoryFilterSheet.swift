@@ -16,6 +16,7 @@ import SwiftUI
 /// Changes apply immediately, so the list behind the sheet updates as you toggle.
 struct InventoryFilterSheet: View {
 
+    /// The list's own ViewModel, so each toggle changes its query directly.
     let viewModel: InventoryViewModel
 
     @Environment(\.dismiss) private var dismiss
@@ -78,6 +79,7 @@ struct InventoryFilterSheet: View {
 
 }
 
+/// User-facing strings for the filter sheet.
 private enum Localizable {
     static let title = "Filters"
     static let status = "Auction status"

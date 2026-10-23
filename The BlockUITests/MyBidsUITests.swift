@@ -44,12 +44,14 @@ final class MyBidsUITests: XCTestCase {
 
     // MARK: - Helpers
 
+    /// First element of any type with `identifier`.
     private func element(_ app: XCUIApplication, _ identifier: String) -> XCUIElement {
         app.descendants(matching: .any).matching(identifier: identifier).firstMatch
     }
 
 }
 
+/// Timeouts and expected values for the My bids journey.
 private enum Constants {
     static let loadTimeout: TimeInterval = 20
     static let stepTimeout: TimeInterval = 10

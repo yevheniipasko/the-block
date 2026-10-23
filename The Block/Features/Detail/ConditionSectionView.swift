@@ -14,11 +14,17 @@ import SwiftUI
 /// Condition grade, report, damage notes, and title status (spec DETAIL-4).
 struct ConditionSectionView: View {
 
+    /// Raw grade on the 0–5 scale; drives the bar and its colour.
     let grade: Double
+    /// Grade formatted as `x.x / 5`.
     let gradeText: String
+    /// Free-text condition report.
     let report: String
+    /// Damage notes; empty shows "No damage reported".
     let damageNotes: [String]
+    /// Title status for display, e.g. `Salvage`.
     let titleStatusText: String
+    /// Whether the title is rebuilt or salvage and gets warning styling.
     let isTitleFlagged: Bool
 
     var body: some View {
@@ -32,6 +38,7 @@ struct ConditionSectionView: View {
         }
     }
 
+    /// Grade label, `x.x / 5` value and a 0–5 bar, read by VoiceOver as one element.
     private var gradeRow: some View {
         VStack(alignment: .leading, spacing: Spacing.small) {
             HStack(alignment: .firstTextBaseline) {
@@ -50,12 +57,14 @@ struct ConditionSectionView: View {
         .accessibilityValue(Localizable.gradeValue(gradeText))
     }
 
+    /// Green at 4.0 and above, yellow at 3.0 and above, orange below.
     private var gradeTint: Color {
         if grade >= Constants.goodGrade { return .green }
         if grade >= Constants.fairGrade { return .yellow }
         return .orange
     }
 
+    /// Damage notes as a list, or "No damage reported" when there are none.
     @ViewBuilder
     private var damageList: some View {
         VStack(alignment: .leading, spacing: Spacing.xSmall) {
@@ -77,6 +86,7 @@ struct ConditionSectionView: View {
         .accessibilityIdentifier("detail.damageNotes")
     }
 
+    /// Title status, shown as an orange warning capsule when flagged.
     private var titleStatusRow: some View {
         HStack(spacing: Spacing.small) {
             Text(Localizable.titleStatus)

@@ -18,11 +18,13 @@ import Testing
 private final class MovableClock: AuctionClockProtocol {
     var now: Date
 
+    /// Starts the clock at `now`.
     init(now: Date) {
         self.now = now
     }
 }
 
+/// My bids ViewModel: grouping by position, live regrouping, outbid badge, and empty state.
 @MainActor
 struct MyBidsViewModelTests {
 
@@ -32,6 +34,7 @@ struct MyBidsViewModelTests {
 
     // MARK: - Lots
 
+    /// Live lot where the buyer holds the high bid.
     private func winning(lot: String = "W-1") -> VehicleModel {
         withLot(
             .fixture(auctionStart: anchorStart, buyNowPrice: 90_000, currentBid: 20_000, bidCount: 3, yourBid: 20_000),
@@ -39,6 +42,7 @@ struct MyBidsViewModelTests {
         )
     }
 
+    /// Live lot where someone else outbid the buyer.
     private func outbid(lot: String = "O-1") -> VehicleModel {
         withLot(
             .fixture(auctionStart: anchorStart, buyNowPrice: 90_000, currentBid: 21_000, bidCount: 4, yourBid: 20_000),
@@ -46,26 +50,32 @@ struct MyBidsViewModelTests {
         )
     }
 
+    /// Ended lot the buyer won with the high bid (no floor).
     private func won() -> VehicleModel {
         withLot(.fixture(auctionStart: endedStart, currentBid: 15_000, bidCount: 2, yourBid: 15_000), "N-1")
     }
 
+    /// Lot the buyer bought with Buy Now.
     private func bought() -> VehicleModel {
         withLot(.fixture(auctionStart: anchorStart, buyNowPrice: 30_000, yourPurchasePrice: 30_000), "B-1")
     }
 
+    /// Ended lot where someone else held the high bid.
     private func lost() -> VehicleModel {
         withLot(.fixture(auctionStart: endedStart, currentBid: 16_000, bidCount: 5, yourBid: 15_500), "L-1")
     }
 
+    /// Live lot with bids but none from the buyer.
     private func untouched() -> VehicleModel {
         withLot(.fixture(auctionStart: anchorStart, currentBid: 12_000, bidCount: 1), "U-1")
     }
 
+    /// Start 73 h before the anchor, so the auction has ended at launch.
     private var endedStart: Date {
         anchorStart.addingTimeInterval(-TestDates.hours(73))
     }
 
+    /// Copy of `vehicle` with a different lot number.
     private func withLot(_ vehicle: VehicleModel, _ lot: String) -> VehicleModel {
         VehicleModel(
             id: vehicle.id, vin: vehicle.vin, year: vehicle.year, make: vehicle.make, model: vehicle.model,

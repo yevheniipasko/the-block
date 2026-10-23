@@ -70,6 +70,7 @@ extension BidPosition {
 
 }
 
+/// User-facing strings for bid positions.
 private enum Localizable {
     static let winning = "Winning"
     static let outbid = "Outbid"

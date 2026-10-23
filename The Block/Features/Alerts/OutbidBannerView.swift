@@ -15,11 +15,15 @@ import SwiftUI
 /// to the bid sheet (spec ALERT-1, ALERT-2, ALERT-4). Dismisses itself, or on swipe up.
 struct OutbidBannerView: View {
 
+    /// The outbid notice to show.
     let alert: OutbidAlert
+    /// Called by "Bid again"; the host dismisses the banner and opens that lot's bid sheet.
     let onBidAgain: () -> Void
+    /// Called on swipe up or the VoiceOver "Dismiss" action.
     let onDismiss: () -> Void
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    /// Vertical offset while the banner is being dragged; resets when the drag ends.
     @GestureState private var dragOffset: CGFloat = 0
 
     var body: some View {
@@ -61,6 +65,7 @@ struct OutbidBannerView: View {
         }
     }
 
+    /// Orange down-arrow badge; decorative, so hidden from VoiceOver.
     private var icon: some View {
         Image(systemName: "arrow.down")
             .font(.subheadline.weight(.bold))
@@ -70,6 +75,7 @@ struct OutbidBannerView: View {
             .accessibilityHidden(true)
     }
 
+    /// Full sentence announced to VoiceOver when the banner appears (spec ALERT-4).
     private var message: String {
         Localizable.message(title: alert.title, amount: Formatting.currency(alert.currentBid))
     }

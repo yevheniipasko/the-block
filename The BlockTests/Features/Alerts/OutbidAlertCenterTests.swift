@@ -13,6 +13,7 @@ import Foundation
 import Testing
 @testable import The_Block
 
+/// Outbid alerts raised from the live feed: when they fire, queue, dismiss, and are suppressed.
 @MainActor
 struct OutbidAlertCenterTests {
 
@@ -36,6 +37,9 @@ struct OutbidAlertCenterTests {
         )
     }
 
+    /// Builds the stack and starts `observe()` on a center, optionally loading only after it subscribes.
+    ///
+    /// Cancel the returned harness's `task` when the test ends.
     private func makeCenter(
         _ vehicles: [VehicleModel],
         displayDuration: Duration = .seconds(60),
@@ -188,6 +192,7 @@ private struct Harness {
     let task: Task<Void, Never>
 }
 
+/// Yield and polling budgets for waiting on the observing task.
 private enum Constants {
     static let subscribeYields = 3
     static let timeout: Duration = .seconds(2)

@@ -74,6 +74,7 @@ final class VehicleRepository: VehicleRepositoryProtocol {
     private let pageLatency: Duration
     private let loadStates = StreamBroadcaster<LoadState>()
     private let changes = StreamBroadcaster<VehicleModel>()
+    /// Task consuming the current feed connection; cancelled when `load()` reconnects.
     private var feedTask: Task<Void, Never>?
     private let logger = Logger(subsystem: "TheBlock", category: "VehicleRepository")
 
@@ -169,6 +170,7 @@ final class VehicleRepository: VehicleRepositoryProtocol {
         }
     }
 
+    /// Applies one feed event to the cache: a snapshot replaces it and marks the load done, an update replaces one lot.
     private func handle(_ event: VehicleFeedEvent) {
         switch event {
         case .snapshot(let snapshot):
@@ -193,6 +195,10 @@ final class VehicleRepository: VehicleRepositoryProtocol {
         changes.yield(vehicle)
     }
 
+    /// Runs a bid / Buy Now request and caches the returned lot on success (spec LIVE-4).
+    ///
+    /// Errors other than `BidRejection` are logged and reported as `.connectionFailed`; the cache
+    /// is left untouched on any failure (spec BID-8).
     private func perform(_ request: () async throws -> VehicleModel) async -> Result<VehicleModel, BidRejection> {
         do {
             let vehicle = try await request()
@@ -206,6 +212,7 @@ final class VehicleRepository: VehicleRepositoryProtocol {
         }
     }
 
+    /// Logs why the feed failed and moves to `.failed` with the user-facing message (spec DATA-3, LIVE-4).
     private func fail(reason: String) {
         logger.error("[VehicleRepository] feed failed: \(reason, privacy: .public)")
         loadState = .failed(message: Localizable.loadFailed)

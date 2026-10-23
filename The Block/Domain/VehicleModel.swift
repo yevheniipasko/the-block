@@ -31,19 +31,23 @@ struct VehicleModel: Identifiable, Hashable, Sendable {
     let drivetrain: Drivetrain
     let odometerKm: Int
     let fuelType: FuelType
+    /// Condition grade on a 0–5 scale.
     let conditionGrade: Double
     let conditionReport: String
     let damageNotes: [String]
     let titleStatus: TitleStatus
     let province: String
     let city: String
+    /// Auction start, normalized to real time by `AuctionSchedule` once loaded (spec TIME-1).
     var auctionStart: Date
     let startingBid: Int
+    /// Seller's floor price; never shown to the buyer, only whether it's met.
     let reservePrice: Int?
     let buyNowPrice: Int?
     let images: [URL]
     let sellingDealership: String
     let lot: String
+    /// Highest bid so far, `nil` when there are no bids.
     var currentBid: Int?
     var bidCount: Int
 
@@ -65,6 +69,7 @@ struct VehicleModel: Identifiable, Hashable, Sendable {
 
 }
 
+/// Body style; raw values match `body_style` in the dataset.
 enum BodyStyle: String, Sendable, CaseIterable {
     case suv = "SUV"
     case coupe
@@ -73,6 +78,7 @@ enum BodyStyle: String, Sendable, CaseIterable {
     case truck
 }
 
+/// Transmission type; raw values match `transmission` in the dataset.
 enum Transmission: String, Sendable, CaseIterable {
     case automatic
     case manual
@@ -80,6 +86,7 @@ enum Transmission: String, Sendable, CaseIterable {
     case singleSpeed = "single-speed"
 }
 
+/// Drivetrain; raw values match `drivetrain` in the dataset.
 enum Drivetrain: String, Sendable, CaseIterable {
     case fourWheel = "4WD"
     case allWheel = "AWD"
@@ -87,6 +94,7 @@ enum Drivetrain: String, Sendable, CaseIterable {
     case rearWheel = "RWD"
 }
 
+/// Fuel type; raw values match `fuel_type` in the dataset.
 enum FuelType: String, Sendable, CaseIterable {
     case gasoline
     case diesel
@@ -94,6 +102,7 @@ enum FuelType: String, Sendable, CaseIterable {
     case electric
 }
 
+/// Title status; rebuilt and salvage titles are flagged in the UI (spec DETAIL-4).
 enum TitleStatus: String, Sendable, CaseIterable {
     case clean
     case rebuilt

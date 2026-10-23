@@ -23,17 +23,25 @@ final class InventoryViewModel {
 
     /// What the screen shows as a whole (spec DATA-3, UX-5).
     enum Content: Equatable {
+        /// The feed is connecting, or page one is still on its way.
         case loading
+        /// The feed failed to load; retry reconnects it.
         case loadFailed(message: String)
+        /// The feed loaded but page one failed; retry requests the page again.
         case firstPageFailed
+        /// Page one arrived; the list (or empty state when nothing matches) is shown.
         case results
     }
 
     /// State of the paging pipeline, drives the last list row (spec LIST-7).
     enum PageStatus: Equatable {
+        /// More pages may follow; none is loading.
         case idle
+        /// A page request is in flight.
         case loading
+        /// The last page request failed.
         case failed
+        /// The last page has loaded.
         case complete
     }
 
@@ -66,14 +74,18 @@ final class InventoryViewModel {
     private(set) var loadState: LoadState = .idle
     /// Provinces present in the inventory, alphabetically, for the province filter.
     private(set) var availableProvinces: [String] = []
+    /// Number of lots matching the query, from the latest page; `nil` until page one arrives (spec LIST-6).
     private(set) var totalCount: Int?
+    /// Paging pipeline state; drives the last list row.
     private(set) var pageStatus: PageStatus = .idle
 
     /// The in-flight page request; awaited by pull-to-refresh and tests.
     @ObservationIgnored private(set) var loadTask: Task<Void, Never>?
 
     @ObservationIgnored private let repository: VehicleRepositoryProtocol
+    /// Pending debounce that applies `searchText` to `query`.
     @ObservationIgnored private var searchTask: Task<Void, Never>?
+    /// Cursor from the latest page; `nil` before page one and after the last page.
     @ObservationIgnored private var nextCursor: PageCursor?
     @ObservationIgnored private let logger = Logger(subsystem: "TheBlock", category: "InventoryViewModel")
 
@@ -323,6 +335,7 @@ private extension Set {
 
 }
 
+/// Paging and search tuning.
 private enum Constants {
     static let pageSize = 20
     static let prefetchDistance = 5

@@ -13,6 +13,7 @@ import Foundation
 import Testing
 @testable import The_Block
 
+/// Normalization of dataset start times around the launch date.
 @MainActor
 struct AuctionScheduleTests {
 
@@ -40,6 +41,7 @@ struct AuctionScheduleTests {
 
 }
 
+/// Auction status over time, ended outcomes, and floor (reserve) state.
 @MainActor
 struct AuctionStatusTests {
 
@@ -104,6 +106,7 @@ struct AuctionStatusTests {
 
 }
 
+/// One row of the ended-outcome table: lot inputs and the outcome expected after the end.
 struct OutcomeCase: Sendable, CustomTestStringConvertible {
     let floor: Int?
     let currentBid: Int?
@@ -111,6 +114,7 @@ struct OutcomeCase: Sendable, CustomTestStringConvertible {
     let yourBid: Int?
     let expected: EndedOutcome
 
+    /// Readable case name shown in the test navigator.
     var testDescription: String {
         let describe = { (value: Int?) in value.map(String.init) ?? "none" }
         return "floor \(describe(floor)), bid \(describe(currentBid)) ×\(bidCount), yours \(describe(yourBid))"

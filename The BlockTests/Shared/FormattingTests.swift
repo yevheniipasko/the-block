@@ -13,6 +13,7 @@ import Foundation
 import Testing
 @testable import The_Block
 
+/// Shared display formatters and the ending-soon rule.
 @MainActor
 struct FormattingTests {
 

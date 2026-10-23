@@ -13,7 +13,9 @@ import SwiftUI
 /// Titled card that groups one section of the detail screen.
 struct DetailSectionCard<Content: View>: View {
 
+    /// Section heading, exposed to VoiceOver as a header.
     let title: String
+    /// The section's rows, stacked under the heading.
     @ViewBuilder let content: Content
 
     var body: some View {

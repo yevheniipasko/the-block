@@ -13,6 +13,7 @@ import Foundation
 import Testing
 @testable import The_Block
 
+/// The buyer's position on a lot (winning, outbid, won, lost, bought) at a given time.
 @MainActor
 struct BidPositionTests {
 
@@ -50,6 +51,7 @@ struct BidPositionTests {
 
 }
 
+/// Buyer fee tiers and the total cost estimate.
 @MainActor
 struct FeeScheduleTests {
 
@@ -74,6 +76,7 @@ struct FeeScheduleTests {
 
 }
 
+/// Demo seed that gives the buyer one leading and one outbid position at launch.
 @MainActor
 struct DemoSeedTests {
 

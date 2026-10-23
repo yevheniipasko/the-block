@@ -23,6 +23,7 @@ final class MyBidsViewModel {
     /// Lots that share one position, in display order inside the group.
     struct Group: Identifiable, Equatable {
         let position: BidPosition
+        /// Ending soonest first, lot number breaking ties.
         let vehicles: [VehicleModel]
 
         var id: BidPosition { position }
@@ -35,6 +36,7 @@ final class MyBidsViewModel {
     private(set) var groups: [Group] = []
 
     @ObservationIgnored private let repository: VehicleRepositoryProtocol
+    /// How often positions are re-evaluated against the clock.
     @ObservationIgnored private let tickInterval: Duration
 
     /// Builds the groups from the repository's current vehicles.

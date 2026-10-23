@@ -17,12 +17,17 @@ import Foundation
 /// the simulated market outbid you within seconds. A normal launch uses `.standard`.
 struct LaunchOptions: Equatable, Sendable {
 
+    /// How the simulated market behaves for this launch; the raw value is the `-market` argument.
     enum MarketMode: String, Sendable {
+        /// A competing bid every ~6 s (spec LIVE-2).
         case standard
+        /// No competing bids, for deterministic UI tests.
         case off
+        /// A competing bid every second, always on a lot you're winning when there is one.
         case fast
     }
 
+    /// Options for a normal launch.
     static let standard = LaunchOptions(market: .standard)
 
     let market: MarketMode

@@ -13,6 +13,7 @@ import Foundation
 import Testing
 @testable import The_Block
 
+/// Factory that builds real ViewModels on an empty stub repository and records detail requests.
 @MainActor
 private final class FakeViewModelFactory: ViewModelFactoryProtocol {
 
@@ -20,27 +21,33 @@ private final class FakeViewModelFactory: ViewModelFactoryProtocol {
         result: .success([]),
         clock: FixedClock(now: TestDates.reference)
     )
+    /// Vehicle IDs passed to `makeVehicleDetailViewModel(vehicleID:)`, in call order.
     private(set) var detailRequests: [VehicleModel.ID] = []
 
+    /// Builds an inventory ViewModel on the shared stub repository.
     func makeInventoryViewModel() -> InventoryViewModel {
         InventoryViewModel(repository: repository)
     }
 
+    /// Records the request, then builds a detail ViewModel for `vehicleID`.
     func makeVehicleDetailViewModel(vehicleID: VehicleModel.ID) -> VehicleDetailViewModel {
         detailRequests.append(vehicleID)
         return VehicleDetailViewModel(vehicleID: vehicleID, repository: repository)
     }
 
+    /// Builds a bid ViewModel for `vehicleID` on the shared stub repository.
     func makeBidViewModel(vehicleID: VehicleModel.ID) -> BidViewModel {
         BidViewModel(vehicleID: vehicleID, repository: repository)
     }
 
+    /// Builds a My bids ViewModel on the shared stub repository.
     func makeMyBidsViewModel() -> MyBidsViewModel {
         MyBidsViewModel(repository: repository)
     }
 
 }
 
+/// Router navigation state: detail selection, bid / Buy Now sheets, and My bids.
 @MainActor
 struct InventoryRouterTests {
 

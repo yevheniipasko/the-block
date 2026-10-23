@@ -82,6 +82,7 @@ final class SmokeUITests: XCTestCase {
 
     // MARK: - Helpers
 
+    /// Launches the app with `-market <market>`, stopping the test at the first failure.
     private func launch(market: String) -> XCUIApplication {
         continueAfterFailure = false
         let app = XCUIApplication()
@@ -90,14 +91,17 @@ final class SmokeUITests: XCTestCase {
         return app
     }
 
+    /// First element of any type with `identifier`.
     private func element(_ app: XCUIApplication, _ identifier: String) -> XCUIElement {
         app.descendants(matching: .any).matching(identifier: identifier).firstMatch
     }
 
+    /// Inventory row for `lot`.
     private func row(_ app: XCUIApplication, _ lot: String) -> XCUIElement {
         element(app, "list.row.\(lot)")
     }
 
+    /// Types `text` into the search field, first deleting `previous` if given.
     private func search(_ app: XCUIApplication, for text: String, replacing previous: String = "") {
         let field = app.searchFields.firstMatch
         XCTAssertTrue(field.waitForExistence(timeout: Constants.loadTimeout))
@@ -108,6 +112,7 @@ final class SmokeUITests: XCTestCase {
         field.typeText(text)
     }
 
+    /// Searches for the test lot and opens its detail screen.
     private func openLot(_ app: XCUIApplication) {
         search(app, for: Constants.lot)
         let lotRow = row(app, Constants.lot)
@@ -130,6 +135,7 @@ final class SmokeUITests: XCTestCase {
         XCTFail("Could not reach the confirm step")
     }
 
+    /// Waits for the element with `identifier`, then taps it.
     private func tapWhenReady(_ app: XCUIApplication, _ identifier: String) {
         let target = element(app, identifier)
         XCTAssertTrue(target.waitForExistence(timeout: Constants.stepTimeout), "\(identifier) not found")
@@ -138,6 +144,7 @@ final class SmokeUITests: XCTestCase {
 
 }
 
+/// Test lot, inputs, and timeouts for the smoke flows.
 private enum Constants {
     static let lot = "D-0010"
     static let noMatch = "zzzz"

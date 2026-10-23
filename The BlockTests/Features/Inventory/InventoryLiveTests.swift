@@ -13,7 +13,7 @@ import Foundation
 import Testing
 @testable import The_Block
 
-/// Real repository whose page requests can be made to fail on demand.
+/// Counts snapshot load attempts so the first one can fail and the retry succeed.
 @MainActor
 private final class AttemptCounter {
     var count = 0
@@ -27,16 +27,19 @@ struct InventoryLiveTests {
     private let fleet = inventoryFleet
     private let observers = InventoryObservers()
 
+    /// Stub server plus a loaded repository on the test clock.
     private func makeStack(
         _ vehicles: [VehicleModel]
     ) async -> (server: SimulatedAuctionDataSource, repository: VehicleRepository) {
         await makeInventoryStack(vehicles, clock: clock)
     }
 
+    /// Loaded repository on the test clock.
     private func makeRepository(_ vehicles: [VehicleModel]) async -> VehicleRepository {
         await makeStack(vehicles).repository
     }
 
+    /// Subscribed ViewModel with page one loaded, sorted by price.
     private func makeStartedViewModel(repository: VehicleRepositoryProtocol) async -> InventoryViewModel {
         await makeStartedInventory(repository: repository, observers: observers)
     }
@@ -46,6 +49,7 @@ struct InventoryLiveTests {
         let repository = VehicleRepository.stubbed(result: .success(fleet), clock: clock)
         let viewModel = InventoryViewModel(repository: repository)
         observers.start(viewModel)
+        // Never true: spends the whole yield budget so any pending update would have landed.
         await waitUntil { false }
         #expect(viewModel.loadState == .idle)
         #expect(viewModel.content == .loading)
@@ -126,6 +130,7 @@ struct InventoryLiveTests {
 
         _ = try await repository.placeBid(20_000, on: unloaded).get()
         _ = await updates.next()
+        // Never true: spends the whole yield budget so any pending update would have landed.
         await waitUntil { false }
 
         #expect(viewModel.vehicles == rows)

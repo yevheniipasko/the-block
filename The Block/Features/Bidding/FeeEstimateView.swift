@@ -17,6 +17,7 @@ import SwiftUI
 /// mid-number: each line falls back to a stacked layout when it doesn't fit (spec UX-2).
 struct FeeEstimateView: View {
 
+    /// Amount, fees and total to show.
     let estimate: FeeEstimate
     /// Accessibility id prefix, e.g. `bid` → `bid.estimateRow`, `bid.estimateBreakdown`.
     let identifierPrefix: String
@@ -73,6 +74,7 @@ struct FeeEstimateView: View {
         .contentShape(Rectangle())
     }
 
+    /// "Est. total" label; never truncated.
     private var totalTitle: some View {
         Text(Localizable.totalTitle)
             .font(.subheadline)
@@ -80,6 +82,7 @@ struct FeeEstimateView: View {
             .fixedSize(horizontal: true, vertical: false)
     }
 
+    /// Total in CAD; never wraps mid-number (spec UX-2).
     private var totalAmount: some View {
         Text(Formatting.currency(estimate.total))
             .font(.headline.monospacedDigit())

@@ -40,6 +40,7 @@ enum DemoSeed {
         }
     }
 
+    /// Whether a lot can carry a seeded position: active, has bids, and still biddable below Buy Now.
     private static func isEligible(_ vehicle: VehicleModel, now: Date) -> Bool {
         guard case .active = vehicle.status(at: now), vehicle.bidCount > 0, vehicle.currentBid != nil else {
             return false

@@ -13,14 +13,18 @@ import SwiftUI
 
 /// Bottom action bar: place bid / Buy Now, or the outcome once ended (spec DETAIL-6, TIME-4).
 ///
-/// Re-evaluates every second through `TimelineView`, so the buttons flip when the auction
-/// starts or ends while the screen is open.
+/// Re-evaluates on every tick of the shared `AuctionTicker`, so the buttons flip when the
+/// auction starts or ends while the screen is open.
 struct AuctionActionBar: View {
 
+    /// Source of the bar's state for the current moment.
     let viewModel: VehicleDetailViewModel
+    /// Asks the router to present the bid sheet.
     let onPlaceBid: () -> Void
+    /// Asks the router to present the Buy Now sheet.
     let onBuyNow: () -> Void
 
+    /// Shared once-per-second clock; each tick re-evaluates the bar.
     @Environment(AuctionTicker.self) private var ticker
 
     var body: some View {

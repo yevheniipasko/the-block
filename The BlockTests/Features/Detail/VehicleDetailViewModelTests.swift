@@ -13,6 +13,7 @@ import Foundation
 import Testing
 @testable import The_Block
 
+/// Detail ViewModel: action bar, live bid and Buy Now state, header, and spec / condition sections.
 @MainActor
 struct VehicleDetailViewModelTests {
 
@@ -20,6 +21,7 @@ struct VehicleDetailViewModelTests {
     private let launch = TestDates.reference
     private let datasetAnchor = Date(timeIntervalSince1970: 1_000_000)
 
+    /// Detail ViewModel for `vehicle` plus its loaded repository.
     private func makeViewModel(_ vehicle: VehicleModel) async -> (VehicleDetailViewModel, VehicleRepository) {
         let stack = await makeStack(vehicle)
         return (stack.viewModel, stack.repository)

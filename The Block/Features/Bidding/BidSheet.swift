@@ -17,7 +17,9 @@ import SwiftUI
 /// flight every control is disabled and the sheet can't be swiped away.
 struct BidSheet: View {
 
+    /// Bid state for the lot, kept live while the sheet is open.
     let viewModel: BidViewModel
+    /// Closes the sheet: on Cancel, or shortly after a successful bid.
     let onFinish: () -> Void
 
     var body: some View {
@@ -49,6 +51,7 @@ struct BidSheet: View {
         }
     }
 
+    /// Success, ended notice, amount entry, or review step, by phase and lot status (spec BID-7).
     @ViewBuilder
     private var content: some View {
         if viewModel.phase == .succeeded {
@@ -78,6 +81,7 @@ struct BidSheet: View {
 private struct BidEntryView: View {
 
     let viewModel: BidViewModel
+    /// Keyboard focus of the amount field; dropped before moving to review.
     @FocusState private var isAmountFocused: Bool
 
     var body: some View {
@@ -128,6 +132,7 @@ private struct BidEntryView: View {
         }
     }
 
+    /// "$" prefix and number-pad field bound to the digits-only entry (spec BID-2).
     private var amountField: some View {
         HStack(spacing: Spacing.xSmall) {
             Text(Localizable.currencySymbol)
@@ -144,6 +149,7 @@ private struct BidEntryView: View {
         .background(.fill.tertiary, in: RoundedRectangle(cornerRadius: CornerRadius.medium))
     }
 
+    /// +1, +2 and +5 step buttons in a row, or stacked when they don't fit (spec BID-2, UX-2).
     private var quickAddButtons: some View {
         ViewThatFits(in: .horizontal) {
             HStack(spacing: Spacing.small) { quickAddButtonList }
@@ -151,6 +157,7 @@ private struct BidEntryView: View {
         }
     }
 
+    /// One button per entry in `Constants.quickAddSteps`.
     @ViewBuilder
     private var quickAddButtonList: some View {
         ForEach(Constants.quickAddSteps, id: \.self) { steps in
@@ -167,6 +174,7 @@ private struct BidEntryView: View {
         }
     }
 
+    /// Routes typing through `updateAmountText(_:)`, which keeps digits only.
     private var amountBinding: Binding<String> {
         Binding(get: { viewModel.amountText }, set: { viewModel.updateAmountText($0) })
     }
@@ -241,8 +249,11 @@ private struct BidReviewView: View {
 /// Short success state shown before the sheet closes itself (spec BID-8, BID-10).
 struct BidSuccessView: View {
 
+    /// Headline, e.g. "You're the high bidder".
     let title: String
+    /// Optional second line, e.g. the amount placed or the price paid.
     let detail: String?
+    /// Accessibility identifier for the whole success view.
     let identifier: String
 
     var body: some View {

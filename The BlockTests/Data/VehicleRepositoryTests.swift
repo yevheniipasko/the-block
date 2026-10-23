@@ -13,11 +13,13 @@ import Foundation
 import Testing
 @testable import The_Block
 
+/// Repository load, bid and Buy Now forwarding, rejection mapping, and paged queries.
 @MainActor
 struct VehicleRepositoryTests {
 
     private let launch = TestDates.reference
 
+    /// Repository on a stub server that has already loaded `vehicles`, with `launch` as now.
     private func makeRepository(_ vehicles: [VehicleModel]) async -> VehicleRepository {
         let repository = VehicleRepository.stubbed(
             result: .success(vehicles),

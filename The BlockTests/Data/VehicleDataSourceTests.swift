@@ -13,6 +13,7 @@ import Foundation
 import Testing
 @testable import The_Block
 
+/// Decoding the bundled dataset and mapping DTOs to models, including mapping errors.
 @MainActor
 struct VehicleDataSourceTests {
 
@@ -71,6 +72,7 @@ struct VehicleDataSourceTests {
         }
     }
 
+    /// One-vehicle JSON payload in the bundled file's shape, with a configurable `auction_start`.
     private static func json(auctionStart: String) -> Data {
         Data("""
         [{
