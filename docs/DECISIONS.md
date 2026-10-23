@@ -46,6 +46,7 @@ Running log — see `.claude/rules/decisions-log.md`. One line per entry, newest
 
 - 2026-10-22 — Accessibility pass (UX-2, UX-3): ran Xcode's `performAccessibilityAudit` once as a diagnostic, fixed what it found, then dropped the audit test. Fixes: status badge text is primary on a tinted pill with a coloured dot (green/orange caption text failed contrast, and colour is no longer the only cue); spec-row and outbid-banner icons scale with Dynamic Type (`@ScaledMetric`), they overlapped labels at accessibility sizes. Accepted: "nearly passed" contrast on Apple's semantic `.secondary` text, system Cancel button, and contrast flags on content scrolled under glass bars. Why no committed audit test: it needed three filters to avoid false positives and its failing element changed run to run with the live countdown. Alt: keep it as a gate (rejected, flaky and hard to explain). Verification is `.maestro/accessibility.yaml` screenshots in dark mode at accessibility XXXL and light at default size.
 - 2026-10-22 — `OutbidAlertUITests` review retries raised from 3 to 5: it failed once in a full-suite run (fast market repriced the lot on every review under load), passed 3/3 alone.
+- 2026-10-22 — My bids toolbar button: `.accessibilityValue` moved after `.badge`. The native badge (from `fix/toolbar-badge`) replaced the VoiceOver value "Outbid on 1" with a bare "1"; caught by `MyBidsUITests` after merging main.
 
 ## Time
 
