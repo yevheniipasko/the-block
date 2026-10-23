@@ -51,7 +51,7 @@ final class OutbidAlertUITests: XCTestCase {
     /// Review → confirm. In a live market another bidder can raise the price during review, which
     /// sends the sheet back to editing with a new minimum (spec LIVE-3); review again in that case.
     private func reviewAndConfirmBid(_ app: XCUIApplication) {
-        for _ in 0..<3 {
+        for _ in 0..<Constants.reviewAttempts {
             tapWhenReady(app, "bid.reviewButton")
             let confirm = element(app, "bid.confirmButton")
             if confirm.waitForExistence(timeout: 3) {
@@ -75,4 +75,6 @@ private enum Constants {
     static let loadTimeout: TimeInterval = 20
     static let alertTimeout: TimeInterval = 30
     static let stepTimeout: TimeInterval = 10
+    /// The fast market can reprice the lot during several reviews in a row under load.
+    static let reviewAttempts = 5
 }
