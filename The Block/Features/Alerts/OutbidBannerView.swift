@@ -39,7 +39,11 @@ struct OutbidBannerView: View {
         .padding(.vertical, Spacing.medium)
         .padding(.horizontal, Spacing.large)
         .glassEffect(.regular, in: .rect(cornerRadius: Constants.cornerRadius))
-        .shadow(color: .black.opacity(Constants.shadowOpacity), radius: Constants.shadowRadius, y: Constants.shadowOffset)
+        .shadow(
+            color: .black.opacity(Constants.shadowOpacity),
+            radius: Constants.shadowRadius,
+            y: Constants.shadowOffset
+        )
         .padding(.horizontal, Spacing.medium)
         .offset(y: dragOffset)
         .gesture(swipeUpToDismiss)
