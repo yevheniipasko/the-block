@@ -61,6 +61,7 @@ Running log — see `.claude/rules/decisions-log.md`. One line per entry, newest
 - 2026-10-22 — Smaller fixes: `VehicleImage` shows "Photo unavailable" for a nil URL (was an endless spinner); the market loop exits once its data source is gone; injected repository/router/factory protocols are `Sendable`; stale "streams drop values" comments corrected (broadcasts are unbounded since 86fa4d3).
 - 2026-10-22 — Inventory, My bids and the outbid alert center stay `.container`-scoped (architecture rule updated). Why: Inventory is the root list held by the shared router, My bids feeds the toolbar badge while closed, the alert center is app-wide.
 - 2026-10-22 — Earlier commits that break `commits.md` (`design:` / `perf:` types, merge commits with conflict bodies) left as is. Why: they are on `main`; rewriting history isn't worth it for a prototype. Rule applies from here on.
+- 2026-10-22 — Detail action bar buttons share one two-line label ("Place bid / Min $X", "Buy Now / $X") and stay equal height; the filled vs. tinted style alone marks the primary action. Why: side by side, the longer "Place bid · Min $X" label wrapped in its half of the bar and made that button taller than Buy Now, which looked broken. Alt: one-line labels with a stacked fallback (cut: unequal widths, stacks more often), moving the minimum to a caption (cut: hides the minimum right before tapping), always stacked (cut: more vertical space).
 
 ## Time
 
@@ -79,6 +80,7 @@ Running log — see `.claude/rules/decisions-log.md`. One line per entry, newest
 - 2026-10-22 — Reconciled with commit times: 15:33–22:33, ~7 h in one session; core (through live streams + XCUITest) done by 18:39 (~3 h), stretch 18:39–20:22, polish 20:22–22:33. The estimates above for setup → three screens (~175 min) are high; commits put that stretch at ~1 h 40.
 - 2026-10-22 — README time section, platform note, test count: 15 min
 - 2026-10-22 — Review cross-check (Claude + Codex), verification, fixes for 17 findings with 4 parallel agents, integration: ~1 h 30
+- 2026-10-22 — Action bar button sizing fix: ~20 min
 
 ## AI usage
 
@@ -101,3 +103,4 @@ Running log — see `.claude/rules/decisions-log.md`. One line per entry, newest
 - 2026-10-22 — Claude Code caught the toolbar-badge a11y regression in the post-merge full test run, fixed it by reordering modifiers, and verified with the full suite (164/164) and a simulator screenshot.
 - 2026-10-22 — Claude Code checked the submission README against the brief and commit times: the time section understated the total (~5-6 h vs ~7 h) and the test count was stale. It also pointed out that the brief's "desktop" bullet is a leftover from the web-only version. I asked for the honest ~3 h core / ~4 h extra split and a note that no desktop version is expected; I declined to rescale commit timestamps.
 - 2026-10-22 — Claude Code ran `/code-review xhigh` and Codex `review` (high), merged 18 findings, had 4 agents try to disprove each (1 rejected, 9 partial), then fixed the rest with 4 agents in one shared worktree (disjoint file ownership, separate DerivedData and simulators); I asked for one worktree instead of four. The orchestrator wrote SPEC/DECISIONS and ran the full suite.
+- 2026-10-22 — Claude Code traced the uneven Place bid / Buy Now heights to the label wrapping inside an equal HStack split, proposed four layouts; I picked the matching two-line labels.

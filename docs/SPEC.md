@@ -108,7 +108,7 @@ Tasks:
 - **DETAIL-3** Specs: engine, transmission, drivetrain, fuel, odometer, body style, exterior/interior color, VIN (copyable).
 - **DETAIL-4** Condition: grade (x.x / 5 with visual scale), condition report, damage notes list or "No damage reported", title status — rebuilt/salvage visually flagged.
 - **DETAIL-5** Seller: selling dealership, city, province.
-- **DETAIL-6** Bottom action bar is always reachable: "Place bid" (Upcoming/Active), "Buy Now $X" (Active, when priced); ended lots show the outcome instead of actions.
+- **DETAIL-6** Bottom action bar is always reachable: "Place bid" with the minimum (Upcoming/Active), "Buy Now" with the price (Active, when priced), equal-height buttons; ended lots show the outcome instead of actions.
 - **DETAIL-7** *(postponed — see Postponed)* Tapping the condition grade opens an explainer: the 0–5 scale with what each band means for a buyer (e.g. 4.0+ "light wear, retail-ready"; under 2.0 "major reconditioning"), highlighting this lot's band.
 
 Tasks:
