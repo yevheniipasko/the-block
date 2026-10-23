@@ -47,6 +47,7 @@ Running log — see `.claude/rules/decisions-log.md`. One line per entry, newest
 - 2026-10-22 — Native iOS only, no desktop version. Why: the brief allows "web or mobile" on "the platform you choose"; the Minimum Bar's "desktop and mobile" dates from the web-only brief, so it maps to small vs. large screens (iPhone stack, iPad split view). "My Mac (Designed for iPad)" is available by default but untested. Alt: Mac Catalyst / macOS target (cut: out of scope, extra testing).
 - 2026-10-22 — Accessibility pass (UX-2, UX-3): ran Xcode's `performAccessibilityAudit` once as a diagnostic, fixed what it found, then dropped the audit test. Fixes: status badge text is primary on a tinted pill with a coloured dot (green/orange caption text failed contrast, and colour is no longer the only cue); spec-row and outbid-banner icons scale with Dynamic Type (`@ScaledMetric`), they overlapped labels at accessibility sizes. Accepted: "nearly passed" contrast on Apple's semantic `.secondary` text, system Cancel button, and contrast flags on content scrolled under glass bars. Why no committed audit test: it needed three filters to avoid false positives and its failing element changed run to run with the live countdown. Alt: keep it as a gate (rejected, flaky and hard to explain). Verification is `.maestro/accessibility.yaml` screenshots in dark mode at accessibility XXXL and light at default size.
 - 2026-10-22 — `OutbidAlertUITests` review retries raised from 3 to 5: it failed once in a full-suite run (fast market repriced the lot on every review under load), passed 3/3 alone.
+- 2026-10-22 — Detail action bar buttons share one two-line label ("Place bid / Min $X", "Buy Now / $X") and stay equal height; the filled vs. tinted style alone marks the primary action. Why: side by side, the longer "Place bid · Min $X" label wrapped in its half of the bar and made that button taller than Buy Now, which looked broken. Alt: one-line labels with a stacked fallback (cut: unequal widths, stacks more often), moving the minimum to a caption (cut: hides the minimum right before tapping), always stacked (cut: more vertical space).
 
 ## Time
 
@@ -64,6 +65,7 @@ Running log — see `.claude/rules/decisions-log.md`. One line per entry, newest
 - 2026-10-22 — Polish after the README (scroll perf, design pass + revert, outbid banner restyle, Buy Now detail fix, toolbar badge + VoiceOver fix, accessibility pass): ~2 h
 - 2026-10-22 — Reconciled with commit times: 15:33–22:33, ~7 h in one session; core (through live streams + XCUITest) done by 18:39 (~3 h), stretch 18:39–20:22, polish 20:22–22:33. The estimates above for setup → three screens (~175 min) are high; commits put that stretch at ~1 h 40.
 - 2026-10-22 — README time section, platform note, test count: 15 min
+- 2026-10-22 — Action bar button sizing fix: ~20 min
 
 ## AI usage
 
@@ -85,3 +87,4 @@ Running log — see `.claude/rules/decisions-log.md`. One line per entry, newest
 - 2026-10-22 — Claude Code added a copyright/summary header to all 75 Swift files and filled missing `///` docs, using 4 parallel agents (one worktree each, split App/Data/Domain · Alerts/Bidding/Detail · Inventory/MyBids/Shared · tests); fixed two stale comments (`AuctionActionBar` TimelineView, `AttemptCounter`); verified diff is comments-only and all 164 tests pass.
 - 2026-10-22 — Claude Code caught the toolbar-badge a11y regression in the post-merge full test run, fixed it by reordering modifiers, and verified with the full suite (164/164) and a simulator screenshot.
 - 2026-10-22 — Claude Code checked the submission README against the brief and commit times: the time section understated the total (~5-6 h vs ~7 h) and the test count was stale. It also pointed out that the brief's "desktop" bullet is a leftover from the web-only version. I asked for the honest ~3 h core / ~4 h extra split and a note that no desktop version is expected; I declined to rescale commit timestamps.
+- 2026-10-22 — Claude Code traced the uneven Place bid / Buy Now heights to the label wrapping inside an equal HStack split, proposed four layouts; I picked the matching two-line labels.
