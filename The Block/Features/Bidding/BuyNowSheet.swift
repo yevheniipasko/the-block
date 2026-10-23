@@ -19,7 +19,7 @@ struct BuyNowSheet: View {
 
     /// Bid / Buy Now state for the lot.
     let viewModel: BidViewModel
-    /// Closes the sheet: on Cancel, or shortly after a successful purchase.
+    /// Closes the sheet: on Cancel or Done, or shortly after a successful purchase.
     let onFinish: () -> Void
 
     var body: some View {
@@ -32,9 +32,17 @@ struct BuyNowSheet: View {
             .navigationTitle(Localizable.title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(Localizable.cancel, action: onFinish)
-                        .disabled(viewModel.isSubmitting)
+                if viewModel.phase == .succeeded {
+                    // After success there is nothing to cancel; "Done" makes that clear.
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button(Localizable.done, action: onFinish)
+                            .accessibilityIdentifier("buyNow.doneButton")
+                    }
+                } else {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button(Localizable.cancel, action: onFinish)
+                            .disabled(viewModel.isSubmitting)
+                    }
                 }
             }
         }
@@ -132,6 +140,7 @@ private enum Constants {
 private enum Localizable {
     static let title = "Buy Now"
     static let cancel = "Cancel"
+    static let done = "Done"
     static let price = "Buy Now price"
     static let endsAuctionNotice = "Buying ends the auction immediately. The purchase is binding."
     static let confirm = "Confirm purchase"

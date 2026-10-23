@@ -19,7 +19,7 @@ struct BidSheet: View {
 
     /// Bid state for the lot, kept live while the sheet is open.
     let viewModel: BidViewModel
-    /// Closes the sheet: on Cancel, or shortly after a successful bid.
+    /// Closes the sheet: on Cancel or Done, or shortly after a successful bid.
     let onFinish: () -> Void
 
     var body: some View {
@@ -33,9 +33,17 @@ struct BidSheet: View {
             .navigationTitle(Localizable.title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(Localizable.cancel, action: onFinish)
-                        .disabled(viewModel.isSubmitting)
+                if viewModel.phase == .succeeded {
+                    // After success there is nothing to cancel; "Done" makes that clear.
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button(Localizable.done, action: onFinish)
+                            .accessibilityIdentifier("bid.doneButton")
+                    }
+                } else {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button(Localizable.cancel, action: onFinish)
+                            .disabled(viewModel.isSubmitting)
+                    }
                 }
             }
         }
@@ -288,6 +296,7 @@ private enum Constants {
 private enum Localizable {
     static let title = "Place bid"
     static let cancel = "Cancel"
+    static let done = "Done"
     static let review = "Review bid"
     static let confirm = "Confirm bid"
     static let edit = "Edit bid"
