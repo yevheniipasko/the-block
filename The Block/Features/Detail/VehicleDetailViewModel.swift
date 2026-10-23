@@ -121,10 +121,9 @@ final class VehicleDetailViewModel {
         return Formatting.currency(vehicle.currentBid ?? vehicle.startingBid)
     }
 
-    /// Bid count with the right plural, e.g. `1 bid`, `14 bids`.
+    /// Bid count with the right plural, e.g. `No bids`, `1 bid`, `14 bids`.
     var bidCountText: String {
-        let count = vehicle?.bidCount ?? 0
-        return count == 1 ? Localizable.oneBid : Localizable.bids(count)
+        Formatting.bidCount(vehicle?.bidCount ?? 0)
     }
 
     /// Spec grid rows in display order; the VIN is shown separately with a copy button (spec DETAIL-3).
@@ -202,8 +201,6 @@ private enum Localizable {
     static let startingAt = "Starting at"
     static let currentBid = "Current bid"
     static let purchasedFor = "Purchased for"
-    static let oneBid = "1 bid"
-    static func bids(_ count: Int) -> String { "\(count) bids" }
     static let engine = "Engine"
     static let transmission = "Transmission"
     static let drivetrain = "Drivetrain"

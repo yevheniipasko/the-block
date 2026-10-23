@@ -3,7 +3,7 @@
 //  The Block
 //
 //  Shared display formatters: whole-dollar CAD currency, kilometres,
-//  and compact countdowns.
+//  bid counts, and compact countdowns.
 //
 //  Created by Yevhenii Pasko on 2026-10-22.
 //  Copyright © 2026 Yevhenii Pasko. All rights reserved.
@@ -22,6 +22,17 @@ enum Formatting {
     /// Formats an odometer reading, e.g. `47,731 km`.
     static func kilometres(_ value: Int) -> String {
         "\(value.formatted(.number.locale(Locale(identifier: "en_CA")))) km"
+    }
+
+    /// Bid count with the right plural: `No bids`, `1 bid`, `14 bids` (spec LIST-1, DETAIL-2).
+    ///
+    /// The one wording used by the inventory card, the detail header, and the bid sheet.
+    static func bidCount(_ count: Int) -> String {
+        switch count {
+        case 0: "No bids"
+        case 1: "1 bid"
+        default: "\(count) bids"
+        }
     }
 
     /// Compact time remaining until `date` (spec TIME-3).

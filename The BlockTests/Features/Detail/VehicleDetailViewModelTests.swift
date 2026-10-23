@@ -219,7 +219,7 @@ struct VehicleDetailViewModelTests {
 
         #expect(viewModel.priceLabel == "Starting at")
         #expect(viewModel.priceAmount == "$12,500")
-        #expect(viewModel.bidCountText == "0 bids")
+        #expect(viewModel.bidCountText == "No bids")
         #expect(viewModel.buyerMarker(at: launch) == nil)
     }
 

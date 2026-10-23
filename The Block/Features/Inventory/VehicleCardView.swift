@@ -68,7 +68,7 @@ struct VehicleCardView: View {
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.tint)
             }
-            yourPositionMarker
+            CardPositionMarker(vehicle: vehicle, pausedAt: countdownPausedAt)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -105,30 +105,10 @@ struct VehicleCardView: View {
     }
 
     private var bidCountText: some View {
-        Text(InventoryLabels.bidCount(vehicle.bidCount))
+        Text(Formatting.bidCount(vehicle.bidCount))
             .font(.caption)
             .foregroundStyle(.secondary)
             .fixedSize(horizontal: true, vertical: false)
-    }
-
-    /// Your position on the lot: purchased, high bidder, or outbid (spec BID-6, BID-10, LIVE-3).
-    @ViewBuilder private var yourPositionMarker: some View {
-        if let purchasePrice = vehicle.yourPurchasePrice {
-            Label(Localizable.purchased(Formatting.currency(purchasePrice)), systemImage: "bag.fill")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(Color.accentColor)
-                .accessibilityIdentifier("list.purchasedBadge")
-        } else if vehicle.isYouHighBidder {
-            Label(Localizable.highBidder, systemImage: "checkmark.seal.fill")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.green)
-                .accessibilityIdentifier("list.highBidderBadge")
-        } else if vehicle.isYouOutbid {
-            Label(Localizable.outbid, systemImage: "exclamationmark.triangle.fill")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.red)
-                .accessibilityIdentifier("list.outbidBadge")
-        }
     }
 
     /// Current bid, or the starting bid while there are no bids.
@@ -150,20 +130,81 @@ struct VehicleCardView: View {
     private var accessibilityLabel: String {
         var parts = [
             vehicle.title,
-            "\(priceTitle) \(Formatting.currency(price)), \(InventoryLabels.bidCount(vehicle.bidCount))",
+            "\(priceTitle) \(Formatting.currency(price)), \(Formatting.bidCount(vehicle.bidCount))",
             vehicle.status(at: now).badgeTitle
         ]
         if let buyNowPrice = vehicle.buyNowPrice {
             parts.append(Localizable.buyNow(Formatting.currency(buyNowPrice)))
         }
-        if let purchasePrice = vehicle.yourPurchasePrice {
-            parts.append(Localizable.purchased(Formatting.currency(purchasePrice)))
-        } else if vehicle.isYouHighBidder {
-            parts.append(Localizable.highBidder)
-        } else if vehicle.isYouOutbid {
-            parts.append(Localizable.outbid)
+        switch CardBuyerPosition(vehicle: vehicle, at: now) {
+        case .purchased(let price): parts.append(Localizable.purchased(Formatting.currency(price)))
+        case .highBidder: parts.append(Localizable.highBidder)
+        case .outbid: parts.append(Localizable.outbid)
+        case nil: break
         }
         return parts.joined(separator: ". ")
+    }
+
+}
+
+/// The buyer's own position shown on an inventory card (spec BID-6, BID-10, LIVE-3).
+enum CardBuyerPosition: Equatable {
+    /// Bought through Buy Now for this price.
+    case purchased(Int)
+    /// The buyer's bid is the current bid.
+    case highBidder
+    /// Someone passed the buyer's bid on a lot that is still open.
+    case outbid
+
+    /// Picks the marker for `vehicle` at `now`, or `nil` when the buyer has no position to show.
+    ///
+    /// "Outbid" is hidden once the lot has ended: it is no longer actionable and the status
+    /// badge shows the outcome instead (same rule as the detail header).
+    init?(vehicle: VehicleModel, at now: Date) {
+        if let purchasePrice = vehicle.yourPurchasePrice {
+            self = .purchased(purchasePrice)
+        } else if vehicle.isYouHighBidder {
+            self = .highBidder
+        } else if vehicle.isYouOutbid, !vehicle.status(at: now).isEnded {
+            self = .outbid
+        } else {
+            return nil
+        }
+    }
+}
+
+/// Your position on the lot: purchased, high bidder, or outbid (spec BID-6, BID-10, LIVE-3).
+///
+/// Its own view so only this line, not the whole card, re-renders on each tick of the shared
+/// clock that hides "outbid" when the lot ends.
+private struct CardPositionMarker: View {
+
+    let vehicle: VehicleModel
+    /// When set, the marker is evaluated at this moment until scrolling ends, like the badge.
+    var pausedAt: Date?
+
+    @Environment(AuctionTicker.self) private var ticker
+
+    var body: some View {
+        switch CardBuyerPosition(vehicle: vehicle, at: pausedAt ?? ticker.now) {
+        case .purchased(let price):
+            Label(Localizable.purchased(Formatting.currency(price)), systemImage: "bag.fill")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(Color.accentColor)
+                .accessibilityIdentifier("list.purchasedBadge")
+        case .highBidder:
+            Label(Localizable.highBidder, systemImage: "checkmark.seal.fill")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.green)
+                .accessibilityIdentifier("list.highBidderBadge")
+        case .outbid:
+            Label(Localizable.outbid, systemImage: "exclamationmark.triangle.fill")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.red)
+                .accessibilityIdentifier("list.outbidBadge")
+        case nil:
+            EmptyView()
+        }
     }
 
 }

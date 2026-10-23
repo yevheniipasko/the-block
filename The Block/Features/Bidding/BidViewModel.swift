@@ -149,7 +149,7 @@ final class BidViewModel {
             minimum: Formatting.currency(minimumBid),
             step: Formatting.currency(bidStep),
             activity: activityName,
-            bids: Localizable.bidCount(vehicle.bidCount)
+            bids: Formatting.bidCount(vehicle.bidCount)
         )
     }
 
@@ -204,7 +204,19 @@ final class BidViewModel {
 
     /// Inline message under the amount: the last refused submission first, then live validation.
     var validationMessage: String? {
-        rejectionMessage ?? validationRejection.map { Localizable.message(for: $0) }
+        rejectionMessage ?? validationRejection.map { message(for: $0) }
+    }
+
+    /// Buyer-facing reason for `rejection`, worded for the lot's live state (spec BID-4, BID-11).
+    ///
+    /// A bid at or above the Buy Now price only points to Buy Now while Buy Now can be used;
+    /// on an upcoming lot it explains that Buy Now opens once the auction is live.
+    private func message(for rejection: BidRejection) -> String {
+        if case .atOrAboveBuyNow(let buyNowPrice) = rejection,
+           let vehicle, !BiddingRules.canBuyNow(vehicle, at: now) {
+            return Localizable.belowBuyNowUntilLive(Formatting.currency(buyNowPrice))
+        }
+        return Localizable.message(for: rejection)
     }
 
     /// Whether "Review bid" is enabled: editing, and the entry passes validation (spec BID-3, BID-4).
@@ -248,8 +260,11 @@ final class BidViewModel {
     // MARK: - Buy Now
 
     /// Why Buy Now can't be offered right now, or `nil` when it can (spec BID-11).
+    ///
+    /// `BiddingRules.canBuyNow` decides; the status only picks which reason to show.
     var buyNowUnavailableReason: String? {
         guard let vehicle else { return Localizable.message(for: .vehicleNotFound) }
+        guard !BiddingRules.canBuyNow(vehicle, at: now) else { return nil }
         guard vehicle.buyNowPrice != nil else { return Localizable.noBuyNowPrice }
         switch vehicle.status(at: now) {
         case .upcoming: return Localizable.buyNowNotOpenYet
@@ -281,7 +296,7 @@ final class BidViewModel {
         logger.info("[BidViewModel] request rejected: \(String(describing: rejection), privacy: .public)")
         vehicle = repository.vehicle(id: vehicleID)
         now = repository.now
-        rejectionMessage = Localizable.notPlaced(Localizable.message(for: rejection))
+        rejectionMessage = Localizable.notPlaced(message(for: rejection))
         phase = .editing
     }
 
@@ -303,8 +318,6 @@ private enum Localizable {
         "Minimum \(minimum) · step \(step) · \(activity), \(bids)"
     }
 
-    static func bidCount(_ count: Int) -> String { count == 1 ? "1 bid" : "\(count) bids" }
-
     static func activityName(_ level: ActivityLevel) -> String? {
         switch level {
         case .opening: nil
@@ -315,6 +328,10 @@ private enum Localizable {
     }
 
     static func notPlaced(_ reason: String) -> String { "Not placed. \(reason)" }
+
+    static func belowBuyNowUntilLive(_ buyNowPrice: String) -> String {
+        "Bids must be below the Buy Now price of \(buyNowPrice). Buy Now opens when the auction goes live."
+    }
 
     static func message(for rejection: BidRejection) -> String {
         switch rejection {
