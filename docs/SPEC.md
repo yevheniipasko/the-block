@@ -205,7 +205,7 @@ Tasks:
 
 Tasks:
 - [x] Design tokens + formatters in `Shared/` (Spacing, Formatting, status display, `AuctionStatusBadge`, `VehicleImage`, `LoadingStateView` / `ErrorStateView` / `PageStatusRow`)
-- [ ] Accessibility pass
+- [x] Accessibility pass (Xcode audit as a diagnostic, fixes, visual check via `.maestro/accessibility.yaml` in dark mode at the largest text size)
 - [x] XCUITest smoke tests: browse/search, open detail, valid bid, below-minimum, live outbid (see `.claude/rules/ui-testing.md`)
 - [x] Submission README
 

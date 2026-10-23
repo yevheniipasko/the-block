@@ -42,6 +42,9 @@ Running log — see `.claude/rules/decisions-log.md`. One line per entry, newest
 - 2026-10-22 - Inventory countdowns use one shared clock instead of one timer per visible row, and pause visual countdown updates while the list is moving. Live bid updates continue during scrolling. Pagination now prefetches five rows before each page boundary. Why: timer-driven layout work and late page loading caused visible scroll hitches.
 - 2026-10-22 — Outbid banner redesigned as a compact Liquid Glass card (icon, "Outbid", one-line title, "Now $X", capsule "Bid again"); the ✕ button was dropped because the banner auto-dismisses and still dismisses on swipe or via the VoiceOver action. Why: the old card was heavy and covered the photo. Alt: native local notifications (rejected: permission prompt, only useful when the app is backgrounded, which the simulated market isn't; flaky SpringBoard UI tests).
 
+- 2026-10-22 — Accessibility pass (UX-2, UX-3): ran Xcode's `performAccessibilityAudit` once as a diagnostic, fixed what it found, then dropped the audit test. Fixes: status badge text is primary on a tinted pill with a coloured dot (green/orange caption text failed contrast, and colour is no longer the only cue); spec-row and outbid-banner icons scale with Dynamic Type (`@ScaledMetric`), they overlapped labels at accessibility sizes. Accepted: "nearly passed" contrast on Apple's semantic `.secondary` text, system Cancel button, and contrast flags on content scrolled under glass bars. Why no committed audit test: it needed three filters to avoid false positives and its failing element changed run to run with the live countdown. Alt: keep it as a gate (rejected, flaky and hard to explain). Verification is `.maestro/accessibility.yaml` screenshots in dark mode at accessibility XXXL and light at default size.
+- 2026-10-22 — `OutbidAlertUITests` review retries raised from 3 to 5: it failed once in a full-suite run (fast market repriced the lot on every review under load), passed 3/3 alone.
+
 ## Time
 
 - 2026-10-22 — Setup: project rules, workflow, repo structure: ~30 min
@@ -54,6 +57,7 @@ Running log — see `.claude/rules/decisions-log.md`. One line per entry, newest
 - 2026-10-22 — Stretch (My bids, outbid banner, fee estimate; parallel agents) + integration + README: ~70 min
 - 2026-10-22 — App icon: 10 min
 - 2026-10-22 — Maestro flows recovered, verified, committed: 10 min
+- 2026-10-22 — Accessibility pass (audit, fixes, Maestro visual check): ~45 min
 
 ## AI usage
 
@@ -70,3 +74,4 @@ Running log — see `.claude/rules/decisions-log.md`. One line per entry, newest
 - 2026-10-22 — Claude Code wrote the icon generator script and tuned the composition after previewing the render.
 - 2026-10-22 — Claude Code found the Maestro flows it had written in an earlier session's scratchpad, added `-market` launch args, made the high-bidder check optional after the fast market outbid before it ran, and verified both flows pass.
 - 2026-10-22 — Claude Code looked at SwiftUI toast/banner libraries for reference, argued against native notifications, rewrote `OutbidBannerView`, and verified it from simulator screenshots taken during the outbid UI test.
+- 2026-10-22 — Claude Code ran the Xcode accessibility audit, separated real issues from false positives (glass-bar occlusion, system controls), fixed badge contrast and icon scaling, and checked the result with Maestro screenshots on a cloned simulator. I asked to drop the committed XCUITest audit in favour of Maestro; Claude's first version of that test needed three filters and was flaky.
