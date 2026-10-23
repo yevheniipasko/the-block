@@ -84,15 +84,23 @@ final class VehicleDetailViewModel {
         return vehicle.isYouOutbid ? .outbid : nil
     }
 
-    /// "Current bid" once the lot has bids, otherwise "Starting at" (spec DETAIL-2).
+    /// "Purchased for" after Buy Now, "Current bid" once the lot has bids, otherwise "Starting at"
+    /// (spec DETAIL-2, BID-10).
     var priceLabel: String {
-        guard let vehicle, vehicle.bidCount > 0, vehicle.currentBid != nil else { return Localizable.startingAt }
+        guard let vehicle else { return Localizable.startingAt }
+        if vehicle.isPurchasedByYou {
+            return Localizable.purchasedFor
+        }
+        guard vehicle.bidCount > 0, vehicle.currentBid != nil else { return Localizable.startingAt }
         return Localizable.currentBid
     }
 
-    /// Current bid, or the starting bid when there are no bids, as CAD.
+    /// The Buy Now price paid, else the current bid, else the starting bid, as CAD.
     var priceAmount: String {
         guard let vehicle else { return "" }
+        if let purchasePrice = vehicle.yourPurchasePrice {
+            return Formatting.currency(purchasePrice)
+        }
         return Formatting.currency(vehicle.currentBid ?? vehicle.startingBid)
     }
 
@@ -173,6 +181,7 @@ private extension BodyStyle {
 private enum Localizable {
     static let startingAt = "Starting at"
     static let currentBid = "Current bid"
+    static let purchasedFor = "Purchased for"
     static let oneBid = "1 bid"
     static func bids(_ count: Int) -> String { "\(count) bids" }
     static let engine = "Engine"
