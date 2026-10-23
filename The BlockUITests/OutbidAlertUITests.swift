@@ -13,8 +13,7 @@ final class OutbidAlertUITests: XCTestCase {
         let app = launch(market: "fast")
         openLot(app)
         element(app, "detail.placeBidButton").tap()
-        tapWhenReady(app, "bid.reviewButton")
-        tapWhenReady(app, "bid.confirmButton")
+        reviewAndConfirmBid(app)
 
         let banner = element(app, "alert.banner")
         XCTAssertTrue(banner.waitForExistence(timeout: Constants.alertTimeout))
@@ -47,6 +46,20 @@ final class OutbidAlertUITests: XCTestCase {
         XCTAssertTrue(lotRow.waitForExistence(timeout: Constants.stepTimeout))
         lotRow.tap()
         XCTAssertTrue(element(app, "detail.placeBidButton").waitForExistence(timeout: Constants.stepTimeout))
+    }
+
+    /// Review → confirm. In a live market another bidder can raise the price during review, which
+    /// sends the sheet back to editing with a new minimum (spec LIVE-3); review again in that case.
+    private func reviewAndConfirmBid(_ app: XCUIApplication) {
+        for _ in 0..<3 {
+            tapWhenReady(app, "bid.reviewButton")
+            let confirm = element(app, "bid.confirmButton")
+            if confirm.waitForExistence(timeout: 3) {
+                confirm.tap()
+                return
+            }
+        }
+        XCTFail("Could not reach the confirm step")
     }
 
     private func tapWhenReady(_ app: XCUIApplication, _ identifier: String) {

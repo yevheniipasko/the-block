@@ -14,6 +14,8 @@ protocol ViewModelFactoryProtocol: AnyObject {
     func makeInventoryViewModel() -> InventoryViewModel
     func makeVehicleDetailViewModel(vehicleID: VehicleModel.ID) -> VehicleDetailViewModel
     func makeBidViewModel(vehicleID: VehicleModel.ID) -> BidViewModel
+    /// The app-wide "My bids" ViewModel; the router asks once and keeps it (spec MYBIDS-1, MYBIDS-6).
+    func makeMyBidsViewModel() -> MyBidsViewModel
 }
 
 /// Navigation state for the whole app: selected vehicle (list → detail) and presented sheet.
@@ -23,6 +25,10 @@ protocol InventoryRouterProtocol: AnyObject {
     var detailViewModel: VehicleDetailViewModel? { get }
     var presentedSheet: BiddingSheet? { get }
     var bidViewModel: BidViewModel? { get }
+    /// Lives as long as the router, so the toolbar's outbid badge stays current (spec MYBIDS-6).
+    var myBidsViewModel: MyBidsViewModel { get }
+    /// Whether "My bids" is pushed over the inventory list (spec MYBIDS-1).
+    var isShowingMyBids: Bool { get }
 
     /// Shows a vehicle's detail, or clears it with `nil` (spec UX-1).
     func select(_ vehicleID: VehicleModel.ID?)
@@ -32,6 +38,10 @@ protocol InventoryRouterProtocol: AnyObject {
     func presentBuyNow(for vehicleID: VehicleModel.ID)
     /// Closes any presented sheet.
     func dismissSheet()
+    /// Opens "My bids" (spec MYBIDS-1).
+    func showMyBids()
+    /// Closes "My bids" and returns to the inventory list (spec MYBIDS-5).
+    func hideMyBids()
 }
 
 @Observable
@@ -41,13 +51,16 @@ final class InventoryRouter: InventoryRouterProtocol {
     private(set) var detailViewModel: VehicleDetailViewModel?
     private(set) var presentedSheet: BiddingSheet?
     private(set) var bidViewModel: BidViewModel?
+    private(set) var isShowingMyBids = false
     let inventoryViewModel: InventoryViewModel
+    let myBidsViewModel: MyBidsViewModel
 
     @ObservationIgnored private unowned let factory: ViewModelFactoryProtocol
 
     init(factory: ViewModelFactoryProtocol) {
         self.factory = factory
         self.inventoryViewModel = factory.makeInventoryViewModel()
+        self.myBidsViewModel = factory.makeMyBidsViewModel()
     }
 
     /// ViewModels are built here, on navigation, never inside a view's `body`.
@@ -70,6 +83,14 @@ final class InventoryRouter: InventoryRouterProtocol {
     func dismissSheet() {
         presentedSheet = nil
         bidViewModel = nil
+    }
+
+    func showMyBids() {
+        isShowingMyBids = true
+    }
+
+    func hideMyBids() {
+        isShowingMyBids = false
     }
 
 }

@@ -47,6 +47,11 @@ final class AppModule: ViewModelFactoryProtocol {
         resolve(BidViewModel.self, argument: vehicleID)
     }
 
+    /// Builds the "My bids" ViewModel on the shared repository.
+    func makeMyBidsViewModel() -> MyBidsViewModel {
+        resolve(MyBidsViewModel.self)
+    }
+
     // MARK: - Registrations
 
     private func registerData() {
@@ -93,6 +98,12 @@ final class AppModule: ViewModelFactoryProtocol {
             BidViewModel(vehicleID: vehicleID, repository: repository)
         }
         .inObjectScope(.transient)
+
+        // One per app, like the inventory: the toolbar's outbid badge reads it while the screen is closed.
+        container.register(MyBidsViewModel.self) { [unowned self] _ in
+            MyBidsViewModel(repository: repository)
+        }
+        .inObjectScope(.container)
 
         container.register(OutbidAlertCenter.self) { [unowned self] _ in
             OutbidAlertCenter(repository: repository)

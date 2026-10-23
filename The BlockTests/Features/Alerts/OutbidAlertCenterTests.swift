@@ -91,6 +91,8 @@ struct OutbidAlertCenterTests {
 
         #expect(center.current?.lotID == first.id)
         center.dismiss()
+        // The second update may still be in flight on the feed when the first is dismissed.
+        try await waitUntil { center.current?.lotID == second.id }
         #expect(center.current?.lotID == second.id)
         center.dismiss()
         #expect(center.current == nil)

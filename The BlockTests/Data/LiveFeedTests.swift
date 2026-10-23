@@ -96,6 +96,24 @@ struct LiveFeedTests {
         #expect(await updates.next()?.id == id)
     }
 
+    @Test("LIVE-1: a subscriber that starts before loading receives every lot of a large snapshot")
+    func largeSnapshotIsNotTruncated() async {
+        let lots = (0..<150).map { _ in activeLot() }
+        let server = SimulatedAuctionDataSource.stub(result: .success(lots), clock: clock)
+        let repository = VehicleRepository(dataSource: server, clock: clock)
+        var updates = repository.inventoryUpdates().makeAsyncIterator()
+
+        await repository.load()
+
+        var received = Set<VehicleModel.ID>()
+        for _ in lots {
+            if let vehicle = await updates.next() {
+                received.insert(vehicle.id)
+            }
+        }
+        #expect(received == Set(lots.map(\.id)))
+    }
+
     @Test("LIVE-1: inventoryUpdates reports lots changed by anyone")
     func inventoryUpdatesStream() async {
         let id = UUID()

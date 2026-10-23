@@ -36,6 +36,9 @@ Running log — see `.claude/rules/decisions-log.md`. One line per entry, newest
 - 2026-10-22 — Visual check (simctl screenshots: iPad split view, dark mode, largest accessibility text): fixed the price line wrapping mid-number ("$28,50 / 0") in the narrow iPad sidebar and at large text — card and detail now put title / amount / bid count side by side when they fit, stacked otherwise, and never break the amount.
 - 2026-10-22 — App icon drawn by a Pillow script (`Resources/scripts/generate_app_icon.py`, gavel on sound block, navy/amber) with light, dark and tinted variants. Why: reproducible, no design tool or licensed artwork. Alt: hand-made asset in Figma (cut, time).
 - 2026-10-22 — Maestro flows (`.maestro/`: smoke, live outbid) kept in the repo as optional exploratory checks; XCUITest stays the UI suite of record. Why: quick to run and already written during visual checks. Alt: drop them (lose a cheap live-update demo).
+- 2026-10-22 — Stretch: My bids (container-scoped ViewModel so the toolbar's outbid badge stays live while the screen is closed; regroups from the repository on every feed signal and on a 1 s tick for auction ends), outbid banner (queued, auto-dismiss 4 s; suppressed only while that lot's bid sheet is on screen and not on its success step — otherwise a fast outbid right after bidding would never be shown), fee estimate (shown even for an invalid amount so the buyer sees the cost while typing).
+- 2026-10-22 — Stream buffers are unbounded. Two agents independently found that the 64-value buffer dropped early lots from the ~200-lot snapshot burst (the seeded My bids lots vanished). Values are small structs, so unbounded is safe; regression test added.
+- 2026-10-22 — Live UI tests retry the review step: with the fast market a competing bid can land during review and correctly send the sheet back to editing (LIVE-3), which made one test fail ~1 in 15 runs. Verified with three consecutive full green runs.
 
 ## Time
 
@@ -46,6 +49,7 @@ Running log — see `.claude/rules/decisions-log.md`. One line per entry, newest
 - 2026-10-22 — Inventory / Detail / Bidding (parallel agents) + integration: ~45 min
 - 2026-10-22 — Live feed (AsyncStream, simulated market) + parallel migration + cleanup: ~75 min
 - 2026-10-22 — XCUITest smoke tests, launch options, visual checks + layout fix: ~35 min
+- 2026-10-22 — Stretch (My bids, outbid banner, fee estimate; parallel agents) + integration + README: ~70 min
 - 2026-10-22 — App icon: 10 min
 - 2026-10-22 — Maestro flows recovered, verified, committed: 10 min
 
